@@ -1,0 +1,99 @@
+<directory_organization_workflow>
+  <overview>
+    目录整理器的主要工作流程，基于项目docs中定义的标准目录结构规范，
+    自动分析混乱的文件并重新组织到正确的位置。
+  </overview>
+
+  <initialization_steps>
+    <step number="1">
+      <action>分析当前项目目录结构</action>
+      <details>
+        使用list_files工具扫描项目根目录，识别：
+        - 散落在根目录的文件
+        - 不符合规范的目录结构
+        - 临时文件和重复文件
+        - 需要分类的文件类型
+      </details>
+    </step>
+    
+    <step number="2">
+      <action>加载项目目录规范</action>
+      <tools>
+        <tool>read_file - 读取docs/统一规范文档体系/03_开发规范.md</tool>
+        <tool>read_file - 读取docs/文件整理计划.md</tool>
+      </tools>
+      <purpose>理解标准目录结构和文件分类规则</purpose>
+    </step>
+
+    <step number="3">
+      <action>生成文件分类映射</action>
+      <details>
+        基于文件扩展名、文件名模式、内容特征创建分类规则：
+        - CSV/JSON数据文件 → data_files/
+        - Python演示脚本 → scripts/demos/
+        - 日志文件 → logs/
+        - 配置文件 → config/
+        - 文档文件 → docs/
+        - 压缩包 → packages/
+      </details>
+    </step>
+  </initialization_steps>
+
+  <main_workflow>
+    <phase name="analysis">
+      <description>分析当前状态和整理需求</description>
+      <steps>
+        <step>扫描根目录下的所有文件</step>
+        <step>识别每个文件的类型和功能</step>
+        <step>检查是否存在标准目录结构</step>
+        <step>识别重复和临时文件</step>
+        <step>生成整理建议报告</step>
+      </steps>
+    </phase>
+
+    <phase name="preparation">
+      <description>准备目录结构和整理计划</description>
+      <steps>
+        <step>创建缺失的标准目录</step>
+        <step>验证目标目录的写入权限</step>
+        <step>生成详细的文件移动计划</step>
+        <step>备份重要配置文件</step>
+      </steps>
+    </phase>
+
+    <phase name="execution">
+      <description>执行文件整理操作</description>
+      <steps>
+        <step>按类型批量移动文件</step>
+        <step>处理重复文件（重命名或删除）</step>
+        <step>更新相关配置文件中的路径</step>
+        <step>清理空目录</step>
+      </steps>
+    </phase>
+
+    <phase name="validation">
+      <description>验证整理结果</description>
+      <steps>
+        <step>检查所有文件是否正确移动</step>
+        <step>验证项目功能未受影响</step>
+        <step>生成整理完成报告</step>
+        <step>更新项目文档</step>
+      </steps>
+    </phase>
+  </main_workflow>
+
+  <completion_criteria>
+    <criterion>所有散落文件已按规范分类</criterion>
+    <criterion>标准目录结构已建立</criterion>
+    <criterion>重复文件已处理</criterion>
+    <criterion>项目功能正常运行</criterion>
+    <criterion>生成详细的整理报告</criterion>
+  </completion_criteria>
+
+  <safety_measures>
+    <measure>保护核心模块目录（quant_system/DATA, STRATEGIES, ENGINE等）</measure>
+    <measure>移动前备份重要配置文件</measure>
+    <measure>逐步执行，每步确认结果</measure>
+    <measure>保留原文件的修改时间戳</measure>
+  </safety_measures>
+</directory_organization_workflow>

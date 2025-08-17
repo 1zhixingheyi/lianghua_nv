@@ -1,0 +1,205 @@
+<file_classification_rules>
+  <overview>
+    基于项目实际需求和docs/文件整理计划.md的标准，定义详细的文件分类规则，
+    确保每种文件类型都能被正确识别和归类到合适的目录中。
+  </overview>
+
+  <standard_directory_structure>
+    <directory name="data_files">
+      <purpose>存储所有数据相关文件</purpose>
+      <subdirectories>
+        <subdir name="daily_data">CSV格式的日常数据文件</subdir>
+        <subdir name="financial">金融数据文件</subdir>
+        <subdir name="database">数据库文件(.db文件)</subdir>
+        <subdir name="reports">数据报告和分析结果</subdir>
+      </subdirectories>
+    </directory>
+
+    <directory name="scripts">
+      <purpose>存储所有脚本文件</purpose>
+      <subdirectories>
+        <subdir name="demos">演示和测试脚本</subdir>
+        <subdir name="setup">安装和配置脚本</subdir>
+        <subdir name="tools">工具和辅助脚本</subdir>
+      </subdirectories>
+    </directory>
+
+    <directory name="logs">
+      <purpose>存储所有日志文件</purpose>
+      <subdirectories>
+        <subdir name="demos">演示脚本日志</subdir>
+        <subdir name="system">系统运行日志</subdir>
+        <subdir name="scraping">网页抓取日志</subdir>
+      </subdirectories>
+    </directory>
+
+    <directory name="config">
+      <purpose>存储配置文件</purpose>
+      <note>不包含敏感的.env文件</note>
+    </directory>
+
+    <directory name="packages">
+      <purpose>存储安装包和压缩文件</purpose>
+    </directory>
+  </standard_directory_structure>
+
+  <classification_patterns>
+    <category name="data_files">
+      <file_patterns>
+        <pattern>.*\.csv$</pattern>
+        <pattern>.*\.json$</pattern>
+        <pattern>.*\.db$</pattern>
+        <pattern>.*_data_.*\.(csv|json)$</pattern>
+        <pattern>.*数据.*\.(csv|json)$</pattern>
+        <pattern>.*_report_.*\.json$</pattern>
+      </file_patterns>
+      <name_patterns>
+        <pattern>A股.*</pattern>
+        <pattern>.*量化.*</pattern>
+        <pattern>.*抓取.*</pattern>
+        <pattern>.*市场.*</pattern>
+        <pattern>mysql_verification_report.*</pattern>
+      </name_patterns>
+      <target_directory>data_files/</target_directory>
+    </category>
+
+    <category name="demo_scripts">
+      <file_patterns>
+        <pattern>.*演示\.py$</pattern>
+        <pattern>.*demo.*\.py$</pattern>
+        <pattern>.*测试\.py$</pattern>
+        <pattern>.*示例\.py$</pattern>
+      </file_patterns>
+      <name_patterns>
+        <pattern>.*演示.*</pattern>
+        <pattern>.*数据库.*演示.*</pattern>
+        <pattern>.*网页抓取.*</pattern>
+        <pattern>高级.*演示.*</pattern>
+      </name_patterns>
+      <target_directory>scripts/demos/</target_directory>
+    </category>
+
+    <category name="setup_scripts">
+      <file_patterns>
+        <pattern>setup.*\.py$</pattern>
+        <pattern>.*\.ps1$</pattern>
+        <pattern>pytest\.ini$</pattern>
+      </file_patterns>
+      <target_directory>scripts/setup/</target_directory>
+    </category>
+
+    <category name="verification_scripts">
+      <file_patterns>
+        <pattern>check_.*\.py$</pattern>
+        <pattern>verify_.*\.py$</pattern>
+        <pattern>test_.*\.py$</pattern>
+        <pattern>.*检查.*\.py$</pattern>
+      </file_patterns>
+      <target_directory>scripts/tools/</target_directory>
+    </category>
+
+    <category name="log_files">
+      <file_patterns>
+        <pattern>.*\.log$</pattern>
+      </file_patterns>
+      <name_patterns>
+        <pattern>.*演示.*</pattern>
+        <pattern>.*网页抓取.*</pattern>
+        <pattern>.*数据模块.*</pattern>
+      </name_patterns>
+      <target_directory>logs/</target_directory>
+    </category>
+
+    <category name="config_files">
+      <file_patterns>
+        <pattern>.*_config\.json$</pattern>
+        <pattern>.*\.yaml$</pattern>
+        <pattern>.*\.yml$</pattern>
+      </file_patterns>
+      <exclusions>
+        <pattern>\.env.*</pattern>
+      </exclusions>
+      <target_directory>config/</target_directory>
+    </category>
+
+    <category name="packages">
+      <file_patterns>
+        <pattern>.*\.zip$</pattern>
+        <pattern>.*\.tar\.gz$</pattern>
+        <pattern>.*\.rar$</pattern>
+      </file_patterns>
+      <target_directory>packages/</target_directory>
+    </category>
+
+    <category name="documentation">
+      <file_patterns>
+        <pattern>.*\.md$</pattern>
+        <pattern>.*\.rst$</pattern>
+        <pattern>.*\.txt$</pattern>
+      </file_patterns>
+      <exclusions>
+        <pattern>README\.md$</pattern>
+        <pattern>CLAUDE\.md$</pattern>
+      </exclusions>
+      <target_directory>docs/</target_directory>
+    </category>
+  </classification_patterns>
+
+  <special_handling>
+    <temporary_files>
+      <description>识别并处理临时文件</description>
+      <patterns>
+        <pattern>.*\.tmp$</pattern>
+        <pattern>.*\.temp$</pattern>
+        <pattern>dump\.rdb$</pattern>
+        <pattern>.*~$</pattern>
+      </patterns>
+      <action>confirm_deletion</action>
+    </temporary_files>
+
+    <duplicate_detection>
+      <description>检测重复文件</description>
+      <criteria>
+        <criterion>相同文件名但不同时间戳</criterion>
+        <criterion>相同功能但不同版本</criterion>
+        <criterion>备份文件（含"备份"、"copy"等）</criterion>
+      </criteria>
+      <action>rename_with_timestamp</action>
+    </duplicate_detection>
+
+    <protected_files>
+      <description>不应移动的文件</description>
+      <patterns>
+        <pattern>README\.md$</pattern>
+        <pattern>CLAUDE\.md$</pattern>
+        <pattern>\.gitignore$</pattern>
+        <pattern>requirements.*\.txt$</pattern>
+        <pattern>\.env.*</pattern>
+      </patterns>
+      <action>keep_in_root</action>
+    </protected_files>
+  </special_handling>
+
+  <validation_rules>
+    <rule name="core_modules_protection">
+      <description>保护核心模块目录不受影响</description>
+      <protected_paths>
+        <path>quant_system/DATA</path>
+        <path>quant_system/STRATEGIES</path>
+        <path>quant_system/ENGINE</path>
+        <path>quant_system/czsc</path>
+        <path>quant_system/czsc_strategy</path>
+        <path>quant_system/config</path>
+      </protected_paths>
+    </rule>
+
+    <rule name="functionality_preservation">
+      <description>确保文件移动不影响项目功能</description>
+      <checks>
+        <check>移动后检查import路径是否需要更新</check>
+        <check>验证配置文件中的路径引用</check>
+        <check>确保脚本的相对路径仍然有效</check>
+      </checks>
+    </rule>
+  </validation_rules>
+</file_classification_rules>

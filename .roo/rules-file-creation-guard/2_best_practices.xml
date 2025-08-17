@@ -1,0 +1,263 @@
+<best_practices>
+  <general_principles>
+    <principle priority="high">
+      <name>守门员原则</name>
+      <description>每个文件创建请求都必须经过严格审核，绝不允许未经检查的文件创建</description>
+      <rationale>防止项目文件混乱和重复，维护项目结构的清晰性</rationale>
+      <enforcement>
+        <rule>任何write_to_file操作前必须执行完整检查流程</rule>
+        <rule>检查结果必须明确给出建议和理由</rule>
+        <rule>用户必须确认建议后才能执行文件创建</rule>
+      </enforcement>
+    </principle>
+
+    <principle priority="high">
+      <name>完善优于新建</name>
+      <description>优先建议完善现有文件而非重复创建新文件</description>
+      <rationale>避免功能重复，提高代码复用率，降低维护成本</rationale>
+      <implementation>
+        <threshold>相似度≥80%时强烈建议完善现有文件</threshold>
+        <threshold>相似度50-79%时建议谨慎评估</threshold>
+        <threshold>相似度<50%时可以考虑新建</threshold>
+      </implementation>
+    </principle>
+
+    <principle priority="high">
+      <name>路径精准定位</name>
+      <description>确保每个新建文件都位于最合适的目录位置</description>
+      <rationale>维护项目结构的逻辑性和可维护性</rationale>
+      <accuracy_requirements>
+        <requirement>路径准确性必须≥95%</requirement>
+        <requirement>必须精确到子目录级别</requirement>
+        <requirement>必须符合三层DRY模块化规范</requirement>
+      </accuracy_requirements>
+    </principle>
+
+    <principle priority="medium">
+      <name>规范强制执行</name>
+      <description>所有文件创建必须严格遵循项目技术规范</description>
+      <rationale>确保项目的技术一致性和标准化</rationale>
+      <compliance_checks>
+        <check>三层DRY规范符合性</check>
+        <check>8大模块架构遵循性</check>
+        <check>CZSC技术特色体现</check>
+        <check>配置v4.0标准执行</check>
+      </compliance_checks>
+    </principle>
+  </general_principles>
+
+  <file_analysis_best_practices>
+    <practice category="存在性检查">
+      <rule>使用精确的文件名匹配，包括大小写变体</rule>
+      <rule>检查所有可能的文件扩展名组合</rule>
+      <rule>扫描整个项目树，不遗漏任何目录</rule>
+      <implementation>
+        <step>使用search_files工具进行全项目搜索</step>
+        <step>使用list_files工具验证目录结构</step>
+        <step>使用read_file工具确认相同文件内容</step>
+      </implementation>
+    </practice>
+
+    <practice category="相似性分析">
+      <rule>基于多维度进行相似性评估</rule>
+      <rule>不仅比较文件名，更要分析功能语义</rule>
+      <rule>考虑模块归属和技术栈的影响</rule>
+      <scoring_algorithm>
+        <dimension weight="40%">功能描述语义相似度</dimension>
+        <dimension weight="30%">文件名语义相似度</dimension>
+        <dimension weight="20%">模块归属相似度</dimension>
+        <dimension weight="10%">技术栈相似度</dimension>
+      </scoring_algorithm>
+    </practice>
+
+    <practice category="路径计算">
+      <rule>综合考虑语义、模式、依赖、位置四个维度</rule>
+      <rule>优先考虑功能语义分析的结果</rule>
+      <rule>文件名模式匹配提供重要参考</rule>
+      <rule>依赖关系分析补充定位精度</rule>
+      <calculation_steps>
+        <step>分析文件功能和业务归属</step>
+        <step>匹配文件名模式到目录映射</step>
+        <step>分析预期依赖关系</step>
+        <step>参考相似文件的位置分布</step>
+        <step>综合评分选择最佳路径</step>
+      </calculation_steps>
+    </practice>
+  </file_analysis_best_practices>
+
+  <project_structure_compliance>
+    <dry_specification_compliance>
+      <architecture_layer>
+        <location>docs/三层DRY模块化规范/00_架构层/</location>
+        <file_types>系统架构、数据流转、技术标准等文档</file_types>
+        <naming_convention>编号+描述性名称</naming_convention>
+        <example>09_期权交易架构.md</example>
+      </architecture_layer>
+
+      <common_specification_layer>
+        <location>docs/三层DRY模块化规范/01_通用规范层/</location>
+        <sub_categories>
+          <category>01_开发规范/ - 编码标准、开发流程</category>
+          <category>02_数据规范/ - 数据格式、质量标准</category>
+          <category>03_接口规范/ - API设计、接口标准</category>
+          <category>04_配置规范/ - 配置管理、参数标准</category>
+        </sub_categories>
+      </common_specification_layer>
+
+      <module_specific_layer>
+        <location>docs/三层DRY模块化规范/02_模块专用层/</location>
+        <modules>
+          <module>01_DATA_模块专用规范/</module>
+          <module>02_STRATEGIES_模块专用规范/</module>
+          <module>03_RISK_模块专用规范/</module>
+          <module>04_EXECUTION_模块专用规范/</module>
+          <module>05_PORTFOLIO_模块专用规范/</module>
+          <module>06_MONITORING_模块专用规范/</module>
+          <module>07_ENGINE_模块专用规范/</module>
+          <module>08_BACKTEST_模块专用规范/</module>
+        </modules>
+      </module_specific_layer>
+    </dry_specification_compliance>
+
+    <code_structure_compliance>
+      <module_organization>
+        <data_module>
+          <base_path>quant_system/data/</base_path>
+          <sub_directories>
+            <dir name="providers">数据提供商接口实现</dir>
+            <dir name="processors">数据处理和清洗逻辑</dir>
+            <dir name="storage">数据存储管理</dir>
+            <dir name="validators">数据验证规则</dir>
+            <dir name="models">数据模型定义</dir>
+            <dir name="utils">数据处理工具函数</dir>
+            <dir name="api">数据服务API</dir>
+          </sub_directories>
+        </data_module>
+
+        <strategies_module>
+          <base_path>quant_system/strategies/</base_path>
+          <sub_directories>
+            <dir name="base">基础策略抽象类</dir>
+            <dir name="technical">技术分析策略</dir>
+            <dir name="fundamental">基本面分析策略</dir>
+            <dir name="options">期权交易策略</dir>
+            <dir name="portfolio">组合投资策略</dir>
+            <dir name="utils">策略开发工具</dir>
+          </sub_directories>
+        </strategies_module>
+
+        <other_modules>
+          <risk_module>quant_system/risk/ - 风险管理相关</risk_module>
+          <execution_module>quant_system/execution/ - 交易执行相关</execution_module>
+          <portfolio_module>quant_system/portfolio/ - 组合管理相关</portfolio_module>
+          <monitoring_module>quant_system/monitoring/ - 监控相关</monitoring_module>
+          <engine_module>quant_system/engine/ - 引擎核心</engine_module>
+          <backtest_module>quant_system/backtest/ - 回测相关</backtest_module>
+        </other_modules>
+      </module_organization>
+    </code_structure_compliance>
+  </project_structure_compliance>
+
+  <quality_assurance>
+    <pre_creation_checklist>
+      <category name="文件分析完整性">
+        <item>✅ 文件存在性检查已执行</item>
+        <item>✅ 相似文件分析已完成</item>
+        <item>✅ 相似度评分已计算</item>
+        <item>✅ 路径规范性已验证</item>
+        <item>✅ 精准路径已计算</item>
+      </category>
+
+      <category name="决策建议质量">
+        <item>✅ 建议理由充分且清晰</item>
+        <item>✅ 路径选择有明确依据</item>
+        <item>✅ 备选方案已提供</item>
+        <item>✅ 注意事项已说明</item>
+        <item>✅ 相关文件关联已建立</item>
+      </category>
+
+      <category name="规范符合性">
+        <item>✅ 三层DRY规范要求已满足</item>
+        <item>✅ 8大模块架构已遵循</item>
+        <item>✅ 技术特色已体现</item>
+        <item>✅ 命名规范已执行</item>
+        <item>✅ 目录结构已验证</item>
+      </category>
+    </pre_creation_checklist>
+
+    <quality_metrics>
+      <metric name="准确性指标">
+        <target>路径推荐准确率 ≥ 95%</target>
+        <measurement>用户接受推荐路径的比例</measurement>
+      </metric>
+
+      <metric name="效率指标">
+        <target>重复文件避免率 ≥ 98%</target>
+        <measurement>成功避免重复创建的比例</measurement>
+      </metric>
+
+      <metric name="合规性指标">
+        <target>规范符合度 = 100%</target>
+        <measurement>创建文件完全符合项目规范的比例</measurement>
+      </metric>
+    </quality_metrics>
+  </quality_assurance>
+
+  <common_pitfalls>
+    <pitfall>
+      <description>忽略文件扩展名的变体</description>
+      <why_problematic>可能遗漏功能相同但扩展名不同的文件</why_problematic>
+      <correct_approach>检查.py, .pyx, .pyi等所有可能的Python文件扩展名</correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>仅基于文件名进行相似性判断</description>
+      <why_problematic>文件名相似但功能可能完全不同</why_problematic>
+      <correct_approach>结合功能描述、模块归属、技术栈等多维度分析</correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>路径定位停留在模块级别</description>
+      <why_problematic>大型模块内部仍然会出现文件组织混乱</why_problematic>
+      <correct_approach>必须精确到子目录级别，明确文件的具体归属</correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>忽略项目的技术特色要求</description>
+      <why_problematic>创建的文件可能不符合项目的技术标准</why_problematic>
+      <correct_approach>确保文件创建体现CZSC技术特色和配置v4.0等要求</correct_approach>
+    </pitfall>
+  </common_pitfalls>
+
+  <continuous_improvement>
+    <learning_mechanism>
+      <feedback_collection>
+        <method>记录用户对路径建议的接受/修改情况</method>
+        <method>分析用户最终选择的路径与建议路径的差异</method>
+        <method>收集文件创建后的使用效果反馈</method>
+      </feedback_collection>
+
+      <pattern_evolution>
+        <rule>定期分析项目结构的演进趋势</rule>
+        <rule>更新路径映射规则以适应项目发展</rule>
+        <rule>优化相似性分析算法的权重配置</rule>
+        <rule>扩展文件类型和模式识别规则</rule>
+      </pattern_evolution>
+    </learning_mechanism>
+
+    <quality_monitoring>
+      <regular_review>
+        <frequency>每月检查路径推荐的准确性</frequency>
+        <frequency>每季度评估规范符合度</frequency>
+        <frequency>每半年更新最佳实践指南</frequency>
+      </regular_review>
+
+      <improvement_actions>
+        <action>根据反馈调整路径计算算法</action>
+        <action>更新项目结构映射规则</action>
+        <action>完善相似性分析维度</action>
+        <action>扩展质量检查清单</action>
+      </improvement_actions>
+    </quality_monitoring>
+  </continuous_improvement>
+</best_practices>

@@ -1,0 +1,246 @@
+<error_prevention_protocols>
+  <overview>
+    基于实际分析错误案例建立的错误预防协议，确保文档目录管理器的分析准确性和可靠性。
+    这些协议针对在实际工作中发现的严重判断错误进行系统性防范。
+  </overview>
+
+  <critical_error_categories>
+    <error_category name="目录结构误判" severity="P0" frequency="高">
+      <description>
+        错误地理解项目目录结构，将不存在的目录当作存在，或混淆目录层级关系
+      </description>
+      <typical_manifestations>
+        <manifestation>基于文档内容推测目录存在性，未进行实际验证</manifestation>
+        <manifestation>将子目录误认为是独立的平级目录</manifestation>
+        <manifestation>将相似命名的目录视为重复，未理解功能差异</manifestation>
+        <manifestation>基于搜索结果的路径引用推断目录存在</manifestation>
+      </typical_manifestations>
+      <root_causes>
+        <cause>跳过实地扫描步骤，依赖推测分析</cause>
+        <cause>单一信息源依赖，缺乏交叉验证</cause>
+        <cause>对目录层级关系理解错误</cause>
+        <cause>缺乏系统性的验证机制</cause>
+      </root_causes>
+      <prevention_protocol>
+        <mandatory_steps>
+          <step priority="P0">必须使用list_files工具获取真实目录结构</step>
+          <step priority="P0">必须区分父子关系与平级关系</step>
+          <step priority="P0">必须验证每个分析目录的实际存在性</step>
+          <step priority="P1">必须用多种方法交叉验证结论</step>
+        </mandatory_steps>
+        <verification_checklist>
+          <check mandatory="true">已执行list_files扫描项目根目录</check>
+          <check mandatory="true">已识别所有相似命名的目录</check>
+          <check mandatory="true">已理解目录间的真实层级关系</check>
+          <check mandatory="true">已验证每个目录的实际存在性</check>
+          <check mandatory="true">已确认目录的实际功能定位</check>
+          <check mandatory="false">已用search_files验证目录引用</check>
+        </verification_checklist>
+      </prevention_protocol>
+    </error_category>
+
+    <error_category name="分析方法论错误" severity="P0" frequency="中">
+      <description>
+        使用错误的分析方法，导致基于错误前提的推理链条
+      </description>
+      <typical_manifestations>
+        <manifestation>基于假设进行后续分析，未验证前提条件</manifestation>
+        <manifestation>缺乏系统性的分析流程</manifestation>
+        <manifestation>忽略实际数据，依赖主观判断</manifestation>
+      </typical_manifestations>
+      <prevention_protocol>
+        <standard_analysis_flow>
+          <phase number="1" name="实地扫描阶段">
+            <actions>
+              <action>使用list_files(recursive=true)获取完整目录树</action>
+              <action>识别所有目标相关的目录和文件</action>
+              <action>记录每个发现目录的完整路径</action>
+            </actions>
+            <exit_criteria>
+              <criterion>完整目录结构已获取</criterion>
+              <criterion>相关目录已全部识别</criterion>
+            </exit_criteria>
+          </phase>
+          
+          <phase number="2" name="结构分析阶段">
+            <actions>
+              <action>分析目录间的层级关系</action>
+              <action>理解每个目录的功能定位</action>
+              <action>识别功能重复或相似的情况</action>
+            </actions>
+            <exit_criteria>
+              <criterion>目录层级关系已明确</criterion>
+              <criterion>功能定位已理解</criterion>
+            </exit_criteria>
+          </phase>
+          
+          <phase number="3" name="交叉验证阶段">
+            <actions>
+              <action>用search_files验证目录引用关系</action>
+              <action>用read_file检查关键配置文件</action>
+              <action>确认分析结论的准确性</action>
+            </actions>
+            <exit_criteria>
+              <criterion>所有结论已交叉验证</criterion>
+              <criterion>无矛盾或错误发现</criterion>
+            </exit_criteria>
+          </phase>
+          
+          <phase number="4" name="规范对比阶段">
+            <actions>
+              <action>与三层DRY规范进行结构匹配</action>
+              <action>评估规范符合度</action>
+              <action>识别需要优化的结构问题</action>
+            </actions>
+            <exit_criteria>
+              <criterion>规范符合度已评估</criterion>
+              <criterion>优化建议已制定</criterion>
+            </exit_criteria>
+          </phase>
+        </standard_analysis_flow>
+      </prevention_protocol>
+    </error_category>
+
+    <error_category name="信息源混淆" severity="P1" frequency="中">
+      <description>
+        混淆不同来源的信息，将推测当作事实，将引用当作存在
+      </description>
+      <prevention_protocol>
+        <information_source_hierarchy>
+          <source level="1" reliability="最高">
+            <name>实际工具扫描结果</name>
+            <tools>list_files, read_file返回的实际内容</tools>
+            <trust_level>100%</trust_level>
+          </source>
+          
+          <source level="2" reliability="高">
+            <name>配置文件中的明确声明</name>
+            <tools>read_file读取的配置文件内容</tools>
+            <trust_level>90%</trust_level>
+          </source>
+          
+          <source level="3" reliability="中">
+            <name>代码中的路径引用</name>
+            <tools>search_files找到的import或路径引用</tools>
+            <trust_level>70%</trust_level>
+            <note>需要验证引用路径的实际存在性</note>
+          </source>
+          
+          <source level="4" reliability="低">
+            <name>文档中的路径描述</name>
+            <tools>文档内容中提到的路径</tools>
+            <trust_level>50%</trust_level>
+            <note>可能过时或理想化，必须验证</note>
+          </source>
+          
+          <source level="5" reliability="最低">
+            <name>基于命名模式的推测</name>
+            <tools>基于文件名或目录名的功能推测</tools>
+            <trust_level>30%</trust_level>
+            <note>仅供参考，不能作为决策依据</note>
+          </source>
+        </information_source_hierarchy>
+        
+        <decision_rules>
+          <rule>只有Level 1和2的信息可以作为确定性事实</rule>
+          <rule>Level 3-5的信息必须通过Level 1-2的方法验证</rule>
+          <rule>任何结论都必须有Level 1信息支撑</rule>
+          <rule>当不同级别信息矛盾时，以级别更高的为准</rule>
+        </decision_rules>
+      </prevention_protocol>
+    </error_category>
+  </critical_error_categories>
+
+  <mandatory_verification_checklist>
+    <pre_analysis_checks>
+      <check id="PA001">是否已用list_files扫描项目根目录？</check>
+      <check id="PA002">是否已识别所有相似命名的目录？</check>
+      <check id="PA003">是否已理解这是目录结构分析而非功能分析？</check>
+    </pre_analysis_checks>
+    
+    <during_analysis_checks>
+      <check id="DA001">每个分析的目录是否都有list_files的确认？</check>
+      <check id="DA002">是否区分了父子关系与平级关系？</check>
+      <check id="DA003">是否基于实际扫描而非推测进行分析？</check>
+      <check id="DA004">是否验证了目录的实际功能用途？</check>
+    </during_analysis_checks>
+    
+    <post_analysis_checks>
+      <check id="PO001">所有结论是否都有实际扫描结果支撑？</check>
+      <check id="PO002">是否存在基于推测的错误结论？</check>
+      <check id="PO003">建议方案是否基于正确的结构理解？</check>
+      <check id="PO004">是否提供了最小化破坏的优化方案？</check>
+    </post_analysis_checks>
+  </mandatory_verification_checklist>
+
+  <error_recovery_procedures>
+    <procedure name="发现分析错误时">
+      <steps>
+        <step>立即停止基于错误前提的后续分析</step>
+        <step>重新执行实地扫描获取正确信息</step>
+        <step>基于正确信息重新开始分析</step>
+        <step>明确指出之前的错误原因</step>
+        <step>更新分析方法避免重复错误</step>
+      </steps>
+    </procedure>
+    
+    <procedure name="信息矛盾时">
+      <steps>
+        <step>优先相信实际扫描结果</step>
+        <step>重新验证矛盾的信息源</step>
+        <step>更新所有基于错误信息的结论</step>
+      </steps>
+    </procedure>
+  </error_recovery_procedures>
+
+  <quality_assurance_metrics>
+    <accuracy_targets>
+      <target name="目录存在性判断准确率">目标 ≥ 99%</target>
+      <target name="层级关系理解准确率">目标 ≥ 98%</target>
+      <target name="功能定位准确率">目标 ≥ 95%</target>
+      <target name="路径建议准确率">目标 ≥ 95%</target>
+    </accuracy_targets>
+    
+    <process_metrics>
+      <metric name="实地扫描执行率">目标 = 100%</metric>
+      <metric name="交叉验证执行率">目标 = 100%</metric>
+      <metric name="检查清单完成率">目标 = 100%</metric>
+    </process_metrics>
+  </quality_assurance_metrics>
+
+  <learning_from_errors>
+    <case_study id="20250816_directory_structure_misunderstanding">
+      <error_description>
+        误认为项目存在三个独立的DATA目录，实际上只有一个主DATA模块。
+        错误地基于文档内容推测目录存在性，未进行实际验证。
+      </error_description>
+      <lessons_learned>
+        <lesson>必须基于list_files实际扫描结果进行分析</lesson>
+        <lesson>不能基于文档内容或搜索结果推测目录存在</lesson>
+        <lesson>必须理解目录的层级关系而非简单的名称相似</lesson>
+        <lesson>承认错误比坚持错误更重要</lesson>
+      </lessons_learned>
+      <preventive_measures>
+        <measure>在工作流中增加强制性实地扫描步骤</measure>
+        <measure>建立信息源可靠性等级制度</measure>
+        <measure>增加强制性验证检查清单</measure>
+        <measure>建立错误恢复程序</measure>
+      </preventive_measures>
+    </case_study>
+  </learning_from_errors>
+
+  <continuous_improvement>
+    <improvement_cycle>
+      <phase name="监控">定期检查分析准确性和决策质量</phase>
+      <phase name="评估">分析错误模式和改进机会</phase>
+      <phase name="更新">更新协议和检查清单</phase>
+      <phase name="培训">强化正确的分析方法</phase>
+    </improvement_cycle>
+    
+    <feedback_integration>
+      <source>用户反馈的分析错误</source>
+      <source>自动化工具检测的问题</source>
+      <source>定期审查发现的改进点</source>
+    </feedback_integration>
+  </continuous_improvement>
+</error_prevention_protocols>

@@ -1,0 +1,368 @@
+<path_calculation_algorithm>
+  <overview>
+    文档目录管理器的核心路径计算算法，基于多维度分析确定最佳文件位置。
+    该算法通过语义分析、模式匹配、依赖关系和位置分布四个维度，
+    计算文件的最优存储路径，确保项目结构的清晰性和规范性。
+  </overview>
+
+  <multi_dimensional_analysis>
+    <dimension name="功能语义分析" weight="40%" priority="P0">
+      <description>基于文件功能和业务语义确定归属模块</description>
+      <analysis_points>
+        <point name="关键词识别">
+          <keywords>
+            <data_keywords>provider, processor, source, storage, validator, cache</data_keywords>
+            <strategy_keywords>strategy, signal, indicator, backtest, portfolio</strategy_keywords>
+            <risk_keywords>risk, limit, monitor, control, exposure</risk_keywords>
+            <execution_keywords>order, trade, execution, broker, settlement</execution_keywords>
+            <engine_keywords>engine, core, event, bus, scheduler</engine_keywords>
+          </keywords>
+        </point>
+        <point name="功能描述分析">
+          <semantic_mapping>
+            <mapping pattern="数据获取|数据源|数据提供" target="data/providers/"/>
+            <mapping pattern="数据处理|数据清洗|数据转换" target="data/processors/"/>
+            <mapping pattern="数据存储|数据库|缓存" target="data/storage/"/>
+            <mapping pattern="数据验证|数据质量|数据检查" target="data/validators/"/>
+            <mapping pattern="策略开发|交易策略|信号生成" target="strategies/"/>
+            <mapping pattern="风险管理|风险控制|风险监控" target="risk/"/>
+            <mapping pattern="交易执行|订单管理|经纪商" target="execution/"/>
+            <mapping pattern="组合管理|资产配置|投资组合" target="portfolio/"/>
+            <mapping pattern="系统监控|性能监控|日志" target="monitoring/"/>
+            <mapping pattern="引擎核心|事件总线|调度器" target="engine/"/>
+            <mapping pattern="回测系统|历史测试|策略验证" target="backtest/"/>
+          </semantic_mapping>
+        </point>
+        <point name="业务领域判断">
+          <domain_classification>
+            <domain name="数据领域">
+              <indicators>tushare, akshare, pandas, database, mysql, clickhouse</indicators>
+              <target_path>quant_system/data/</target_path>
+            </domain>
+            <domain name="策略领域">
+              <indicators>strategy, signal, indicator, alpha, factor</indicators>
+              <target_path>quant_system/strategies/</target_path>
+            </domain>
+            <domain name="风险领域">
+              <indicators>risk, var, exposure, limit, drawdown</indicators>
+              <target_path>quant_system/risk/</target_path>
+            </domain>
+            <domain name="执行领域">
+              <indicators>order, trade, broker, execution, settlement</indicators>
+              <target_path>quant_system/execution/</target_path>
+            </domain>
+          </domain_classification>
+        </point>
+      </analysis_points>
+      <scoring_rules>
+        <rule>精确关键词匹配 +100分</rule>
+        <rule>语义相关性匹配 +80分</rule>
+        <rule>业务领域匹配 +60分</rule>
+        <rule>功能描述匹配 +40分</rule>
+      </scoring_rules>
+    </dimension>
+
+    <dimension name="文件名模式匹配" weight="30%" priority="P1">
+      <description>基于文件命名模式确定目录归属</description>
+      <pattern_mappings>
+        <category name="数据模块模式">
+          <pattern regex=".*_provider\.py$" target="data/providers/" score="90"/>
+          <pattern regex=".*_source\.py$" target="data/sources/" score="90"/>
+          <pattern regex=".*_processor\.py$" target="data/processors/" score="90"/>
+          <pattern regex=".*_storage\.py$" target="data/storage/" score="90"/>
+          <pattern regex=".*_cache\.py$" target="data/caching/" score="90"/>
+          <pattern regex=".*_validator\.py$" target="data/validators/" score="90"/>
+          <pattern regex=".*_quality\.py$" target="data/quality/" score="90"/>
+          <pattern regex=".*_stream.*\.py$" target="data/streaming/" score="80"/>
+          <pattern regex=".*_pipeline\.py$" target="data/pipeline/" score="80"/>
+        </category>
+        
+        <category name="策略模块模式">
+          <pattern regex=".*_strategy\.py$" target="strategies/" score="90"/>
+          <pattern regex=".*_signal\.py$" target="strategies/signals/" score="90"/>
+          <pattern regex=".*_indicator\.py$" target="strategies/indicators/" score="90"/>
+          <pattern regex=".*_backtest\.py$" target="backtest/" score="90"/>
+          <pattern regex=".*_portfolio\.py$" target="portfolio/" score="90"/>
+        </category>
+        
+        <category name="风险模块模式">
+          <pattern regex=".*_risk\.py$" target="risk/" score="90"/>
+          <pattern regex=".*_limit\.py$" target="risk/limits/" score="90"/>
+          <pattern regex=".*_monitor\.py$" target="risk/monitors/" score="90"/>
+          <pattern regex=".*_metric\.py$" target="risk/metrics/" score="90"/>
+        </category>
+        
+        <category name="通用模式">
+          <pattern regex=".*_config\.py$" target="config/" score="85"/>
+          <pattern regex=".*_util\.py$" target="utils/" score="80"/>
+          <pattern regex=".*_tool\.py$" target="tools/" score="80"/>
+          <pattern regex="test_.*\.py$" target="tests/" score="95"/>
+          <pattern regex=".*_test\.py$" target="tests/" score="95"/>
+          <pattern regex=".*_model\.py$" target="models/" score="85"/>
+          <pattern regex=".*_api\.py$" target="api/" score="85"/>
+        </category>
+      </pattern_mappings>
+      <scoring_algorithm>
+        <step>1. 对文件名进行正则匹配</step>
+        <step>2. 计算匹配度评分</step>
+        <step>3. 应用权重系数</step>
+        <step>4. 归一化到0-100范围</step>
+      </scoring_algorithm>
+    </dimension>
+
+    <dimension name="依赖关系分析" weight="20%" priority="P1">
+      <description>基于预期依赖关系推断最佳位置</description>
+      <dependency_indicators>
+        <indicator name="数据相关依赖">
+          <imports>
+            <import pattern="import tushare" target="data/providers/"/>
+            <import pattern="import akshare" target="data/providers/"/>
+            <import pattern="from sqlalchemy" target="data/storage/"/>
+            <import pattern="import redis" target="data/caching/"/>
+            <import pattern="import clickhouse" target="data/storage/"/>
+            <import pattern="import pandas.*read" target="data/processors/"/>
+            <import pattern="from pydantic.*BaseModel" target="models/"/>
+          </imports>
+          <score_mapping>
+            <mapping pattern="tushare|akshare" target="data/providers/" score="85"/>
+            <mapping pattern="sqlalchemy|mysql|clickhouse" target="data/storage/" score="85"/>
+            <mapping pattern="redis|memcached" target="data/caching/" score="85"/>
+            <mapping pattern="pandas.*processing" target="data/processors/" score="80"/>
+          </score_mapping>
+        </indicator>
+        
+        <indicator name="策略相关依赖">
+          <imports>
+            <import pattern="import numpy.*finance" target="strategies/"/>
+            <import pattern="import talib" target="strategies/technical/"/>
+            <import pattern="from zipline" target="backtest/"/>
+            <import pattern="import backtrader" target="backtest/"/>
+            <import pattern="from portfolio" target="portfolio/"/>
+          </imports>
+        </indicator>
+        
+        <indicator name="风险相关依赖">
+          <imports>
+            <import pattern="import scipy.*risk" target="risk/"/>
+            <import pattern="from risk_metrics" target="risk/metrics/"/>
+            <import pattern="import VaR" target="risk/models/"/>
+          </imports>
+        </indicator>
+      </dependency_indicators>
+      <analysis_method>
+        <step>1. 扫描文件预期导入模式</step>
+        <step>2. 匹配依赖关系指标</step>
+        <step>3. 计算依赖关系评分</step>
+        <step>4. 加权到总体评分</step>
+      </analysis_method>
+    </dimension>
+
+    <dimension name="相似文件位置分布" weight="10%" priority="P2">
+      <description>参考功能相似文件的位置分布</description>
+      <similarity_analysis>
+        <method name="功能相似性分析">
+          <step>1. 识别功能相似的现有文件</step>
+          <step>2. 统计相似文件的位置分布</step>
+          <step>3. 计算位置集中度</step>
+          <step>4. 推荐主要分布位置</step>
+        </method>
+        <scoring_criteria>
+          <criterion>相似文件集中度 > 70% 时，推荐主要位置</criterion>
+          <criterion>相似文件分散时，降低该维度权重</criterion>
+          <criterion>无相似文件时，该维度评分为0</criterion>
+        </scoring_criteria>
+      </similarity_analysis>
+    </dimension>
+  </multi_dimensional_analysis>
+
+  <path_calculation_process>
+    <phase name="信息收集阶段">
+      <actions>
+        <action>提取文件名和扩展名</action>
+        <action>分析用户提供的功能描述</action>
+        <action>识别预期的技术栈和依赖</action>
+        <action>收集相关的业务上下文</action>
+      </actions>
+    </phase>
+    
+    <phase name="多维度评分阶段">
+      <actions>
+        <action>执行功能语义分析并评分</action>
+        <action>进行文件名模式匹配并评分</action>
+        <action>分析依赖关系并评分</action>
+        <action>统计相似文件位置分布并评分</action>
+      </actions>
+      <formula>
+        总评分 = (语义分析评分 × 0.4) + (模式匹配评分 × 0.3) + (依赖分析评分 × 0.2) + (位置分布评分 × 0.1)
+      </formula>
+    </phase>
+    
+    <phase name="路径生成阶段">
+      <actions>
+        <action>根据最高评分确定基础路径</action>
+        <action>应用子目录规则进行精确定位</action>
+        <action>验证路径的规范符合性</action>
+        <action>生成备选路径方案</action>
+      </actions>
+    </phase>
+    
+    <phase name="验证确认阶段">
+      <actions>
+        <action>检查目标目录是否存在</action>
+        <action>验证路径符合三层DRY规范</action>
+        <action>确认不与现有文件冲突</action>
+        <action>生成最终路径建议</action>
+      </actions>
+    </phase>
+  </path_calculation_process>
+
+  <subdirectory_precision_rules>
+    <module name="data模块精确定位">
+      <subdirectories>
+        <subdir name="acquisition">
+          <criteria>数据获取、API调用、外部数据源接入</criteria>
+          <patterns>.*_fetcher\.py, .*_downloader\.py, .*_crawler\.py</patterns>
+        </subdir>
+        <subdir name="providers">
+          <criteria>数据提供商接口、标准化数据接口</criteria>
+          <patterns>.*_provider\.py, .*_source\.py</patterns>
+        </subdir>
+        <subdir name="processors">
+          <criteria>数据清洗、转换、计算处理</criteria>
+          <patterns>.*_processor\.py, .*_cleaner\.py, .*_transformer\.py</patterns>
+        </subdir>
+        <subdir name="storage">
+          <criteria>数据存储、数据库操作、持久化</criteria>
+          <patterns>.*_storage\.py, .*_db\.py, .*_repository\.py</patterns>
+        </subdir>
+        <subdir name="caching">
+          <criteria>数据缓存、临时存储、内存管理</criteria>
+          <patterns>.*_cache\.py, .*_buffer\.py</patterns>
+        </subdir>
+        <subdir name="validators">
+          <criteria>数据验证、质量检查、完整性校验</criteria>
+          <patterns>.*_validator\.py, .*_checker\.py, .*_quality\.py</patterns>
+        </subdir>
+        <subdir name="streaming">
+          <criteria>实时数据流、流式处理</criteria>
+          <patterns>.*_stream\.py, .*_realtime\.py</patterns>
+        </subdir>
+        <subdir name="pipeline">
+          <criteria>数据流水线、批处理管道</criteria>
+          <patterns>.*_pipeline\.py, .*_workflow\.py</patterns>
+        </subdir>
+        <subdir name="models">
+          <criteria>数据模型、结构定义</criteria>
+          <patterns>.*_model\.py, .*_schema\.py</patterns>
+        </subdir>
+        <subdir name="utils">
+          <criteria>数据处理工具函数</criteria>
+          <patterns>.*_util\.py, .*_helper\.py</patterns>
+        </subdir>
+        <subdir name="api">
+          <criteria>数据服务API、接口层</criteria>
+          <patterns>.*_api\.py, .*_service\.py</patterns>
+        </subdir>
+        <subdir name="tools">
+          <criteria>数据工具、调试工具、管理工具</criteria>
+          <patterns>.*_tool\.py, debug_.*\.py, check_.*\.py</patterns>
+        </subdir>
+        <subdir name="tests">
+          <criteria>数据模块测试文件</criteria>
+          <patterns>test_.*\.py, .*_test\.py</patterns>
+        </subdir>
+        <subdir name="monitoring">
+          <criteria>数据监控、状态检查</criteria>
+          <patterns>.*_monitor\.py, .*_health\.py</patterns>
+        </subdir>
+      </subdirectories>
+    </module>
+
+    <module name="strategies模块精确定位">
+      <subdirectories>
+        <subdir name="base">
+          <criteria>基础策略类、抽象策略接口</criteria>
+          <patterns>base_.*\.py, abstract_.*\.py</patterns>
+        </subdir>
+        <subdir name="technical">
+          <criteria>技术分析策略、指标策略</criteria>
+          <patterns>.*_technical\.py, .*_indicator\.py</patterns>
+        </subdir>
+        <subdir name="fundamental">
+          <criteria>基本面分析策略</criteria>
+          <patterns>.*_fundamental\.py, .*_value\.py</patterns>
+        </subdir>
+        <subdir name="options">
+          <criteria>期权策略、衍生品策略</criteria>
+          <patterns>.*_option\.py, .*_derivative\.py</patterns>
+        </subdir>
+        <subdir name="portfolio">
+          <criteria>组合策略、多资产策略</criteria>
+          <patterns>.*_portfolio\.py, .*_multi_asset\.py</patterns>
+        </subdir>
+        <subdir name="signals">
+          <criteria>信号生成、信号处理</criteria>
+          <patterns>.*_signal\.py, .*_trigger\.py</patterns>
+        </subdir>
+        <subdir name="utils">
+          <criteria>策略开发工具</criteria>
+          <patterns>.*_util\.py, .*_helper\.py</patterns>
+        </subdir>
+      </subdirectories>
+    </module>
+
+    <module name="risk模块精确定位">
+      <subdirectories>
+        <subdir name="metrics">
+          <criteria>风险指标计算、风险度量</criteria>
+          <patterns>.*_metric\.py, .*_measure\.py</patterns>
+        </subdir>
+        <subdir name="models">
+          <criteria>风险模型、VaR模型</criteria>
+          <patterns>.*_model\.py, .*_var\.py</patterns>
+        </subdir>
+        <subdir name="limits">
+          <criteria>风险限制、风险控制</criteria>
+          <patterns>.*_limit\.py, .*_control\.py</patterns>
+        </subdir>
+        <subdir name="monitors">
+          <criteria>风险监控、实时风险检查</criteria>
+          <patterns>.*_monitor\.py, .*_watch\.py</patterns>
+        </subdir>
+      </subdirectories>
+    </module>
+  </subdirectory_precision_rules>
+
+  <quality_assurance>
+    <accuracy_validation>
+      <validation_checks>
+        <check>路径是否符合项目目录规范</check>
+        <check>是否与现有文件产生冲突</check>
+        <check>是否体现了CZSC技术特色</check>
+        <check>是否遵循了配置v4.0标准</check>
+        <check>子目录级别的精确性</check>
+      </validation_checks>
+    </accuracy_validation>
+    
+    <performance_metrics>
+      <metric name="路径准确率">目标 ≥ 95%</metric>
+      <metric name="用户接受率">目标 ≥ 90%</metric>
+      <metric name="规范符合度">目标 = 100%</metric>
+    </performance_metrics>
+    
+    <continuous_improvement>
+      <feedback_collection>
+        <source>用户对路径建议的反馈</source>
+        <source>实际使用效果的跟踪</source>
+        <source>项目结构演进的观察</source>
+      </feedback_collection>
+      
+      <algorithm_optimization>
+        <method>定期调整各维度权重</method>
+        <method>更新模式匹配规则</method>
+        <method>扩展语义分析词典</method>
+        <method>优化子目录定位规则</method>
+      </algorithm_optimization>
+    </continuous_improvement>
+  </quality_assurance>
+</path_calculation_algorithm>

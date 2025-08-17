@@ -1,0 +1,408 @@
+<file_creation_workflow>
+  <mode_overview>
+    文档目录管理器是一个专门负责文件创建规范管理和项目结构分析的守门员模式。
+    它通过严格的检查流程和智能路径定位算法，确保所有新建文件都符合项目规范，
+    防止文件重复、位置错误、命名不规范等问题。
+    
+    🔄 **重要**: 本模式严格遵循universal_verification_principles中的通用验证原则，
+    适用于文件创建和任何涉及项目结构分析的任务。
+  </mode_overview>
+
+  <universal_principles_reference>
+    <reference_document>.roo/rules-universal-verification/1_universal_verification_principles.xml</reference_document>
+    <mandatory_compliance>
+      本模式的所有分析任务必须严格遵循通用验证原则：
+      - P1: 实证优先原则 - 禁止基于推测进行分析
+      - P2: 完整性验证原则 - 声称组件缺失前必须执行穷尽搜索
+      - P3: 证据链完整性原则 - 每个结论都要有验证证据
+    </mandatory_compliance>
+  </universal_principles_reference>
+
+  <initialization_steps>
+    <step number="1">
+      <action>接收文件创建请求</action>
+      <details>
+        获取用户的文件创建意图和基本信息：
+        - 文件名称和扩展名
+        - 文件功能描述
+        - 预期文件内容类型
+        - 用户建议的路径（如果有）
+        - 文件归属的模块或功能域
+      </details>
+    </step>
+    
+    <step number="2">
+      <action>项目结构扫描</action>
+      <tools>
+        <tool>list_files - 扫描项目完整目录结构</tool>
+        <tool>read_file - 读取关键规范文件</tool>
+      </tools>
+      <error_prevention_protocol>
+        <critical_rule>必须基于实际扫描结果分析，绝不能基于假设推理</critical_rule>
+        <universal_principles_enforcement>
+          🔄 严格执行universal_verification_principles中的mandatory_workflow：
+          1. initialization阶段的完整扫描要求
+          2. analysis阶段的证据验证要求
+          3. conclusion阶段的强制检查清单
+        </universal_principles_enforcement>
+        <scanning_sequence>
+          <step>1. 扫描根目录结构：list_files(root, recursive=false)</step>
+          <step>2. 识别相似命名目录：查找所有包含目标关键词的目录</step>
+          <step>3. 逐个详细扫描：list_files(each_similar_dir, recursive=true)</step>
+          <step>4. 交叉验证：用search_files验证目录引用关系</step>
+          <step>5. 确认实际存在性：确保每个分析的目录都真实存在</step>
+        </scanning_sequence>
+        <verification_checklist>
+          <check>☐ 已用list_files获取真实目录结构</check>
+          <check>☐ 已识别所有相似命名的目录</check>
+          <check>☐ 已理解目录间的层级关系(父子vs平级)</check>
+          <check>☐ 已验证每个目录的实际存在性</check>
+          <check>☐ 已确认目录的实际功能用途</check>
+          <check>☐ 已排除基于推测的错误结论</check>
+          <check>☐ 已完成universal_verification_principles的mandatory_checklist</check>
+        </verification_checklist>
+      </error_prevention_protocol>
+      <checklist>
+        <item>项目根目录结构已了解</item>
+        <item>三层DRY规范目录已扫描</item>
+        <item>8大模块代码目录已识别</item>
+        <item>现有文件分布已掌握</item>
+        <item>目录层级关系已正确理解</item>
+        <item>相似目录的功能差异已明确</item>
+      </checklist>
+    </step>
+  </initialization_steps>
+
+  <main_workflow>
+    <phase name="文件存在性检查" priority="P0">
+      <description>检查目标文件是否已经存在</description>
+      <steps>
+        <step>
+          <title>精确文件名匹配</title>
+          <actions>
+            <action>在整个项目中搜索相同文件名</action>
+            <action>检查不同扩展名的同名文件</action>
+            <action>识别大小写不同的相似文件名</action>
+          </actions>
+          <decision_logic>
+            如果找到完全相同的文件名：
+            - 立即阻止创建
+            - 指向现有文件位置
+            - 建议修改现有文件
+          </decision_logic>
+          <output>文件存在性检查报告</output>
+        </step>
+      </steps>
+    </phase>
+
+    <phase name="相似文件分析" priority="P0">
+      <description>分析是否存在功能相似的文件</description>
+      <steps>
+        <step>
+          <title>功能语义相似性分析</title>
+          <similarity_dimensions>
+            <dimension name="文件名语义" weight="30%">
+              分析文件名中的关键词和功能指示
+            </dimension>
+            <dimension name="功能描述" weight="40%">
+              基于用户描述的功能与现有文件功能对比
+            </dimension>
+            <dimension name="模块归属" weight="20%">
+              同一模块内的功能重叠分析
+            </dimension>
+            <dimension name="技术栈" weight="10%">
+              相同技术实现的功能对比
+            </dimension>
+          </similarity_dimensions>
+          
+          <similarity_scoring>
+            <score level="高相似">相似度 >= 80% - 🔴 强烈建议完善现有文件</score>
+            <score level="中等相似">相似度 50-79% - 🟡 建议参考现有文件或合并</score>
+            <score level="低相似">相似度 20-49% - 🟢 可以新建但需建立关联</score>
+            <score level="无相似">相似度 < 20% - ✅ 可以安全新建</score>
+          </similarity_scoring>
+          
+          <output>相似文件分析报告和相似度评分</output>
+        </step>
+
+        <step>
+          <title>相似文件处理建议</title>
+          <recommendation_logic>
+            根据相似度评分生成处理建议：
+            
+            【高相似度处理】
+            - 详细说明现有文件的功能
+            - 指出两者功能重叠的具体方面
+            - 建议如何完善现有文件来满足需求
+            - 提供现有文件的具体路径和修改建议
+            
+            【中等相似度处理】
+            - 列出相似文件的功能特点
+            - 分析功能差异和互补性
+            - 建议是否可以合并或需要分离
+            - 如果新建，建议如何与现有文件协调
+            
+            【低相似度处理】
+            - 说明虽有相似但差异显著
+            - 建议新建时如何避免功能冲突
+            - 建立与相似文件的引用关系
+          </recommendation_logic>
+          <output>详细的文件处理建议和行动方案</output>
+        </step>
+      </steps>
+    </phase>
+
+    <phase name="路径规范性验证" priority="P1">
+      <description>验证文件路径是否符合项目规范</description>
+      <steps>
+        <step>
+          <title>三层DRY规范路径映射</title>
+          <path_categories>
+            <category name="DRY规范文档">
+              <base_path>docs/三层DRY模块化规范/</base_path>
+              <sub_paths>
+                <path>00_架构层/ - 系统架构、技术标准等</path>
+                <path>01_通用规范层/ - 开发规范、接口规范、配置规范等</path>
+                <path>02_模块专用层/ - 8大模块专用规范</path>
+              </sub_paths>
+            </category>
+            
+            <category name="工作流文档">
+              <base_path>0_工作流开发/workflow/</base_path>
+              <sub_paths>
+                <path>01_基础通用工作流/ - 配置、代码质量等</path>
+                <path>02_数据层工作流/ - 数据获取、处理等</path>
+                <path>03_业务层工作流/ - 策略、回测等</path>
+                <path>04_系统层工作流/ - 风险、执行等</path>
+                <path>05_部署运维工作流/ - 部署、监控等</path>
+              </sub_paths>
+            </category>
+            
+            <category name="代码文件">
+              <base_path>quant_system/</base_path>
+              <sub_paths>
+                <path>data/ - 数据相关代码</path>
+                <path>strategies/ - 策略相关代码</path>
+                <path>risk/ - 风险管理代码</path>
+                <path>execution/ - 交易执行代码</path>
+                <path>portfolio/ - 组合管理代码</path>
+                <path>monitoring/ - 监控相关代码</path>
+                <path>engine/ - 引擎核心代码</path>
+                <path>backtest/ - 回测相关代码</path>
+              </sub_paths>
+            </category>
+            
+            <category name="配置文件">
+              <base_path>config/</base_path>
+              <naming_pattern>基于配置v4.0四层存储规范</naming_pattern>
+            </category>
+            
+            <category name="测试文件">
+              <base_path>tests/</base_path>
+              <structure>与源代码目录结构保持一致</structure>
+            </category>
+          </path_categories>
+          
+          <output>路径规范符合性评估</output>
+        </step>
+      </steps>
+    </phase>
+
+    <phase name="精准路径计算" priority="P1">
+      <description>基于多维度分析计算最佳文件路径</description>
+      <steps>
+        <step>
+          <title>多维度路径定位算法</title>
+          <location_dimensions>
+            <dimension name="功能语义分析" weight="40%">
+              <analysis_points>
+                <point>文件名关键词识别(provider, processor, model, util等)</point>
+                <point>功能描述语义分析</point>
+                <point>业务领域归属判断</point>
+              </analysis_points>
+            </dimension>
+            
+            <dimension name="文件名模式匹配" weight="30%">
+              <patterns>
+                <pattern>*_provider.py → providers/</pattern>
+                <pattern>*_processor.py → processors/</pattern>
+                <pattern>*_model.py → models/</pattern>
+                <pattern>*_util.py → utils/</pattern>
+                <pattern>*_config.py → config/</pattern>
+                <pattern>*_test.py → tests/对应目录</pattern>
+              </patterns>
+            </dimension>
+            
+            <dimension name="依赖关系分析" weight="20%">
+              <analysis_rules>
+                <rule>tushare导入 → data/providers/</rule>
+                <rule>pandas+数据处理 → data/processors/</rule>
+                <rule>sqlalchemy → data/storage/</rule>
+                <rule>pydantic.BaseModel → models/</rule>
+                <rule>策略算法 → strategies/</rule>
+                <rule>风险计算 → risk/</rule>
+              </analysis_rules>
+            </dimension>
+            
+            <dimension name="相似文件位置" weight="10%">
+              <analysis_method>
+                分析功能相似文件的位置分布，推断最佳归属目录
+              </analysis_method>
+            </dimension>
+          </location_dimensions>
+          
+          <calculation_algorithm>
+            1. 对每个维度进行分析评分
+            2. 按权重计算综合评分
+            3. 选择得分最高的路径作为建议
+            4. 验证路径的可用性和合规性
+            5. 生成备选路径方案
+          </calculation_algorithm>
+          
+          <output>精确的文件路径建议和计算依据</output>
+        </step>
+
+        <step>
+          <title>子目录级精准定位</title>
+          <sub_directory_rules>
+            <module name="data模块">
+              <sub_dirs>
+                <dir>providers/ - 数据提供商接口</dir>
+                <dir>processors/ - 数据处理和清洗</dir>
+                <dir>storage/ - 数据存储管理</dir>
+                <dir>validators/ - 数据验证</dir>
+                <dir>models/ - 数据模型定义</dir>
+                <dir>utils/ - 数据工具函数</dir>
+                <dir>api/ - 数据API接口</dir>
+              </sub_dirs>
+            </module>
+            
+            <module name="strategies模块">
+              <sub_dirs>
+                <dir>base/ - 基础策略类</dir>
+                <dir>technical/ - 技术分析策略</dir>
+                <dir>fundamental/ - 基本面策略</dir>
+                <dir>options/ - 期权策略</dir>
+                <dir>portfolio/ - 组合策略</dir>
+                <dir>utils/ - 策略工具</dir>
+              </sub_dirs>
+            </module>
+            
+            <module name="risk模块">
+              <sub_dirs>
+                <dir>metrics/ - 风险指标计算</dir>
+                <dir>models/ - 风险模型</dir>
+                <dir>limits/ - 风险限制管理</dir>
+                <dir>monitors/ - 风险监控</dir>
+              </sub_dirs>
+            </module>
+          </sub_directory_rules>
+          
+          <precise_location_logic>
+            基于文件功能和内容描述，确定具体的子目录位置：
+            1. 分析文件的具体功能类型
+            2. 匹配到对应的子目录规则
+            3. 验证子目录的存在性
+            4. 如果子目录不存在，评估是否需要创建
+          </precise_location_logic>
+          
+          <output>精确到子目录级的文件路径</output>
+        </step>
+      </steps>
+    </phase>
+
+    <phase name="决策建议输出" priority="P2">
+      <description>生成最终的文件创建决策和路径建议</description>
+      <steps>
+        <step>
+          <title>综合决策生成</title>
+          <decision_matrix>
+            <scenario name="建议完善现有文件">
+              <condition>存在高相似度文件 (>= 80%)</condition>
+              <output_format>
+                🚫 **不建议新建文件**
+                
+                **原因**: 发现高度相似的现有文件
+                **现有文件**: {文件路径}
+                **相似度**: {相似度百分比}
+                **建议行动**: 完善现有文件来满足需求
+                **具体建议**: {详细的完善建议}
+              </output_format>
+            </scenario>
+            
+            <scenario name="建议参考现有文件">
+              <condition>存在中等相似度文件 (50-79%)</condition>
+              <output_format>
+                ⚠️ **建议谨慎新建**
+                
+                **发现相似文件**: {文件路径}
+                **相似度**: {相似度百分比}
+                **功能差异**: {差异分析}
+                **建议**: 考虑合并功能或明确功能边界
+                **如需新建**: {推荐路径和注意事项}
+              </output_format>
+            </scenario>
+            
+            <scenario name="可以安全新建">
+              <condition>无相似文件或相似度很低 (< 50%)</condition>
+              <output_format>
+                ✅ **建议新建文件**
+                
+                **推荐路径**: {精确路径}
+                **路径依据**: {选择该路径的分析依据}
+                **备选路径**: {备选方案}
+                **注意事项**: {命名规范和技术要求}
+                **相关文件**: {需要关联的相关文件}
+              </output_format>
+            </scenario>
+          </decision_matrix>
+          
+          <output>完整的文件创建决策报告</output>
+        </step>
+
+        <step>
+          <title>路径验证和确认</title>
+          <verification_checks>
+            <check>路径是否符合三层DRY规范</check>
+            <check>目录是否存在，不存在是否需要创建</check>
+            <check>文件名是否符合模块命名规范</check>
+            <check>是否与现有文件产生冲突</check>
+            <check>是否体现项目的技术特色(CZSC、配置v4.0等)</check>
+          </verification_checks>
+          
+          <final_confirmation>
+            在确认所有检查通过后，提供最终的文件创建指令：
+            - 精确的文件路径
+            - 推荐的文件内容结构
+            - 需要的import声明
+            - 与其他文件的关联关系
+          </final_confirmation>
+          
+          <output>经过验证的最终文件创建方案</output>
+        </step>
+      </steps>
+    </phase>
+  </main_workflow>
+
+  <completion_criteria>
+    <criterion>文件存在性检查已完成</criterion>
+    <criterion>相似文件分析已完成</criterion>
+    <criterion>路径规范性已验证</criterion>
+    <criterion>精确路径已计算</criterion>
+    <criterion>最终决策已生成</criterion>
+  </completion_criteria>
+
+  <success_metrics>
+    <quantitative>
+      <metric name="路径准确性">目标 ≥ 95%</metric>
+      <metric name="重复文件避免率">目标 ≥ 98%</metric>
+      <metric name="规范符合度">目标 ≥ 100%</metric>
+    </quantitative>
+    <qualitative>
+      <metric>新建文件都在正确的位置</metric>
+      <metric>文件命名符合项目规范</metric>
+      <metric>避免了功能重复的文件创建</metric>
+      <metric>项目目录结构保持清晰有序</metric>
+    </qualitative>
+  </success_metrics>
+</file_creation_workflow>

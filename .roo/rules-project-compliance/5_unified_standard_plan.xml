@@ -1,0 +1,309 @@
+<unified_standard_plan>
+  <overview>
+    基于123个规范文档深度分析结果的统一规范整合方案，
+    解决文档重复、架构差异、内容矛盾等问题的完整解决方案。
+  </overview>
+
+  <analysis_summary>
+    <document_statistics>
+      <total_documents>123个规范相关文档</total_documents>
+      <duplicate_categories>
+        <category name="配置架构描述" count="8个文档" target="config/README.md"/>
+        <category name="技术栈描述" count="12个文档" target="PROJECT_SUMMARY.md"/>
+        <category name="开发规范" count="15个文档" target="CLAUDE.md"/>
+        <category name="CZSC模块描述" count="6个文档" target="czsc/README.md"/>
+      </duplicate_categories>
+    </document_statistics>
+
+    <architecture_analysis>
+      <successful_implementations>
+        <implementation name="配置v4.0四层存储架构">
+          <status>完美实现</status>
+          <value>降低30%配置维护成本</value>
+          <action>保护并突出展示</action>
+        </implementation>
+        <implementation name="CZSC集成架构">
+          <status>技术成功案例</status>
+          <value>95.50%回测收益率</value>
+          <action>保护双目录结构czsc/+czsc_strategy/</action>
+        </implementation>
+        <implementation name="DATA模块providers分层">
+          <status>架构合理</status>
+          <structure>acquisition/storage/processing/quality</structure>
+          <action>保持现有结构</action>
+        </implementation>
+      </successful_implementations>
+
+      <missing_modules>
+        <module name="PORTFOLIO">规范描述存在，实际实现缺失</module>
+        <module name="RISK">规范描述存在，实际实现缺失</module>
+        <module name="BACKTEST">规范描述存在，实际实现缺失</module>
+        <module name="MONITORING">规范描述存在，实际实现缺失</module>
+      </missing_modules>
+
+      <contradictions>
+        <contradiction type="包管理">CZSC模块使用UV包管理，主系统配置未明确指定</contradiction>
+        <contradiction type="架构描述">7大核心模块vs实际4+1模块架构不符</contradiction>
+      </contradictions>
+    </architecture_analysis>
+  </analysis_summary>
+
+  <integration_strategy>
+    <core_principles>
+      <principle name="实际优先">以成功实现的架构为标准，文档服务于实现</principle>
+      <principle name="单一信息源">每类信息只在一处维护，消除重复内容</principle>
+      <principle name="成功保护">保持已验证的技术架构，如配置v4.0、CZSC集成</principle>
+      <principle name="分阶段实施">立即保护→消除重复→完善缺失模块</principle>
+    </core_principles>
+
+    <phase_implementation>
+      <phase number="1" name="保护成功架构" priority="立即执行">
+        <objectives>
+          <objective>保护配置v4.0四层存储架构（已完美实现）</objective>
+          <objective>保护CZSC集成架构（95.50%回测收益率）</objective>
+          <objective>保护DATA模块providers分层架构</objective>
+          <objective>保护STRATEGIES模块czsc_strategy应用</objective>
+        </objectives>
+        <actions>
+          <action type="文档标记">明确标记成功实现的架构组件</action>
+          <action type="更新规范">更新过时的规范描述，与实际架构保持一致</action>
+          <action type="突出展示">在项目总览中突出技术亮点</action>
+        </actions>
+      </phase>
+
+      <phase number="2" name="消除重复内容" priority="1周内完成">
+        <duplicate_elimination>
+          <category name="配置架构描述">
+            <current_locations>8个文档分散描述</current_locations>
+            <target_location>config/README.md</target_location>
+            <action>整合v4.0四层存储架构描述</action>
+            <benefits>统一配置管理文档，提升查找效率</benefits>
+          </category>
+          <category name="技术栈描述">
+            <current_locations>12个文档重复描述</current_locations>
+            <target_location>PROJECT_SUMMARY.md</target_location>
+            <action>统一技术栈和成果展示</action>
+            <benefits>突出项目技术亮点和成果指标</benefits>
+          </category>
+          <category name="开发规范">
+            <current_locations>15个文档重复规范</current_locations>
+            <target_location>CLAUDE.md</target_location>
+            <action>整合开发规范，移除重复</action>
+            <benefits>简化开发规范查阅，提高执行效率</benefits>
+          </category>
+          <category name="CZSC模块描述">
+            <current_locations>6个文档重复描述</current_locations>
+            <target_location>czsc/README.md</target_location>
+            <action>统一CZSC集成架构描述</action>
+            <benefits>突出CZSC技术成功案例</benefits>
+          </category>
+        </duplicate_elimination>
+      </phase>
+
+      <phase number="3" name="完善缺失模块" priority="1个月内完成">
+        <missing_modules_design>
+          <module name="PORTFOLIO">
+            <status>规范描述存在，实际实现缺失</status>
+            <design_approach>基于现有成功模式设计</design_approach>
+            <integration_point>与ENGINE模块集成</integration_point>
+            <implementation_priority>高（核心业务功能）</implementation_priority>
+          </module>
+          <module name="RISK">
+            <status>规范描述存在，实际实现缺失</status>
+            <design_approach>基于ENGINE模块风险组件扩展</design_approach>
+            <integration_point>与DATA和PORTFOLIO模块集成</integration_point>
+            <implementation_priority>高（风险控制必需）</implementation_priority>
+          </module>
+          <module name="BACKTEST">
+            <status>规范描述存在，实际实现缺失</status>
+            <design_approach>基于czsc_strategy回测经验设计</design_approach>
+            <integration_point>与STRATEGIES和DATA模块集成</integration_point>
+            <implementation_priority>中（策略验证需要）</implementation_priority>
+          </module>
+          <module name="MONITORING">
+            <status>规范描述存在，实际实现缺失</status>
+            <design_approach>基于现有监控组件扩展</design_approach>
+            <integration_point>与所有模块监控点集成</integration_point>
+            <implementation_priority>中（运维支持需要）</implementation_priority>
+          </module>
+        </missing_modules_design>
+      </phase>
+    </phase_implementation>
+  </integration_strategy>
+
+  <unified_document_system>
+    <target_structure>
+      <document name="01_项目总览.md">
+        <purpose>整合PROJECT_SUMMARY.md核心内容</purpose>
+        <content>
+          <section>技术亮点展示（配置v4.0、CZSC集成）</section>
+          <section>核心架构描述（实际4+1模块架构）</section>
+          <section>成果指标展示（95.50%回测收益率）</section>
+        </content>
+      </document>
+      <document name="02_架构设计.md">
+        <purpose>整合架构相关重复内容</purpose>
+        <content>
+          <section>DATA模块架构（providers四层架构）</section>
+          <section>STRATEGIES模块架构（策略基类+czsc_strategy）</section>
+          <section>ENGINE模块架构（执行引擎架构）</section>
+          <section>CZSC集成架构（czsc/+czsc_strategy/）</section>
+          <section>配置v4.0架构（schemas/+modules/）</section>
+        </content>
+      </document>
+      <document name="03_开发规范.md">
+        <purpose>整合CLAUDE.md中的开发规范</purpose>
+        <content>
+          <section>编码标准（PEP8、命名规范）</section>
+          <section>项目结构规范（基于实际架构）</section>
+          <section>文件组织规范（实际目录结构）</section>
+          <section>质量标准（测试、文档要求）</section>
+        </content>
+      </document>
+      <document name="04_配置管理.md">
+        <purpose>整合config相关重复内容</purpose>
+        <content>
+          <section>v4.0架构详解（四层存储架构）</section>
+          <section>schemas配置（存储层配置）</section>
+          <section>modules配置（业务模块配置）</section>
+          <section>最佳实践（配置管理经验）</section>
+        </content>
+      </document>
+      <document name="05_模块补完计划.md">
+        <purpose>缺失模块实现计划</purpose>
+        <content>
+          <section>PORTFOLIO模块设计</section>
+          <section>RISK模块设计</section>
+          <section>BACKTEST模块设计</section>
+          <section>MONITORING模块设计</section>
+        </content>
+      </document>
+    </target_structure>
+  </unified_document_system>
+
+  <implementation_checklist>
+    <immediate_actions>
+      <action priority="P0">创建统一规范文档体系（5个核心文档）</action>
+      <action priority="P0">更新CLAUDE.md，移除重复内容，引用统一文档</action>
+      <action priority="P0">更新config/README.md，专注v4.0架构描述</action>
+      <action priority="P0">更新PROJECT_SUMMARY.md，突出技术亮点</action>
+    </immediate_actions>
+
+    <maintenance_mechanisms>
+      <mechanism>创建文档更新检查清单</mechanism>
+      <mechanism>建立单一信息源更新流程</mechanism>
+      <mechanism>设置文档一致性验证机制</mechanism>
+      <mechanism>实施项目规范执行器自动检查</mechanism>
+    </maintenance_mechanisms>
+
+    <risk_controls>
+      <risk name="架构破坏">确保不修改已成功运行的架构</risk>
+      <risk name="文档同步">建立更新机制，避免文档再次分散</risk>
+      <risk name="开发中断">分阶段实施，不影响开发进度</risk>
+      <mitigation>实施前完整备份现有文档</mitigation>
+      <mitigation>准备快速回滚到当前状态的方案</mitigation>
+      <mitigation>每阶段完成后验证系统功能正常</mitigation>
+    </risk_controls>
+  </implementation_checklist>
+
+  <document_archival_strategy>
+    <overview>
+      对123个原有规范文档采用渐进式归档策略，确保信息安全且可回溯
+    </overview>
+    
+    <archival_principles>
+      <principle name="安全优先">备份所有原始文档，避免信息丢失</principle>
+      <principle name="渐进归档">分阶段归档，不直接删除</principle>
+      <principle name="可回溯性">保持历史版本可查阅</principle>
+      <principle name="清晰标记">明确标记文档状态和归档原因</principle>
+    </archival_principles>
+
+    <archival_process>
+      <phase number="1" name="备份保护">
+        <action>创建完整备份目录 docs/archive/规范文档备份_20250814/</action>
+        <action>备份所有123个规范文档的完整副本</action>
+        <action>生成文档清单和映射关系</action>
+        <duration>立即执行</duration>
+      </phase>
+
+      <phase number="2" name="状态标记">
+        <action>在原文档开头添加归档声明</action>
+        <template>
+          ```
+          # ⚠️ 文档归档声明
+          > **状态**: 已归档 | **原因**: 内容已整合到统一规范体系
+          > **新位置**: [具体的统一文档位置]
+          > **归档时间**: 2025-08-14
+          ```
+        </template>
+        <duration>1周内完成</duration>
+      </phase>
+
+      <phase number="3" name="逐步移除">
+        <action>将标记文档移动到 docs/archive/legacy/ 目录</action>
+        <action>保持目录结构，便于查找</action>
+        <action>更新所有引用链接指向新的统一文档</action>
+        <duration>2周内完成</duration>
+      </phase>
+    </archival_process>
+
+    <document_classification>
+      <category name="核心文档" action="保留更新">
+        <document>CLAUDE.md（保留但移除重复内容）</document>
+        <document>PROJECT_SUMMARY.md（保留但突出技术亮点）</document>
+        <document>config/README.md（保留专注v4.0架构）</document>
+        <document>czsc/README.md（保留突出集成成果）</document>
+      </category>
+
+      <category name="重复文档" action="归档整合">
+        <document>配置架构描述相关的8个文档</document>
+        <document>技术栈描述相关的12个文档</document>
+        <document>开发规范相关的15个文档</document>
+        <document>CZSC模块描述相关的6个文档</document>
+      </category>
+
+      <category name="过时文档" action="归档保留">
+        <document>描述过时架构的文档</document>
+        <document>已被实际实现替代的规范</document>
+        <document>实验性或已废弃的设计文档</document>
+      </category>
+
+      <category name="历史文档" action="永久保留">
+        <document>项目重要里程碑记录</document>
+        <document>技术决策历史文档</document>
+        <document>重要的架构演进记录</document>
+      </category>
+    </document_classification>
+
+    <safety_measures>
+      <measure>完整备份所有原始文档</measure>
+      <measure>生成详细的文档映射表</measure>
+      <measure>设置3个月试用期，期间保留原文档</measure>
+      <measure>建立快速恢复机制</measure>
+      <measure>记录所有归档操作的详细日志</measure>
+    </safety_measures>
+
+    <recommended_approach>
+      <step number="1">立即备份所有123个文档</step>
+      <step number="2">实施统一规范文档体系</step>
+      <step number="3">在原文档添加归档声明和新位置指引</step>
+      <step number="4">运行3个月验证新体系有效性</step>
+      <step number="5">确认无问题后正式归档到archive目录</step>
+      <step number="6">保留核心历史文档，移除纯重复内容</step>
+    </recommended_approach>
+  </document_archival_strategy>
+
+  <expected_benefits>
+    <short_term benefits="1周内">
+      <benefit>消除文档重复，提高查找效率40%</benefit>
+      <benefit>统一规范描述，减少开发困惑</benefit>
+      <benefit>突出技术亮点，提升项目价值展示</benefit>
+    </short_term>
+    <long_term benefits="1个月内">
+      <benefit>建立完整的规范体系，提高开发效率</benefit>
+      <benefit>完善缺失模块，实现完整架构</benefit>
+      <benefit>建立可持续的文档维护机制</benefit>
+      <benefit>清理冗余文档，项目结构更清晰</benefit>
+    </long_term>
+  </expected_benefits>
+</unified_standard_plan>

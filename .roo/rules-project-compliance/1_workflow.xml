@@ -1,0 +1,209 @@
+<project_compliance_workflow>
+  <overview>
+    项目规范执行器的核心工作流程，基于CLAUDE.md规范要求，
+    自动检查、修复和维护项目文件组织规范。
+    
+    🔄 **重要**: 本模式严格遵循universal_verification_principles中的通用验证原则，
+    在执行任何项目结构分析前都必须完成强制性验证流程。
+  </overview>
+
+  <universal_principles_reference>
+    <reference_document>.roo/rules-universal-verification/1_universal_verification_principles.xml</reference_document>
+    <mandatory_compliance>
+      本模式的所有项目结构分析任务必须严格遵循通用验证原则：
+      - P1: 实证优先原则 - 禁止基于推测进行项目结构分析
+      - P2: 完整性验证原则 - 声称文件缺失或违规前必须执行穷尽搜索
+      - P3: 证据链完整性原则 - 每个合规性结论都要有验证证据
+    </mandatory_compliance>
+  </universal_principles_reference>
+
+  <initialization_steps>
+    <step number="1">
+      <action>读取CLAUDE.md规范文档</action>
+      <details>
+        解析项目规范要求：
+        - 7大核心模块架构
+        - 文件追踪五要点
+        - 禁止行为清单
+        - 命名规范要求
+      </details>
+    </step>
+    
+    <step number="2">
+      <action>全面扫描项目结构</action>
+      <universal_verification_enforcement>
+        🔄 强制执行universal_verification_principles的mandatory_workflow：
+        1. initialization阶段 - 完整项目结构扫描
+        2. analysis阶段 - 基于实际验证结果分析
+        3. conclusion阶段 - 完成强制检查清单
+      </universal_verification_enforcement>
+      <tools>
+        <tool>list_files - 递归列出所有文件和目录</tool>
+        <tool>search_files - 查找特定模式的文件</tool>
+        <tool>read_file - 检查文件内容和分类</tool>
+      </tools>
+    </step>
+
+    <step number="3">
+      <action>分析现有文件分类</action>
+      <details>
+        根据文件路径、文件名、文件内容判断：
+        - 属于哪个核心模块
+        - 是否符合命名规范
+        - 是否违反禁止行为
+      </details>
+    </step>
+  </initialization_steps>
+
+  <main_workflow>
+    <phase name="问题识别">
+      <description>识别所有违反项目规范的文件和目录</description>
+      <checks>
+        <check name="根目录清洁检查">
+          <rule>根目录不应包含独立的Python脚本文件</rule>
+          <pattern>*.py文件直接在根目录</pattern>
+          <action>标记为需要移动到合适模块</action>
+        </check>
+        
+        <check name="模块目录规范检查">
+          <rule>所有文件必须在正确的7大核心模块目录下</rule>
+          <modules>
+            <module name="DATA">数据获取、存储、处理相关文件</module>
+            <module name="STRATEGIES">策略开发相关文件</module>
+            <module name="EXECUTION">执行引擎相关文件</module>
+            <module name="RISK">风险管理相关文件</module>
+            <module name="PORTFOLIO">组合管理相关文件</module>
+            <module name="BACKTEST">回测引擎相关文件</module>
+            <module name="MONITORING">监控报告相关文件</module>
+          </modules>
+        </check>
+
+        <check name="临时文件检查">
+          <rule>禁止在模块目录下创建临时文件</rule>
+          <patterns>
+            <pattern>*.tmp</pattern>
+            <pattern>*.temp</pattern>
+            <pattern>test_*.py (不在tests目录下)</pattern>
+            <pattern>temp_*</pattern>
+          </patterns>
+        </check>
+
+        <check name="命名规范检查">
+          <rule>文件名必须使用小写字母+下划线</rule>
+          <invalid_patterns>
+            <pattern>camelCase文件名</pattern>
+            <pattern>PascalCase文件名</pattern>
+            <pattern>包含空格的文件名</pattern>
+            <pattern>包含特殊字符的文件名</pattern>
+          </invalid_patterns>
+        </check>
+
+        <check name="功能重复检查">
+          <rule>避免功能重复的文件</rule>
+          <method>分析文件内容，识别相似功能的文件</method>
+        </check>
+      </checks>
+    </phase>
+
+    <phase name="修复计划生成">
+      <description>为每个问题生成具体的修复方案</description>
+      <plan_generation>
+        <step>分类违规文件的严重程度</step>
+        <step>确定文件的正确归属模块</step>
+        <step>生成文件移动和重命名计划</step>
+        <step>确定需要删除的无用文件</step>
+        <step>规划目录结构调整</step>
+      </plan_generation>
+    </phase>
+
+    <phase name="自动化修复执行">
+      <description>执行规范修复操作</description>
+      <execution_steps>
+        <step priority="1">
+          <action>创建备份</action>
+          <command>创建当前项目状态的备份</command>
+        </step>
+        
+        <step priority="2">
+          <action>创建标准目录结构</action>
+          <command>确保7大核心模块目录存在</command>
+        </step>
+
+        <step priority="3">
+          <action>移动文件到正确位置</action>
+          <method>
+            根据文件功能和内容分析结果，
+            将文件移动到对应的核心模块目录
+          </method>
+        </step>
+
+        <step priority="4">
+          <action>重命名不符合规范的文件</action>
+          <method>将camelCase等命名转换为snake_case</method>
+        </step>
+
+        <step priority="5">
+          <action>清理临时和无用文件</action>
+          <method>删除或归档不需要的文件</method>
+        </step>
+
+        <step priority="6">
+          <action>更新文档</action>
+          <method>更新docs/文件追踪.md记录重要文件变更</method>
+        </step>
+      </execution_steps>
+    </phase>
+
+    <phase name="验证和报告">
+      <description>验证修复结果并生成报告</description>
+      <universal_verification_checklist>
+        <mandatory_item>☐ 已使用list_files获取完整项目结构</mandatory_item>
+        <mandatory_item>☐ 已读取关键文件验证功能实现</mandatory_item>
+        <mandatory_item>☐ 已用search_files验证所有"违规"声明</mandatory_item>
+        <mandatory_item>☐ 每个合规性结论都有对应工具验证证据</mandatory_item>
+        <mandatory_item>☐ 已排除基于推测的错误判断</mandatory_item>
+        <mandatory_item>☐ 完成universal_verification_principles的mandatory_checklist</mandatory_item>
+      </universal_verification_checklist>
+      <validation>
+        <check>重新扫描项目结构</check>
+        <check>验证所有文件都在正确位置</check>
+        <check>确认命名规范合规</check>
+        <check>检查是否还有违规项</check>
+      </validation>
+
+      <reporting>
+        <report name="修复前后对比报告">
+          <content>
+            - 修复前问题清单
+            - 执行的修复操作
+            - 修复后项目结构
+            - 剩余问题（如有）
+          </content>
+        </report>
+        
+        <report name="项目规范合规报告">
+          <content>
+            - 规范合规度评分
+            - 各模块文件分布统计
+            - 建议的后续维护措施
+          </content>
+        </report>
+      </reporting>
+    </phase>
+  </main_workflow>
+
+  <completion_criteria>
+    <criterion>所有文件都在正确的7大核心模块目录下</criterion>
+    <criterion>没有违反禁止行为的文件存在</criterion>
+    <criterion>所有文件命名符合规范</criterion>
+    <criterion>项目结构清晰且易于维护</criterion>
+    <criterion>生成了完整的修复报告</criterion>
+  </completion_criteria>
+
+  <prevention_measures>
+    <measure>创建项目规范检查脚本，可定期运行</measure>
+    <measure>更新.gitignore忽略临时文件</measure>
+    <measure>在docs目录创建项目结构维护指南</measure>
+    <measure>设置pre-commit钩子防止违规提交</measure>
+  </prevention_measures>
+</project_compliance_workflow>

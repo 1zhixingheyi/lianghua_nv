@@ -1,0 +1,263 @@
+<compliance_rules>
+  <overview>
+    基于CLAUDE.md文档的详细项目规范检查规则，
+    确保项目文件组织严格遵循7大核心模块架构。
+  </overview>
+
+  <core_module_architecture>
+    <module name="DATA" path="quant_system/DATA/">
+      <description>数据管理系统 - 数据获取、存储、处理和质量保障</description>
+      <subdirectories>
+        <dir name="services">服务接口层</dir>
+        <dir name="providers">服务实现层</dir>
+        <dir name="connectors">数据源连接器</dir>
+        <dir name="transformations">数据转换处理</dir>
+        <dir name="core">核心基础设施</dir>
+        <dir name="utils">辅助工具</dir>
+      </subdirectories>
+      <file_patterns>
+        <pattern>*data*.py</pattern>
+        <pattern>*source*.py</pattern>
+        <pattern>*storage*.py</pattern>
+        <pattern>*quality*.py</pattern>
+        <pattern>*cache*.py</pattern>
+        <pattern>*connector*.py</pattern>
+        <pattern>*transform*.py</pattern>
+      </file_patterns>
+      <content_indicators>
+        <indicator>DataService</indicator>
+        <indicator>data_source</indicator>
+        <indicator>database</indicator>
+        <indicator>缓存</indicator>
+        <indicator>数据质量</indicator>
+      </content_indicators>
+    </module>
+
+    <module name="STRATEGIES" path="quant_system/STRATEGIES/">
+      <description>策略引擎 - 策略开发、生命周期管理和热重载</description>
+      <subdirectories>
+        <dir name="base">基础策略类</dir>
+        <dir name="examples">策略示例</dir>
+        <dir name="factor">因子策略</dir>
+        <dir name="research">策略研究</dir>
+      </subdirectories>
+      <file_patterns>
+        <pattern>*strategy*.py</pattern>
+        <pattern>*signal*.py</pattern>
+        <pattern>*factor*.py</pattern>
+        <pattern>*indicator*.py</pattern>
+      </file_patterns>
+      <content_indicators>
+        <indicator>BaseStrategy</indicator>
+        <indicator>generate_signal</indicator>
+        <indicator>策略</indicator>
+        <indicator>因子</indicator>
+        <indicator>信号</indicator>
+      </content_indicators>
+    </module>
+
+    <module name="EXECUTION" path="quant_system/EXECUTION/">
+      <description>执行引擎 - 智能执行算法和订单管理</description>
+      <file_patterns>
+        <pattern>*execution*.py</pattern>
+        <pattern>*order*.py</pattern>
+        <pattern>*trade*.py</pattern>
+        <pattern>*broker*.py</pattern>
+      </file_patterns>
+      <content_indicators>
+        <indicator>OrderManager</indicator>
+        <indicator>ExecutionEngine</indicator>
+        <indicator>订单</indicator>
+        <indicator>交易执行</indicator>
+      </content_indicators>
+    </module>
+
+    <module name="RISK" path="quant_system/RISK/">
+      <description>风险管理 - 三层风控体系和实时风险监控</description>
+      <file_patterns>
+        <pattern>*risk*.py</pattern>
+        <pattern>*var*.py</pattern>
+        <pattern>*limit*.py</pattern>
+      </file_patterns>
+      <content_indicators>
+        <indicator>RiskManager</indicator>
+        <indicator>风险</indicator>
+        <indicator>风控</indicator>
+        <indicator>VaR</indicator>
+      </content_indicators>
+    </module>
+
+    <module name="PORTFOLIO" path="quant_system/PORTFOLIO/">
+      <description>组合管理 - 组合管理、市值重估和绩效分析</description>
+      <file_patterns>
+        <pattern>*portfolio*.py</pattern>
+        <pattern>*position*.py</pattern>
+        <pattern>*performance*.py</pattern>
+      </file_patterns>
+      <content_indicators>
+        <indicator>Portfolio</indicator>
+        <indicator>Position</indicator>
+        <indicator>组合</indicator>
+        <indicator>持仓</indicator>
+      </content_indicators>
+    </module>
+
+    <module name="BACKTEST" path="quant_system/BACKTEST/">
+      <description>回测引擎 - 高保真回测和蒙特卡洛框架</description>
+      <file_patterns>
+        <pattern>*backtest*.py</pattern>
+        <pattern>*bt_*.py</pattern>
+        <pattern>*simulation*.py</pattern>
+      </file_patterns>
+      <content_indicators>
+        <indicator>BacktestEngine</indicator>
+        <indicator>回测</indicator>
+        <indicator>模拟</indicator>
+        <indicator>历史数据</indicator>
+      </content_indicators>
+    </module>
+
+    <module name="MONITORING" path="quant_system/MONITORING/">
+      <description>监控报告 - 实时监控、智能报警和报告生成</description>
+      <file_patterns>
+        <pattern>*monitor*.py</pattern>
+        <pattern>*alert*.py</pattern>
+        <pattern>*report*.py</pattern>
+        <pattern>*dashboard*.py</pattern>
+      </file_patterns>
+      <content_indicators>
+        <indicator>Monitor</indicator>
+        <indicator>Alert</indicator>
+        <indicator>监控</indicator>
+        <indicator>报警</indicator>
+        <indicator>报告</indicator>
+      </content_indicators>
+    </module>
+  </core_module_architecture>
+
+  <prohibited_behaviors>
+    <behavior name="根目录独立脚本">
+      <description>禁止在根目录创建独立的Python脚本文件</description>
+      <pattern>*.py 文件直接在项目根目录</pattern>
+      <exceptions>
+        <exception>setup.py</exception>
+        <exception>manage.py</exception>
+        <exception>main.py (项目入口)</exception>
+      </exceptions>
+      <fix_action>移动到相应的核心模块目录</fix_action>
+    </behavior>
+
+    <behavior name="模块目录临时文件">
+      <description>禁止在模块目录下创建临时文件</description>
+      <patterns>
+        <pattern>*.tmp</pattern>
+        <pattern>*.temp</pattern>
+        <pattern>temp_*</pattern>
+        <pattern>test_*.py (不在TESTS目录)</pattern>
+        <pattern>debug_*</pattern>
+        <pattern>*.bak</pattern>
+      </patterns>
+      <fix_action>删除或移动到临时目录</fix_action>
+    </behavior>
+
+    <behavior name="功能重复文件">
+      <description>禁止存在功能重复的文件</description>
+      <detection_method>
+        <method>分析文件名相似度</method>
+        <method>检查类名和函数名重复</method>
+        <method>内容相似度分析</method>
+      </detection_method>
+      <fix_action>合并或删除重复文件</fix_action>
+    </behavior>
+
+    <behavior name="命名规范违规">
+      <description>禁止使用不符合规范的文件和目录命名</description>
+      <invalid_patterns>
+        <pattern>camelCase文件名</pattern>
+        <pattern>PascalCase文件名</pattern>
+        <pattern>包含空格的名称</pattern>
+        <pattern>包含大写字母的目录名</pattern>
+        <pattern>包含特殊字符(!@#$%^&amp;*)的名称</pattern>
+      </invalid_patterns>
+      <fix_action>重命名为符合snake_case规范</fix_action>
+    </behavior>
+  </prohibited_behaviors>
+
+  <file_naming_conventions>
+    <convention type="python_files">
+      <rule>使用小写字母和下划线</rule>
+      <valid_examples>
+        <example>data_service.py</example>
+        <example>trading_engine.py</example>
+        <example>risk_manager.py</example>
+      </valid_examples>
+      <invalid_examples>
+        <example>DataService.py</example>
+        <example>tradingEngine.py</example>
+        <example>Risk-Manager.py</example>
+      </invalid_examples>
+    </convention>
+
+    <convention type="directories">
+      <rule>使用大写字母表示模块，小写字母表示子目录</rule>
+      <valid_examples>
+        <example>DATA/services/</example>
+        <example>STRATEGIES/base/</example>
+        <example>TESTS/unit/</example>
+      </valid_examples>
+    </convention>
+
+    <convention type="config_files">
+      <rule>配置文件使用小写字母和下划线或点分隔</rule>
+      <valid_examples>
+        <example>config.yaml</example>
+        <example>database_config.py</example>
+        <example>.env</example>
+      </valid_examples>
+    </convention>
+  </file_naming_conventions>
+
+  <directory_structure_validation>
+    <required_directories>
+      <dir path="quant_system/DATA/" required="true">数据管理系统</dir>
+      <dir path="quant_system/STRATEGIES/" required="true">策略引擎</dir>
+      <dir path="quant_system/EXECUTION/" required="false">执行引擎（可选）</dir>
+      <dir path="quant_system/RISK/" required="false">风险管理（可选）</dir>
+      <dir path="quant_system/PORTFOLIO/" required="false">组合管理（可选）</dir>
+      <dir path="quant_system/BACKTEST/" required="false">回测引擎（可选）</dir>
+      <dir path="quant_system/MONITORING/" required="false">监控报告（可选）</dir>
+      <dir path="quant_system/config/" required="true">配置管理</dir>
+      <dir path="quant_system/TESTS/" required="true">测试体系</dir>
+      <dir path="docs/" required="true">文档系统</dir>
+    </required_directories>
+
+    <prohibited_root_items>
+      <item type="file" pattern="*.py">Python脚本文件</item>
+      <item type="file" pattern="*.tmp">临时文件</item>
+      <item type="file" pattern="test_*">测试文件</item>
+      <item type="dir" pattern="temp*">临时目录</item>
+    </prohibited_root_items>
+  </directory_structure_validation>
+
+  <compliance_scoring>
+    <metric name="目录结构合规度" weight="30">
+      <calculation>符合规范的目录数 / 总目录数</calculation>
+    </metric>
+    
+    <metric name="文件分类准确度" weight="25">
+      <calculation>正确分类的文件数 / 总文件数</calculation>
+    </metric>
+    
+    <metric name="命名规范遵循度" weight="20">
+      <calculation>符合命名规范的文件数 / 总文件数</calculation>
+    </metric>
+    
+    <metric name="禁止行为违规度" weight="15">
+      <calculation>1 - (违规项数 / 检查项数)</calculation>
+    </metric>
+    
+    <metric name="文档完整度" weight="10">
+      <calculation>存在的必需文档数 / 必需文档总数</calculation>
+    </metric>
+  </compliance_scoring>
+</compliance_rules>

@@ -1,0 +1,371 @@
+<workflow_instructions>
+  <mode_overview>
+    工作流更新管理器是一个专门负责工作流生命周期管理的元工作流模式。
+    它通过5阶段系统性流程和双向同步机制，确保三层DRY规范、工作流、Roo Code模式
+    三个层级之间保持高度一致性，解决工作流过时、更新无序、质量保证等核心问题。
+  </mode_overview>
+
+  <dual_sync_modes>
+    <mode name="规范驱动更新" priority="被动响应">
+      <description>当三层DRY规范发生变更时，自动同步到相关工作流和模式</description>
+      <trigger>三层DRY模块化规范文档变更</trigger>
+      <flow>DRY规范变更 → 检测影响范围 → 更新对应工作流 → 同步相关模式</flow>
+    </mode>
+    <mode name="规则主动更新" priority="主动管理">
+      <description>基于项目需求主动更新规则，并级联同步到整个生态系统</description>
+      <trigger>项目需求变更、架构调整、技术升级</trigger>
+      <flow>规则更新需求 → 同步更新DRY规范 → 级联更新工作流 → 同步相关模式</flow>
+    </mode>
+  </dual_sync_modes>
+
+  <initialization_steps>
+    <step number="1">
+      <action>识别更新模式和需求</action>
+      <details>
+        分析触发工作流更新的具体原因和采用的同步模式：
+        
+        【规范驱动更新场景】
+        - 三层DRY规范文档内容发生变更
+        - 发现工作流与DRY规范不一致
+        - 规范版本升级需要同步
+        
+        【规则主动更新场景】
+        - 项目架构发生重大变更
+        - 业务需求变化需要规则调整
+        - 技术栈升级需要规范更新
+        - 新功能开发需要扩展规范
+        - 工作流执行过程中发现问题
+        - 定期质量评估发现改进空间
+      </details>
+    </step>
+    
+    <step number="2">
+      <action>收集生态系统信息</action>
+      <tools>
+        <tool>list_files - 扫描DRY规范、工作流、模式目录</tool>
+        <tool>read_file - 读取三层DRY规范和现有工作流内容</tool>
+        <tool>search_files - 查找相关项目文件和引用关系</tool>
+      </tools>
+      <scope_mapping>
+        <layer name="三层DRY规范层">
+          <path>docs/三层DRY模块化规范/</path>
+          <content>架构层、通用规范层、模块专用层文档</content>
+        </layer>
+        <layer name="工作流层">
+          <path>0_工作流开发/workflow/</path>
+          <content>各类工作流Markdown文档</content>
+        </layer>
+        <layer name="模式层">
+          <path>.roomodes + .roo/rules-*/</path>
+          <content>Roo Code模式配置和指令文件</content>
+        </layer>
+      </scope_mapping>
+      <checklist>
+        <item>三层DRY规范结构已扫描</item>
+        <item>现有工作流清单已获取</item>
+        <item>相关Roo Code模式已识别</item>
+        <item>项目实际架构已了解</item>
+        <item>问题范围和影响层级已明确</item>
+      </checklist>
+    </step>
+  </initialization_steps>
+
+  <main_workflow>
+    <phase name="差距识别阶段" priority="P0">
+      <description>全面识别工作流与项目实际情况的差距</description>
+      <steps>
+        <step>
+          <title>工作流现状盘点</title>
+          <actions>
+            <action>扫描所有工作流文档</action>
+            <action>统计工作流数量和类别</action>
+            <action>记录最后更新时间</action>
+            <action>识别依赖关系</action>
+          </actions>
+          <output>工作流清单表格和依赖关系图</output>
+        </step>
+
+        <step>
+          <title>项目实际情况调研</title>
+          <actions>
+            <action>分析项目目录结构</action>
+            <action>检查关键组件实现状态</action>
+            <action>识别新增功能和变更</action>
+            <action>收集开发团队反馈</action>
+          </actions>
+          <output>项目架构现状报告</output>
+        </step>
+
+        <step>
+          <title>匹配度量化评估</title>
+          <evaluation_matrix>
+            <dimension name="架构匹配度" weight="40%">
+              描述的架构组件 vs 实际存在组件
+            </dimension>
+            <dimension name="功能匹配度" weight="30%">
+              假设的功能特性 vs 实际实现功能
+            </dimension>
+            <dimension name="流程匹配度" weight="20%">
+              工作流程序列 vs 实际执行流程
+            </dimension>
+            <dimension name="可执行性" weight="10%">
+              工作流步骤的实际可执行程度
+            </dimension>
+          </evaluation_matrix>
+          <scoring_rules>
+            <rule level="严重差距">匹配度 &lt; 50% - 🔴</rule>
+            <rule level="中等差距">匹配度 50-70% - 🟡</rule>
+            <rule level="轻微差距">匹配度 70-90% - 🟢</rule>
+            <rule level="高度匹配">匹配度 &gt; 90% - ✅</rule>
+          </scoring_rules>
+          <output>差距分析详细报告和匹配度评估矩阵</output>
+        </step>
+      </steps>
+    </phase>
+
+    <phase name="更新规划阶段" priority="P0">
+      <description>科学制定双向同步更新计划，支持规范驱动和规则主动更新两种模式</description>
+      <steps>
+        <step>
+          <title>优先级评估</title>
+          <priority_matrix>
+            <dimension name="业务影响程度" weight="35%">
+              <level score="100">核心业务流程 - 影响主要功能</level>
+              <level score="70">重要支撑流程 - 影响开发效率</level>
+              <level score="40">辅助流程 - 影响体验优化</level>
+            </dimension>
+            <dimension name="差距严重程度" weight="30%">
+              <level score="100">严重差距 - 完全不可用</level>
+              <level score="60">中等差距 - 部分可用</level>
+              <level score="20">轻微差距 - 基本可用</level>
+            </dimension>
+            <dimension name="更新复杂程度" weight="20%" reverse="true">
+              <level score="100">简单更新 - 文档修改</level>
+              <level score="60">中等更新 - 流程重构</level>
+              <level score="20">复杂更新 - 架构变更</level>
+            </dimension>
+            <dimension name="依赖关系影响" weight="15%">
+              <level score="100">高依赖 - 影响多个工作流</level>
+              <level score="60">中依赖 - 影响少数工作流</level>
+              <level score="20">低依赖 - 独立工作流</level>
+            </dimension>
+          </priority_matrix>
+          <priority_classification>
+            <class name="P0" range="90-100分">立即更新 - 24小时内</class>
+            <class name="P1" range="70-89分">近期更新 - 1周内</class>
+            <class name="P2" range="50-69分">计划更新 - 1月内</class>
+            <class name="P3" range="0-49分">可选更新 - 季度考虑</class>
+          </priority_classification>
+          <output>更新优先级评估表和P0-P3分级清单</output>
+        </step>
+
+        <step>
+          <title>详细计划制定</title>
+          <planning_template>
+            工作流名称: [工作流名称]
+            优先级: P[0-3]
+            负责人: [责任人]
+            预计时间: [开始时间] - [结束时间]
+            主要任务:
+              - [ ] 具体任务描述
+            依赖关系: [前置条件/并行任务]
+            验收标准: [明确的完成标准]
+            风险评估: [主要风险点]
+          </planning_template>
+          <output>分优先级的详细更新计划</output>
+        </step>
+      </steps>
+    </phase>
+
+    <phase name="更新执行阶段" priority="P1">
+      <description>高质量地执行双向同步更新，确保三层生态系统协同一致</description>
+      <steps>
+        <step>
+          <title>双向同步策略选择</title>
+          <sync_strategy name="规范驱动更新">
+            <when>DRY规范文档发生变更</when>
+            <process>
+              <task>解析DRY规范变更内容和影响范围</task>
+              <task>识别需要同步的工作流和模式</task>
+              <task>按依赖顺序更新工作流内容</task>
+              <task>同步更新或创建对应Roo Code模式</task>
+            </process>
+          </sync_strategy>
+          <sync_strategy name="规则主动更新">
+            <when>项目需求变更或架构调整</when>
+            <process>
+              <task>首先更新三层DRY规范文档</task>
+              <task>基于规范变更级联更新工作流</task>
+              <task>同步创建或更新相关模式</task>
+              <task>验证整个更新链的一致性</task>
+            </process>
+          </sync_strategy>
+          <output>选定的同步策略和执行计划</output>
+        </step>
+
+        <step>
+          <title>三层协同重新设计</title>
+          <design_principles>
+            <principle>规范权威性 - 以三层DRY规范为权威信息源</principle>
+            <principle>概念一致性 - 确保术语和概念在三层级统一</principle>
+            <principle>引用标准化 - 使用标准DRY引用格式</principle>
+            <principle>可执行性 - 每个步骤都能实际执行</principle>
+            <principle>可验证性 - 每个步骤都有检查点</principle>
+          </design_principles>
+          <redesign_process>
+            <task>DRY规范更新 - 基于需求更新规范内容</task>
+            <task>架构概念对齐 - 确保组件定义与实际实现一致</task>
+            <task>工作流规范符合 - 使工作流严格遵循DRY规范</task>
+            <task>模式行为同步 - 确保模式行为与工作流描述一致</task>
+            <task>引用格式统一 - 转换为标准DRY引用格式</task>
+          </redesign_process>
+          <output>三层协同的重新设计方案和变更说明</output>
+        </step>
+
+        <step>
+          <title>分层渐进式更新实施</title>
+          <implementation_layers>
+            <layer name="Layer1: DRY规范层">
+              <substep>备份原DRY规范文档</substep>
+              <substep>更新架构层、通用规范层、模块专用层</substep>
+              <substep>验证规范内容的完整性和一致性</substep>
+            </layer>
+            <layer name="Layer2: 工作流层">
+              <substep>备份原工作流到备份目录</substep>
+              <substep>基于更新后的DRY规范修改工作流</substep>
+              <substep>确保DRY引用格式标准化</substep>
+              <substep>验证工作流的可执行性</substep>
+            </layer>
+            <layer name="Layer3: 模式层">
+              <substep>更新现有Roo Code模式配置</substep>
+              <substep>为新工作流创建对应模式</substep>
+              <substep>更新模式XML指令文件</substep>
+              <substep>验证模式行为与工作流一致性</substep>
+            </layer>
+          </implementation_layers>
+          <version_format>
+            主版本号: 重大架构变更或规范重构 (x.0.0)
+            次版本号: 功能增加或规范扩展 (0.x.0)
+            修订版本号: 问题修复或内容完善 (0.0.x)
+          </version_format>
+          <output>分层更新后的完整生态系统和版本记录</output>
+        </step>
+      </steps>
+    </phase>
+
+    <phase name="验证测试阶段" priority="P1">
+      <description>确保更新后工作流完全可用</description>
+      <steps>
+        <step>
+          <title>多层次验证</title>
+          <validation_levels>
+            <level name="语法验证">
+              <check>Markdown格式检查</check>
+              <check>链接有效性验证</check>
+              <check>代码块语法检查</check>
+            </level>
+            <level name="逻辑验证">
+              <check>流程步骤逻辑性</check>
+              <check>前后依赖关系</check>
+              <check>输入输出匹配</check>
+            </level>
+            <level name="执行验证">
+              <check>按工作流步骤实际执行</check>
+              <check>验证每个检查点</check>
+              <check>测试异常处理流程</check>
+            </level>
+            <level name="AI理解验证">
+              <check>大模型可理解性测试</check>
+              <check>指令表达清晰度</check>
+              <check>执行效果评估</check>
+            </level>
+          </validation_levels>
+          <output>验证测试报告和问题修复记录</output>
+        </step>
+
+        <step>
+          <title>集成测试</title>
+          <integration_scope>
+            <test>依赖关系测试 - 验证前置工作流输出</test>
+            <test>并行工作流测试 - 测试同时执行场景</test>
+            <test>组合流程测试 - 验证端到端流程</test>
+          </integration_scope>
+          <output>集成测试报告和兼容性验证结果</output>
+        </step>
+      </steps>
+    </phase>
+
+    <phase name="发布管理阶段" priority="P2">
+      <description>正式发布和跟踪效果</description>
+      <steps>
+        <step>
+          <title>版本发布</title>
+          <release_process>
+            <substep>确认所有测试通过</substep>
+            <substep>完成文档更新</substep>
+            <substep>准备发布说明</substep>
+            <substep>正式发布并通知相关人员</substep>
+          </release_process>
+          <release_notes_template>
+            # 工作流更新发布 v[版本号]
+            
+            ## 📊 更新概览
+            - 更新工作流数量: [数量]
+            - 修复问题数量: [数量]
+            - 整体匹配度提升: [百分比]
+            
+            ## 🔄 主要变更
+            ### 新增功能
+            - [功能描述]
+            
+            ### 功能修改
+            - [修改描述]
+            
+            ### 问题修复
+            - [问题描述]
+          </release_notes_template>
+          <output>正式版本发布和发布说明文档</output>
+        </step>
+
+        <step>
+          <title>效果跟踪</title>
+          <tracking_metrics>
+            <metric>平均匹配度变化</metric>
+            <metric>执行成功率</metric>
+            <metric>用户满意度</metric>
+            <metric>使用频率统计</metric>
+          </tracking_metrics>
+          <tracking_schedule>
+            <period>短期跟踪: 发布后1周</period>
+            <period>中期跟踪: 发布后1月</period>
+            <period>长期跟踪: 发布后1季度</period>
+          </tracking_schedule>
+          <output>跟踪监控报告和改进建议</output>
+        </step>
+      </steps>
+    </phase>
+  </main_workflow>
+
+  <completion_criteria>
+    <criterion>所有识别的差距已被解决</criterion>
+    <criterion>工作流匹配度达到预期目标</criterion>
+    <criterion>更新过程文档化完整</criterion>
+    <criterion>验证测试全部通过</criterion>
+    <criterion>效果跟踪机制已建立</criterion>
+  </completion_criteria>
+
+  <success_metrics>
+    <quantitative>
+      <metric name="平均匹配度">目标 ≥ 85%</metric>
+      <metric name="执行成功率">目标 ≥ 95%</metric>
+      <metric name="更新及时性">P0问题24小时内解决 ≥ 90%</metric>
+      <metric name="用户满意度">目标 ≥ 90%</metric>
+    </quantitative>
+    <qualitative>
+      <metric>工作流描述与实际情况高度一致</metric>
+      <metric>大模型能够准确理解和执行工作流</metric>
+      <metric>开发团队普遍认可工作流实用性</metric>
+      <metric>工作流更新机制运行顺畅</metric>
+    </qualitative>
+  </success_metrics>
+</workflow_instructions>

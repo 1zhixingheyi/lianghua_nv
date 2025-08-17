@@ -1,0 +1,289 @@
+<best_practices>
+  <general_principles>
+    <principle priority="high">
+      <name>基于现实原则</name>
+      <description>所有工作流更新必须基于项目实际架构和实现情况</description>
+      <rationale>避免过度理想化的架构假设导致工作流不可执行</rationale>
+      <example>
+        <scenario>发现工作流描述了不存在的ConfigManager v4.1</scenario>
+        <good>移除ConfigManager假设，基于实际config/modules/目录重新设计</good>
+        <bad>保留理想化描述，假设未来会实现该组件</bad>
+      </example>
+    </principle>
+
+    <principle priority="high">
+      <name>量化评估原则</name>
+      <description>使用科学的量化方法评估工作流匹配度和更新优先级</description>
+      <rationale>确保更新决策客观准确，资源配置合理</rationale>
+      <example>
+        <scenario>多个工作流都需要更新时</scenario>
+        <good>使用4维度评估矩阵计算优先级分数，按P0-P3分级处理</good>
+        <bad>凭感觉判断重要性，随意安排更新顺序</bad>
+      </example>
+    </principle>
+
+    <principle priority="high">
+      <name>渐进式更新原则</name>
+      <description>采用分段式、可验证的更新方式</description>
+      <rationale>降低更新风险，确保工作流在更新过程中保持可用</rationale>
+      <example>
+        <scenario>需要大幅修改一个复杂工作流时</scenario>
+        <good>分成多个小步骤，每步更新后验证功能</good>
+        <bad>一次性重写整个工作流</bad>
+      </example>
+    </principle>
+
+    <principle priority="medium">
+      <name>向后兼容原则</name>
+      <description>在可能的情况下保持与现有工作流的兼容性</description>
+      <rationale>减少对现有使用者的影响</rationale>
+      <example>
+        <scenario>更新工作流接口时</scenario>
+        <good>保留原有关键参数，新增可选参数</good>
+        <bad>完全改变工作流的输入输出格式</bad>
+      </example>
+    </principle>
+  </general_principles>
+
+  <evaluation_conventions>
+    <convention category="匹配度评估">
+      <rule>使用4维度评估矩阵：架构匹配40% + 功能匹配30% + 流程匹配20% + 可执行性10%</rule>
+      <calculation_method>
+        总匹配度 = Σ(维度得分 × 权重)
+        
+        架构匹配度 = 实际存在组件数 / 工作流描述组件数 × 100%
+        功能匹配度 = 实际实现功能数 / 工作流假设功能数 × 100%
+        流程匹配度 = 可执行步骤数 / 总步骤数 × 100%
+        可执行性 = 明确可操作指令数 / 总指令数 × 100%
+      </calculation_method>
+      <classification>
+        <level range="90-100%">✅ 高度匹配 - 无需更新</level>
+        <level range="70-89%">🟢 轻微差距 - 优化改进</level>
+        <level range="50-69%">🟡 中等差距 - 计划更新</level>
+        <level range="0-49%">🔴 严重差距 - 立即修正</level>
+      </classification>
+    </convention>
+
+    <convention category="优先级评估">
+      <rule>使用4维度优先级矩阵进行科学评估</rule>
+      <dimensions>
+        <dimension name="业务影响程度" weight="35%">
+          核心业务流程(100分) > 重要支撑流程(70分) > 辅助流程(40分)
+        </dimension>
+        <dimension name="差距严重程度" weight="30%">
+          严重差距(100分) > 中等差距(60分) > 轻微差距(20分)
+        </dimension>
+        <dimension name="更新复杂程度" weight="20%" reverse="true">
+          简单更新(100分) > 中等更新(60分) > 复杂更新(20分)
+        </dimension>
+        <dimension name="依赖关系影响" weight="15%">
+          高依赖(100分) > 中依赖(60分) > 低依赖(20分)
+        </dimension>
+      </dimensions>
+      <final_classification>
+        P0 (90-100分): 立即更新 - 24小时内
+        P1 (70-89分): 近期更新 - 1周内
+        P2 (50-69分): 计划更新 - 1月内
+        P3 (0-49分): 可选更新 - 季度考虑
+      </final_classification>
+    </convention>
+  </evaluation_conventions>
+
+  <design_conventions>
+    <convention category="工作流结构">
+      <rule>统一的工作流文档结构</rule>
+      <template>
+        # 工作流名称
+        ## 📋 工作流概述
+        ## 🎯 核心价值
+        ## 🔧 工作流详细步骤
+        ## 📊 工作流配置参数
+        ## 🔍 常见问题和解决方案
+        ## 📈 预期效果
+        ## 📚 相关文档
+        ## 🎯 成功标准
+        **元数据**
+      </template>
+    </convention>
+
+    <convention category="步骤设计">
+      <rule>每个步骤必须包含明确的操作指令和验证标准</rule>
+      <step_template>
+        ### Step X.Y: 步骤名称
+        ```yaml
+        目标: 明确的步骤目标
+        操作步骤:
+          1. 具体操作1
+          2. 具体操作2
+        
+        输出物:
+          - 具体输出物1
+          - 具体输出物2
+        
+        检查点:
+          - [ ] 检查项1
+          - [ ] 检查项2
+        ```
+      </step_template>
+    </convention>
+
+    <convention category="工具引用">
+      <rule>明确指定使用的工具和参数</rule>
+      <tool_reference_format>
+        - 使用 list_files 工具递归扫描项目结构
+        - 使用 read_file 工具检查核心配置文件
+        - 使用 apply_diff 进行精确修改
+        - 使用 search_files 查找相关模块
+      </tool_reference_format>
+    </convention>
+  </design_conventions>
+
+  <common_pitfalls>
+    <pitfall>
+      <description>过度理想化架构假设</description>
+      <why_problematic>导致工作流描述与实际情况严重不符，无法执行</why_problematic>
+      <correct_approach>
+        - 首先深入调研项目实际架构
+        - 基于现有组件设计工作流
+        - 分阶段实现理想功能
+      </correct_approach>
+      <warning_signs>
+        - 工作流引用了不存在的组件
+        - 假设了未实现的功能特性
+        - 描述了理想化的技术栈
+      </warning_signs>
+    </pitfall>
+
+    <pitfall>
+      <description>忽略依赖关系影响</description>
+      <why_problematic>更新一个工作流可能影响其他工作流的正常运行</why_problematic>
+      <correct_approach>
+        - 详细分析工作流依赖关系
+        - 评估更新对下游工作流的影响
+        - 同步更新相关工作流
+      </correct_approach>
+      <warning_signs>
+        - 工作流输出格式发生变化
+        - 工作流执行顺序调整
+        - 共享组件接口修改
+      </warning_signs>
+    </pitfall>
+
+    <pitfall>
+      <description>缺乏版本管理</description>
+      <why_problematic>无法跟踪工作流演进历史，出问题时难以回滚</why_problematic>
+      <correct_approach>
+        - 使用语义化版本号
+        - 详细记录变更日志
+        - 保留历史版本备份
+      </correct_approach>
+      <warning_signs>
+        - 没有版本号标记
+        - 缺少变更记录
+        - 无备份机制
+      </warning_signs>
+    </pitfall>
+
+    <pitfall>
+      <description>验证测试不充分</description>
+      <why_problematic>更新后的工作流可能存在隐藏问题</why_problematic>
+      <correct_approach>
+        - 多层次验证（语法/逻辑/执行/理解）
+        - 集成测试验证兼容性
+        - 实际执行验证可用性
+      </correct_approach>
+      <warning_signs>
+        - 只做语法检查
+        - 未进行实际执行测试
+        - 忽略与其他工作流的集成测试
+      </warning_signs>
+    </pitfall>
+  </common_pitfalls>
+
+  <quality_checklist>
+    <category name="更新前准备">
+      <item>✅ 已明确更新触发原因</item>
+      <item>✅ 已完成现状盘点</item>
+      <item>✅ 已进行实际情况调研</item>
+      <item>✅ 已量化评估差距和优先级</item>
+      <item>✅ 已制定详细更新计划</item>
+    </category>
+
+    <category name="更新过程中">
+      <item>✅ 遵循基于现实原则</item>
+      <item>✅ 保持工作流结构一致性</item>
+      <item>✅ 每个步骤都有明确操作指令</item>
+      <item>✅ 提供具体的工具使用示例</item>
+      <item>✅ 包含完整的验证检查点</item>
+      <item>✅ 采用渐进式更新方式</item>
+    </category>
+
+    <category name="更新完成后">
+      <item>✅ 已进行多层次验证测试</item>
+      <item>✅ 已完成集成兼容性测试</item>
+      <item>✅ 已更新版本号和变更日志</item>
+      <item>✅ 已创建发布说明</item>
+      <item>✅ 已建立效果跟踪机制</item>
+      <item>✅ 已通知相关使用人员</item>
+    </category>
+
+    <category name="持续改进">
+      <item>✅ 定期收集使用反馈</item>
+      <item>✅ 监控工作流执行效果</item>
+      <item>✅ 识别新的改进机会</item>
+      <item>✅ 更新最佳实践知识库</item>
+    </category>
+  </quality_checklist>
+
+  <performance_optimization>
+    <guideline name="批量更新策略">
+      <description>对于多个相关工作流，采用批量更新策略提高效率</description>
+      <approach>
+        - 识别相关工作流集群
+        - 统一规划更新方案
+        - 并行执行独立更新
+        - 串行处理有依赖的更新
+      </approach>
+    </guideline>
+
+    <guideline name="模板化更新">
+      <description>对于类似的更新问题，使用标准化模板</description>
+      <approach>
+        - 建立常见问题的标准修复模板
+        - 自动化重复性更新操作
+        - 复用成功的更新模式
+      </approach>
+    </guideline>
+
+    <guideline name="预防性更新">
+      <description>通过定期评估预防问题发生</description>
+      <approach>
+        - 建立定期评估机制
+        - 监控项目架构变化
+        - 主动识别潜在问题
+        - 提前规划更新需求
+      </approach>
+    </guideline>
+  </performance_optimization>
+
+  <communication_guidelines>
+    <guideline name="更新通知">
+      <description>及时有效地通知相关人员工作流更新</description>
+      <notification_levels>
+        <level name="P0更新">立即通知所有相关人员</level>
+        <level name="P1更新">当日通知主要使用者</level>
+        <level name="P2更新">周报形式通知</level>
+        <level name="P3更新">月报形式通知</level>
+      </notification_levels>
+    </guideline>
+
+    <guideline name="问题反馈">
+      <description>建立畅通的问题反馈渠道</description>
+      <feedback_channels>
+        - 即时反馈：发现问题立即报告
+        - 定期反馈：周/月度使用体验汇总
+        - 建议收集：改进想法和需求收集
+      </feedback_channels>
+    </guideline>
+  </communication_guidelines>
+</best_practices>

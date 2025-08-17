@@ -1,0 +1,156 @@
+<universal_verification_principles>
+  <overview>
+    通用验证原则适用于所有涉及项目结构分析、架构评估、组件查找的任务。
+    这些原则是强制性的，旨在防止基于推测和假设的错误分析。
+    任何模式在执行相关任务时都必须遵循这些验证要求。
+  </overview>
+
+  <core_principles>
+    <principle id="P1" priority="mandatory">
+      <name>实证优先原则</name>
+      <rule>任何结论必须基于实际工具验证，严禁基于推测、假设或环境信息得出架构结论</rule>
+      <blocking_conditions>
+        <condition>🚫 禁止基于environment_details进行架构分析</condition>
+        <condition>🚫 禁止基于文件名或目录名推测功能完整性</condition>
+        <condition>🚫 禁止在未执行list_files的情况下声称组件"缺失"</condition>
+        <condition>🚫 禁止基于局部观察得出全局架构结论</condition>
+      </blocking_conditions>
+      <required_evidence>
+        <evidence>list_files扫描结果</evidence>
+        <evidence>read_file内容验证</evidence>
+        <evidence>search_files引用关系确认</evidence>
+      </required_evidence>
+    </principle>
+
+    <principle id="P2" priority="mandatory">
+      <name>完整性验证原则</name>
+      <rule>声称任何组件"缺失"或"存在问题"前，必须执行穷尽性搜索验证</rule>
+      <verification_sequence>
+        <step number="1">list_files(root, recursive=false) - 扫描根目录结构</step>
+        <step number="2">list_files(target_modules, recursive=true) - 详细扫描目标模块</step>
+        <step number="3">search_files验证组件引用关系</step>
+        <step number="4">read_file确认关键文件的实际功能</step>
+        <step number="5">逐一验证每个"缺失"声明的准确性</step>
+      </verification_sequence>
+    </principle>
+
+    <principle id="P3" priority="mandatory">
+      <name>证据链完整性原则</name>
+      <rule>每个分析结论都必须有对应的验证步骤和工具使用记录</rule>
+      <evidence_requirements>
+        <requirement>结论与验证工具的一一对应关系</requirement>
+        <requirement>验证步骤的完整记录</requirement>
+        <requirement>反驳推测性结论的实际证据</requirement>
+      </evidence_requirements>
+    </principle>
+  </core_principles>
+
+  <mandatory_workflow>
+    <phase name="initialization" priority="P0">
+      <description>任何架构分析任务的强制初始化步骤</description>
+      <steps>
+        <step number="1">
+          <action>项目结构完整扫描</action>
+          <tools>
+            <tool>list_files(root, recursive=false)</tool>
+            <tool>list_files(target_areas, recursive=true)</tool>
+          </tools>
+          <output>完整的实际目录结构</output>
+        </step>
+        
+        <step number="2">
+          <action>关键组件存在性验证</action>
+          <tools>
+            <tool>search_files - 查找组件引用</tool>
+            <tool>read_file - 验证组件功能</tool>
+          </tools>
+          <output>组件实际存在状态清单</output>
+        </step>
+      </steps>
+    </phase>
+
+    <phase name="analysis" priority="P1">
+      <description>基于实际验证结果进行分析</description>
+      <requirements>
+        <requirement>所有分析必须基于第一阶段的验证结果</requirement>
+        <requirement>禁止引入未验证的假设</requirement>
+        <requirement>每个结论都要引用具体的验证证据</requirement>
+      </requirements>
+    </phase>
+
+    <phase name="conclusion" priority="P1">
+      <description>结论输出前的最终验证</description>
+      <mandatory_checklist>
+        <item>☐ 已使用list_files获取完整项目结构</item>
+        <item>☐ 已读取关键文件验证功能实现</item>
+        <item>☐ 已用search_files验证所有"缺失"声明</item>
+        <item>☐ 每个结论都有对应工具验证证据</item>
+        <item>☐ 已排除基于推测的错误判断</item>
+        <item>☐ 分析结果与实际验证结果一致</item>
+      </mandatory_checklist>
+    </phase>
+  </mandatory_workflow>
+
+  <applicable_scenarios>
+    <scenario>架构完整性分析</scenario>
+    <scenario>组件存在性检查</scenario>
+    <scenario>模块功能评估</scenario>
+    <scenario>代码结构审查</scenario>
+    <scenario>项目合规性检查</scenario>
+    <scenario>重构前的现状分析</scenario>
+    <scenario>技术债务评估</scenario>
+  </applicable_scenarios>
+
+  <enforcement_mechanism>
+    <blocking_rule>
+      任何模式在输出涉及项目结构的分析结论前，必须完成mandatory_checklist
+    </blocking_rule>
+    
+    <quality_gate>
+      如果检查清单未完成，必须返回执行验证步骤，不得直接输出结论
+    </quality_gate>
+    
+    <escalation>
+      连续违反验证原则的情况下，必须切换到专门的验证模式重新执行任务
+    </escalation>
+  </enforcement_mechanism>
+
+  <error_prevention_protocols>
+    <protocol name="anti_speculation">
+      <description>防止推测性分析的协议</description>
+      <triggers>
+        <trigger>使用"应该存在"、"可能缺失"等推测性语言</trigger>
+        <trigger>基于文件名判断功能完整性</trigger>
+        <trigger>未使用验证工具就得出结论</trigger>
+      </triggers>
+      <intervention>
+        <action>立即停止分析</action>
+        <action>强制执行验证步骤</action>
+        <action>要求提供实际证据</action>
+      </intervention>
+    </protocol>
+
+    <protocol name="evidence_chain_verification">
+      <description>证据链完整性验证协议</description>
+      <requirements>
+        <requirement>每个负面结论(如"缺失"、"不完整")都要有exhaustive search证据</requirement>
+        <requirement>每个正面结论都要有实际文件内容支撑</requirement>
+        <requirement>分析过程中使用的工具和结果要记录完整</requirement>
+      </requirements>
+    </protocol>
+  </error_prevention_protocols>
+
+  <integration_guidelines>
+    <guideline>
+      所有涉及项目分析的模式都必须在workflow开始时引用universal_verification_principles
+    </guideline>
+    
+    <guideline>
+      模式特定的验证要求应该是这些通用原则的补充，而不是替代
+    </guideline>
+    
+    <guideline>
+      跨模式协作时，验证责任不能转移，每个模式都要独立完成验证
+    </guideline>
+  </integration_guidelines>
+</universal_verification_principles>

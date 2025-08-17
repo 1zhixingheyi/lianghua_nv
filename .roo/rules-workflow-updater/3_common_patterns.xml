@@ -1,0 +1,439 @@
+<common_patterns>
+  <pattern_overview>
+    这里定义了工作流更新管理中常用的模式和模板，
+    帮助标准化工作流更新过程，提高更新效率和质量。
+  </pattern_overview>
+
+  <evaluation_patterns>
+    <pattern name="差距分析模板">
+      <description>标准化的工作流差距分析模板</description>
+      <template><![CDATA[
+# 工作流差距分析报告
+
+## 📊 基本信息
+- 工作流名称: [工作流名称]
+- 分析日期: [YYYY-MM-DD]
+- 分析人员: [负责人]
+- 触发原因: [更新触发原因]
+
+## 📋 匹配度评估矩阵
+
+| 评估维度 | 权重 | 描述假设 | 实际情况 | 得分 | 加权得分 |
+|----------|------|----------|----------|------|----------|
+| 架构匹配度 | 40% | [工作流假设的架构] | [项目实际架构] | [0-100] | [得分×0.4] |
+| 功能匹配度 | 30% | [工作流假设的功能] | [项目实际功能] | [0-100] | [得分×0.3] |
+| 流程匹配度 | 20% | [工作流描述的流程] | [实际执行流程] | [0-100] | [得分×0.2] |
+| 可执行性 | 10% | [工作流操作指令] | [实际可执行性] | [0-100] | [得分×0.1] |
+
+**总匹配度**: [总分] %
+
+## 🔍 具体差距分析
+
+### 🔴 严重差距 (匹配度 < 50%)
+- **问题1**: [具体问题描述]
+  - 工作流描述: [描述内容]
+  - 实际情况: [实际情况]
+  - 影响: [对使用的影响]
+
+### 🟡 中等差距 (匹配度 50-70%)
+- **问题2**: [具体问题描述]
+
+### 🟢 轻微差距 (匹配度 70-90%)
+- **问题3**: [具体问题描述]
+
+## 💡 修复建议
+1. **立即修正** (P0):
+   - [具体修复建议1]
+   - [具体修复建议2]
+
+2. **计划修正** (P1-P2):
+   - [具体修复建议3]
+
+## 📈 预期改进效果
+- 匹配度提升: [当前]% → [目标]%
+- 预计工作量: [时间估算]
+- 主要受益: [受益描述]
+      ]]></template>
+    </pattern>
+
+    <pattern name="优先级评估计算器">
+      <description>标准化的优先级评估计算模板</description>
+      <calculation_formula><![CDATA[
+优先级分数计算公式:
+总分 = 业务影响×0.35 + 差距严重×0.30 + 更新复杂×0.20 + 依赖影响×0.15
+
+具体评分标准:
+业务影响程度 (35%权重):
+- 核心业务流程 (影响主要功能): 100分
+- 重要支撑流程 (影响开发效率): 70分  
+- 辅助流程 (影响体验优化): 40分
+
+差距严重程度 (30%权重):
+- 严重差距 (完全不可用): 100分
+- 中等差距 (部分可用): 60分
+- 轻微差距 (基本可用): 20分
+
+更新复杂程度 (20%权重) - 反向计分:
+- 简单更新 (文档修改): 100分
+- 中等更新 (流程重构): 60分
+- 复杂更新 (架构变更): 20分
+
+依赖关系影响 (15%权重):
+- 高依赖 (影响多个工作流): 100分
+- 中依赖 (影响少数工作流): 60分
+- 低依赖 (独立工作流): 20分
+
+最终分级:
+P0 (90-100分): 立即更新 - 24小时内
+P1 (70-89分): 近期更新 - 1周内  
+P2 (50-69分): 计划更新 - 1月内
+P3 (0-49分): 可选更新 - 季度考虑
+      ]]></calculation_formula>
+    </pattern>
+  </evaluation_patterns>
+
+  <update_patterns>
+    <pattern name="配置类工作流更新模式">
+      <description>针对配置管理相关工作流的标准更新模式</description>
+      <common_issues>
+        <issue>引用不存在的配置管理组件</issue>
+        <issue>假设了复杂的配置层次结构</issue>
+        <issue>描述了理想化的配置API</issue>
+      </common_issues>
+      <update_approach>
+        <step>1. 调研实际配置目录结构</step>
+        <step>2. 识别现有配置文件格式</step>
+        <step>3. 基于实际情况重新设计配置流程</step>
+        <step>4. 简化配置操作步骤</step>
+        <step>5. 提供具体的配置文件示例</step>
+      </update_approach>
+      <template_fixes>
+        <fix type="组件替换">
+          <from>ConfigManager v4.1.get_config()</from>
+          <to>直接读取config/modules/目录下的YAML文件</to>
+        </fix>
+        <fix type="API简化">
+          <from>复杂的配置层次调用</from>
+          <to>简单的文件读取和解析</to>
+        </fix>
+      </template_fixes>
+    </pattern>
+
+    <pattern name="数据处理工作流更新模式">
+      <description>针对数据处理相关工作流的标准更新模式</description>
+      <common_issues>
+        <issue>假设了不存在的存储层</issue>
+        <issue>描述了理想化的数据管道</issue>
+        <issue>引用了未实现的数据质量组件</issue>
+      </common_issues>
+      <update_approach>
+        <step>1. 确认实际数据存储方案</step>
+        <step>2. 分析现有数据处理流程</step>
+        <step>3. 识别实际数据质量检查方法</step>
+        <step>4. 基于现有工具重新设计流程</step>
+        <step>5. 简化数据质量验证步骤</step>
+      </update_approach>
+      <template_fixes>
+        <fix type="存储简化">
+          <from>四层存储架构 (Redis/ClickHouse/MySQL/MinIO)</from>
+          <to>基于ClickHouse和CSV文件的简化存储</to>
+        </fix>
+        <fix type="质量检查现实化">
+          <from>复杂的四维度质量评分体系</from>
+          <to>基础的数据完整性和格式检查</to>
+        </fix>
+      </template_fixes>
+    </pattern>
+
+    <pattern name="策略开发工作流更新模式">
+      <description>针对策略开发相关工作流的标准更新模式</description>
+      <common_issues>
+        <issue>策略架构与CZSC模块不匹配</issue>
+        <issue>假设了标准化的策略基类</issue>
+        <issue>描述了理想化的回测框架</issue>
+      </common_issues>
+      <update_approach>
+        <step>1. 深入分析CZSC模块架构</step>
+        <step>2. 了解现有策略实现方式</step>
+        <step>3. 调整策略开发流程与CZSC对齐</step>
+        <step>4. 基于实际回测能力设计验证流程</step>
+        <step>5. 提供CZSC集成示例</step>
+      </update_approach>
+      <template_fixes>
+        <fix type="架构对齐">
+          <from>通用的BaseStrategy继承体系</from>
+          <to>基于CZSC的策略实现模式</to>
+        </fix>
+        <fix type="回测简化">
+          <from>复杂的多维度回测框架</from>
+          <to>基于现有czsc_strategy的回测流程</to>
+        </fix>
+      </template_fixes>
+    </pattern>
+  </update_patterns>
+
+  <version_management_patterns>
+    <pattern name="语义化版本控制">
+      <description>工作流版本管理的标准模式</description>
+      <version_format>
+        <major>x.0.0 - 重大架构变更，不向后兼容</major>
+        <minor>0.x.0 - 功能增加或修改，向后兼容</minor>
+        <patch>0.0.x - 问题修复，完全兼容</patch>
+      </version_format>
+      <changelog_template><![CDATA[
+# 工作流变更日志
+
+## [版本号] - YYYY-MM-DD
+
+### 新增 (Added)
+- 新增功能描述
+
+### 修改 (Changed)  
+- 修改内容描述
+
+### 修复 (Fixed)
+- 修复问题描述
+
+### 移除 (Removed)
+- 移除内容描述
+
+### 弃用 (Deprecated)
+- 弃用功能说明
+
+### 安全 (Security)
+- 安全相关更新
+      ]]></changelog_template>
+    </pattern>
+
+    <pattern name="备份与回滚策略">
+      <description>工作流更新的备份和回滚标准模式</description>
+      <backup_structure>
+        <directory>backups/workflow_updates/YYYYMMDD_HHMMSS/</directory>
+        <contents>
+          <file>original_workflows/ - 原始工作流备份</file>
+          <file>update_plan.md - 更新计划</file>
+          <file>changes_log.md - 变更记录</file>
+          <file>rollback_script.md - 回滚脚本</file>
+        </contents>
+      </backup_structure>
+      <rollback_procedure>
+        <step>1. 停止当前工作流使用</step>
+        <step>2. 从备份目录恢复原始文件</step>
+        <step>3. 验证回滚后功能正常</step>
+        <step>4. 通知相关人员回滚完成</step>
+        <step>5. 分析回滚原因并制定修复计划</step>
+      </rollback_procedure>
+    </pattern>
+  </version_management_patterns>
+
+  <testing_patterns>
+    <pattern name="多层次验证模式">
+      <description>工作流更新的标准化验证测试模式</description>
+      <validation_levels>
+        <level name="语法验证">
+          <checks>
+            <check>Markdown格式正确性</check>
+            <check>内部链接有效性</check>
+            <check>代码块语法完整性</check>
+            <check>YAML配置格式正确性</check>
+          </checks>
+          <tools>
+            <tool>markdownlint - Markdown格式检查</tool>
+            <tool>link-checker - 链接验证</tool>
+            <tool>yaml-validator - YAML格式验证</tool>
+          </tools>
+        </level>
+
+        <level name="逻辑验证">
+          <checks>
+            <check>工作流步骤逻辑连贯性</check>
+            <check>前后依赖关系正确性</check>
+            <check>输入输出数据匹配性</check>
+            <check>异常处理完整性</check>
+          </checks>
+          <validation_method>
+            人工审查 + 逻辑检查清单
+          </validation_method>
+        </level>
+
+        <level name="执行验证">
+          <checks>
+            <check>每个步骤实际可执行</check>
+            <check>工具调用参数正确</check>
+            <check>检查点可验证</check>
+            <check>错误处理有效</check>
+          </checks>
+          <validation_method>
+            按工作流实际执行 + 结果验证
+          </validation_method>
+        </level>
+
+        <level name="AI理解验证">
+          <checks>
+            <check>大模型能理解指令含义</check>
+            <check>指令表达清晰无歧义</check>
+            <check>执行结果符合预期</check>
+            <check>异常情况处理合理</check>
+          </checks>
+          <validation_method>
+            大模型试执行 + 结果评估
+          </validation_method>
+        </level>
+      </validation_levels>
+    </pattern>
+
+    <pattern name="集成测试模式">
+      <description>工作流与其他工作流集成的测试模式</description>
+      <test_scenarios>
+        <scenario name="依赖关系测试">
+          <description>测试工作流与前置工作流的数据传递</description>
+          <test_cases>
+            <case>前置工作流正常输出 → 当前工作流正常输入</case>
+            <case>前置工作流异常输出 → 当前工作流错误处理</case>
+            <case>前置工作流部分输出 → 当前工作流容错处理</case>
+          </test_cases>
+        </scenario>
+
+        <scenario name="并行执行测试">
+          <description>测试多个工作流同时执行的情况</description>
+          <test_cases>
+            <case>资源竞争处理</case>
+            <case>状态同步机制</case>
+            <case>冲突解决策略</case>
+          </test_cases>
+        </scenario>
+
+        <scenario name="端到端测试">
+          <description>测试完整业务流程的工作流组合</description>
+          <test_cases>
+            <case>正常业务流程完整执行</case>
+            <case>异常情况下的流程恢复</case>
+            <case>长流程的状态维护</case>
+          </test_cases>
+        </scenario>
+      </test_scenarios>
+    </pattern>
+  </testing_patterns>
+
+  <communication_patterns>
+    <pattern name="更新通知模板">
+      <description>工作流更新的标准化通知模板</description>
+      <notification_template><![CDATA[
+# 工作流更新通知
+
+## 📋 更新概览
+- **更新类型**: [P0紧急更新/P1重要更新/P2计划更新/P3优化更新]
+- **影响范围**: [具体影响的工作流或功能]
+- **更新时间**: [YYYY-MM-DD HH:MM]
+- **负责人**: [更新负责人]
+
+## 🔄 主要变更
+### 修复问题
+- [问题1描述]
+- [问题2描述]
+
+### 新增功能
+- [功能1描述]
+- [功能2描述]
+
+### 重要变更
+- [重要变更1]
+- [重要变更2]
+
+## ⚠️ 注意事项
+- [使用注意事项1]
+- [使用注意事项2]
+
+## 📚 参考资料
+- 详细变更日志: [链接]
+- 更新后工作流文档: [链接]
+- 问题反馈渠道: [联系方式]
+
+## 🆘 紧急联系
+如有问题请联系: [紧急联系人和方式]
+      ]]></notification_template>
+    </pattern>
+
+    <pattern name="问题反馈收集">
+      <description>工作流问题反馈的标准化收集模式</description>
+      <feedback_template><![CDATA[
+# 工作流问题反馈
+
+## 📋 基本信息
+- **工作流名称**: [工作流名称]
+- **问题类型**: [执行错误/描述不清/功能缺失/其他]
+- **发生时间**: [YYYY-MM-DD HH:MM]
+- **反馈人**: [反馈人姓名]
+
+## 🐛 问题描述
+### 具体问题
+[详细描述遇到的问题]
+
+### 期望行为
+[描述期望的正确行为]
+
+### 实际行为  
+[描述实际发生的行为]
+
+## 🔍 重现步骤
+1. [步骤1]
+2. [步骤2]
+3. [步骤3]
+
+## 📎 附加信息
+- **环境信息**: [操作系统/工具版本等]
+- **错误日志**: [相关错误信息]
+- **截图**: [如有必要]
+
+## 💡 建议方案
+[如有改进建议，请描述]
+
+## 🎯 优先级评估
+- **影响程度**: [高/中/低]
+- **紧急程度**: [紧急/重要/一般]
+- **建议优先级**: [P0/P1/P2/P3]
+      ]]></feedback_template>
+    </pattern>
+  </communication_patterns>
+
+  <automation_patterns>
+    <pattern name="定期评估自动化">
+      <description>工作流定期评估的自动化模式</description>
+      <schedule>
+        <frequency name="快速检查">每周一次</frequency>
+        <frequency name="常规评估">每月一次</frequency>
+        <frequency name="深度审查">每季度一次</frequency>
+        <frequency name="年度大检">每年一次</frequency>
+      </schedule>
+      <automation_script_outline>
+        <step>扫描所有工作流文档</step>
+        <step>检查最后更新时间</step>
+        <step>分析项目架构变化</step>
+        <step>识别潜在不匹配问题</step>
+        <step>生成评估报告</step>
+        <step>触发必要的更新流程</step>
+      </automation_script_outline>
+    </pattern>
+
+    <pattern name="更新质量门禁">
+      <description>工作流更新的质量控制自动化模式</description>
+      <quality_gates>
+        <gate name="格式检查">
+          <criteria>Markdown格式正确</criteria>
+          <criteria>必要章节完整</criteria>
+          <criteria>元数据信息完整</criteria>
+        </gate>
+        <gate name="内容验证">
+          <criteria>步骤描述具体明确</criteria>
+          <criteria>工具使用正确</criteria>
+          <criteria>检查点可验证</criteria>
+        </gate>
+        <gate name="集成测试">
+          <criteria>与相关工作流兼容</criteria>
+          <criteria>依赖关系正确</criteria>
+          <criteria>实际执行成功</criteria>
+        </gate>
+      </quality_gates>
+    </pattern>
+  </automation_patterns>
+</common_patterns>

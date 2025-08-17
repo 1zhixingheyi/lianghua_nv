@@ -1,0 +1,374 @@
+<automated_fixes>
+  <overview>
+    自动化修复操作的详细指南，确保项目规范修复过程安全、可靠且可回滚。
+  </overview>
+
+  <safety_principles>
+    <principle name="备份优先">
+      在执行任何修复操作前，必须创建完整的项目备份
+    </principle>
+    <principle name="渐进式修复">
+      按优先级逐步执行修复，每个阶段都要验证结果
+    </principle>
+    <principle name="可回滚性">
+      所有操作都要有明确的回滚方案
+    </principle>
+    <principle name="详细日志">
+      记录每个修复操作的详细信息，便于审计和问题排查
+    </principle>
+  </safety_principles>
+
+  <backup_strategy>
+    <step number="1">
+      <action>创建时间戳备份目录</action>
+      <command>mkdir -p backups/compliance_fix_$(date +%Y%m%d_%H%M%S)</command>
+    </step>
+    
+    <step number="2">
+      <action>备份关键目录</action>
+      <targets>
+        <target>quant_system/</target>
+        <target>docs/</target>
+        <target>scripts/</target>
+        <target>config/</target>
+      </targets>
+    </step>
+    
+    <step number="3">
+      <action>创建文件清单</action>
+      <method>生成修复前的完整文件列表，包含文件大小和修改时间</method>
+    </step>
+  </backup_strategy>
+
+  <fix_operations>
+    <operation name="root_directory_cleanup" priority="1">
+      <description>清理根目录的违规文件</description>
+      <detection>
+        <pattern>*.py 文件在根目录</pattern>
+        <exceptions>
+          <exception>setup.py</exception>
+          <exception>main.py</exception>
+          <exception>manage.py</exception>
+        </exceptions>
+      </detection>
+      
+      <analysis_steps>
+        <step>读取文件内容分析功能</step>
+        <step>根据导入语句判断模块归属</step>
+        <step>根据类名和函数名确定分类</step>
+        <step>检查文件注释中的功能描述</step>
+      </analysis_steps>
+      
+      <classification_rules>
+        <rule condition="包含DataService、data_source、database相关内容">
+          <target_module>DATA</target_module>
+          <target_path>quant_system/DATA/services/</target_path>
+        </rule>
+        
+        <rule condition="包含Strategy、signal、factor相关内容">
+          <target_module>STRATEGIES</target_module>
+          <target_path>quant_system/STRATEGIES/</target_path>
+        </rule>
+        
+        <rule condition="包含Order、Trade、Execution相关内容">
+          <target_module>EXECUTION</target_module>
+          <target_path>quant_system/EXECUTION/</target_path>
+        </rule>
+        
+        <rule condition="包含Risk、VaR、风控相关内容">
+          <target_module>RISK</target_module>
+          <target_path>quant_system/RISK/</target_path>
+        </rule>
+        
+        <rule condition="包含Portfolio、Position、组合相关内容">
+          <target_module>PORTFOLIO</target_module>
+          <target_path>quant_system/PORTFOLIO/</target_path>
+        </rule>
+        
+        <rule condition="包含Backtest、回测、模拟相关内容">
+          <target_module>BACKTEST</target_module>
+          <target_path>quant_system/BACKTEST/</target_path>
+        </rule>
+        
+        <rule condition="包含Monitor、Alert、报告相关内容">
+          <target_module>MONITORING</target_module>
+          <target_path>quant_system/MONITORING/</target_path>
+        </rule>
+      </classification_rules>
+      
+      <execution>
+        <step>为每个文件确定目标位置</step>
+        <step>检查目标目录是否存在，不存在则创建</step>
+        <step>执行文件移动操作</step>
+        <step>更新相关的导入路径</step>
+        <step>验证移动后文件的完整性</step>
+      </execution>
+    </operation>
+
+    <operation name="module_directory_creation" priority="2">
+      <description>创建标准的7大核心模块目录结构</description>
+      <required_structure>
+        <module name="DATA">
+          <subdirs>
+            <dir>services</dir>
+            <dir>providers</dir>
+            <dir>core</dir>
+            <dir>utils</dir>
+          </subdirs>
+        </module>
+        
+        <module name="STRATEGIES">
+          <subdirs>
+            <dir>base</dir>
+            <dir>examples</dir>
+            <dir>factor</dir>
+            <dir>research</dir>
+          </subdirs>
+        </module>
+        
+        <module name="EXECUTION">
+          <subdirs>
+            <dir>algorithms</dir>
+            <dir>brokers</dir>
+          </subdirs>
+        </module>
+        
+        <module name="RISK">
+          <subdirs>
+            <dir>pre_trade</dir>
+            <dir>intra_trade</dir>
+            <dir>post_trade</dir>
+          </subdirs>
+        </module>
+        
+        <module name="PORTFOLIO">
+          <subdirs>
+            <dir>management</dir>
+            <dir>analysis</dir>
+          </subdirs>
+        </module>
+        
+        <module name="BACKTEST">
+          <subdirs>
+            <dir>engines</dir>
+            <dir>reports</dir>
+          </subdirs>
+        </module>
+        
+        <module name="MONITORING">
+          <subdirs>
+            <dir>alerts</dir>
+            <dir>dashboards</dir>
+            <dir>reports</dir>
+          </subdirs>
+        </module>
+      </required_structure>
+      
+      <execution>
+        <step>检查每个模块目录是否存在</step>
+        <step>创建缺失的目录</step>
+        <step>在每个目录中创建__init__.py文件</step>
+        <step>添加适当的模块级注释</step>
+      </execution>
+    </operation>
+
+    <operation name="file_renaming" priority="3">
+      <description>修复不符合命名规范的文件名</description>
+      <renaming_rules>
+        <rule pattern="CamelCase">
+          <method>转换为snake_case</method>
+          <example>
+            <before>DataService.py</before>
+            <after>data_service.py</after>
+          </example>
+        </rule>
+        
+        <rule pattern="kebab-case">
+          <method>转换为snake_case</method>
+          <example>
+            <before>trading-engine.py</before>
+            <after>trading_engine.py</after>
+          </example>
+        </rule>
+        
+        <rule pattern="包含空格">
+          <method>替换为下划线</method>
+          <example>
+            <before>risk manager.py</before>
+            <after>risk_manager.py</after>
+          </example>
+        </rule>
+        
+        <rule pattern="大写文件名">
+          <method>转换为小写</method>
+          <example>
+            <before>STRATEGY.PY</before>
+            <after>strategy.py</after>
+          </example>
+        </rule>
+      </renaming_rules>
+      
+      <execution>
+        <step>扫描所有不符合规范的文件名</step>
+        <step>生成重命名映射表</step>
+        <step>检查重命名后是否有冲突</step>
+        <step>执行重命名操作</step>
+        <step>更新所有引用这些文件的导入语句</step>
+      </execution>
+    </operation>
+
+    <operation name="temporary_file_cleanup" priority="4">
+      <description>清理临时文件和无用文件</description>
+      <cleanup_targets>
+        <category name="临时文件">
+          <patterns>
+            <pattern>*.tmp</pattern>
+            <pattern>*.temp</pattern>
+            <pattern>temp_*</pattern>
+            <pattern>*.bak</pattern>
+            <pattern>*.orig</pattern>
+            <pattern>*~</pattern>
+          </patterns>
+          <action>直接删除</action>
+        </category>
+        
+        <category name="编译文件">
+          <patterns>
+            <pattern>*.pyc</pattern>
+            <pattern>*.pyo</pattern>
+            <pattern>__pycache__/</pattern>
+            <pattern>*.egg-info/</pattern>
+          </patterns>
+          <action>删除并添加到.gitignore</action>
+        </category>
+        
+        <category name="IDE文件">
+          <patterns>
+            <pattern>.vscode/</pattern>
+            <pattern>.idea/</pattern>
+            <pattern>*.sublime-*</pattern>
+          </patterns>
+          <action>移动到.gitignore或删除</action>
+        </category>
+        
+        <category name="日志文件">
+          <patterns>
+            <pattern>*.log</pattern>
+            <pattern>logs/</pattern>
+          </patterns>
+          <action>归档到logs目录</action>
+        </category>
+      </cleanup_targets>
+      
+      <execution>
+        <step>扫描匹配的临时文件</step>
+        <step>分类文件类型</step>
+        <step>执行相应的清理动作</step>
+        <step>更新.gitignore文件</step>
+      </execution>
+    </operation>
+
+    <operation name="import_path_updates" priority="5">
+      <description>更新文件移动后的导入路径</description>
+      <update_strategy>
+        <step>分析所有Python文件的导入语句</step>
+        <step>建立旧路径到新路径的映射</step>
+        <step>逐文件更新导入语句</step>
+        <step>验证更新后的导入是否有效</step>
+      </update_strategy>
+      
+      <import_patterns>
+        <pattern type="相对导入">
+          <old>from . import module</old>
+          <new>根据新的模块结构调整</new>
+        </pattern>
+        
+        <pattern type="绝对导入">
+          <old>from quant_system.old_path import module</old>
+          <new>from quant_system.MODULE.new_path import module</new>
+        </pattern>
+      </import_patterns>
+    </operation>
+
+    <operation name="documentation_updates" priority="6">
+      <description>更新项目文档以反映新的文件结构</description>
+      <documents_to_update>
+        <doc name="docs/文件追踪.md">
+          <action>更新重要文件的新位置</action>
+        </doc>
+        
+        <doc name="README.md">
+          <action>更新项目结构说明</action>
+        </doc>
+        
+        <doc name="docs/architecture/">
+          <action>更新架构文档中的目录结构图</action>
+        </doc>
+      </documents_to_update>
+    </operation>
+  </fix_operations>
+
+  <validation_checks>
+    <check name="文件完整性验证">
+      <method>比较修复前后的文件数量和大小</method>
+      <tolerance>允许文件数量变化（删除临时文件），但不应有意外丢失</tolerance>
+    </check>
+    
+    <check name="导入语句验证">
+      <method>尝试导入所有Python模块，确保无导入错误</method>
+      <command>python -m py_compile *.py</command>
+    </check>
+    
+    <check name="目录结构验证">
+      <method>检查所有必需的目录都已创建</method>
+      <method>验证文件分布符合7大核心模块架构</method>
+    </check>
+    
+    <check name="命名规范验证">
+      <method>重新扫描所有文件名，确保符合命名规范</method>
+    </check>
+  </validation_checks>
+
+  <rollback_procedures>
+    <condition name="验证失败">
+      <action>从备份恢复所有文件</action>
+      <steps>
+        <step>停止所有修复操作</step>
+        <step>从备份目录恢复文件</step>
+        <step>验证恢复完整性</step>
+        <step>记录失败原因</step>
+      </steps>
+    </condition>
+    
+    <condition name="用户要求回滚">
+      <action>提供选择性回滚选项</action>
+      <options>
+        <option>完全回滚到修复前状态</option>
+        <option>保留部分修复，回滚特定操作</option>
+        <option>仅回滚最后一个操作</option>
+      </options>
+    </condition>
+  </rollback_procedures>
+
+  <reporting>
+    <report name="修复操作日志">
+      <content>
+        <item>执行的每个操作及其结果</item>
+        <item>移动的文件清单</item>
+        <item>重命名的文件清单</item>
+        <item>删除的文件清单</item>
+        <item>创建的目录清单</item>
+        <item>更新的导入语句</item>
+      </content>
+    </report>
+    
+    <report name="合规度改善报告">
+      <content>
+        <item>修复前后的合规度评分对比</item>
+        <item>各项指标的改善情况</item>
+        <item>剩余的规范问题（如有）</item>
+        <item>建议的后续改进措施</item>
+      </content>
+    </report>
+  </reporting>
+</automated_fixes>

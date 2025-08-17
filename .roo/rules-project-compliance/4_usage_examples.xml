@@ -1,0 +1,353 @@
+<usage_examples>
+  <overview>
+    项目规范执行器的实际使用示例和常见场景处理方法，
+    帮助用户快速理解和有效使用此模式。
+  </overview>
+
+  <common_scenarios>
+    <scenario name="新项目初始化">
+      <description>为新创建的项目建立标准的7大核心模块结构</description>
+      <user_input_examples>
+        <example>"帮我为这个量化交易项目建立标准的目录结构"</example>
+        <example>"初始化项目架构，按照CLAUDE.md规范"</example>
+        <example>"创建7大核心模块的目录"</example>
+      </user_input_examples>
+      
+      <execution_steps>
+        <step>读取CLAUDE.md了解项目规范要求</step>
+        <step>检查当前项目结构</step>
+        <step>创建7大核心模块目录</step>
+        <step>在每个模块中创建标准子目录</step>
+        <step>添加__init__.py文件和模块说明</step>
+        <step>生成项目结构文档</step>
+      </execution_steps>
+      
+      <expected_output>
+        <structure>
+quant_system/
+├── DATA/
+│   ├── services/
+│   ├── providers/
+│   ├── core/
+│   └── utils/
+├── STRATEGIES/
+│   ├── base/
+│   ├── examples/
+│   ├── factor/
+│   └── research/
+├── EXECUTION/
+├── RISK/
+├── PORTFOLIO/
+├── BACKTEST/
+├── MONITORING/
+├── config/
+└── TESTS/
+        </structure>
+      </expected_output>
+    </scenario>
+
+    <scenario name="文件散乱清理">
+      <description>整理项目中散落在各处的文件，按功能归类到正确模块</description>
+      <user_input_examples>
+        <example>"项目文件很乱，帮我按规范重新整理"</example>
+        <example>"根目录有很多Python文件，需要分类整理"</example>
+        <example>"检查并修复项目文件组织问题"</example>
+      </user_input_examples>
+      
+      <typical_problems>
+        <problem type="根目录脚本文件">
+          <files>
+            <file>data_download.py</file>
+            <file>strategy_test.py</file>
+            <file>risk_analysis.py</file>
+            <file>backtest_runner.py</file>
+          </files>
+          <solution>
+            <action>分析文件内容和功能</action>
+            <action>移动到对应的核心模块目录</action>
+            <action>更新导入路径</action>
+          </solution>
+        </problem>
+        
+        <problem type="命名不规范">
+          <files>
+            <file>DataService.py -> data_service.py</file>
+            <file>TradingEngine.py -> trading_engine.py</file>
+            <file>risk-manager.py -> risk_manager.py</file>
+          </files>
+          <solution>
+            <action>批量重命名为snake_case</action>
+            <action>更新所有引用</action>
+          </solution>
+        </problem>
+        
+        <problem type="临时文件堆积">
+          <files>
+            <file>test.py</file>
+            <file>debug.py</file>
+            <file>temp_data.csv</file>
+            <file>backup.py.bak</file>
+          </files>
+          <solution>
+            <action>识别并删除临时文件</action>
+            <action>有用的临时文件移动到合适位置</action>
+          </solution>
+        </problem>
+      </typical_problems>
+    </scenario>
+
+    <scenario name="持续维护检查">
+      <description>定期检查项目是否仍然符合规范，预防规范偏离</description>
+      <user_input_examples>
+        <example>"检查项目是否还符合规范"</example>
+        <example>"定期规范检查"</example>
+        <example>"生成项目合规报告"</example>
+      </user_input_examples>
+      
+      <check_items>
+        <item>新增文件是否在正确位置</item>
+        <item>文件命名是否符合规范</item>
+        <item>是否有新的违规行为</item>
+        <item>模块边界是否清晰</item>
+        <item>文档是否保持同步</item>
+      </check_items>
+    </scenario>
+
+    <scenario name="团队协作规范统一">
+      <description>多人协作时确保所有成员遵循相同的文件组织规范</description>
+      <user_input_examples>
+        <example>"团队成员提交的代码不规范，需要统一整理"</example>
+        <example>"合并分支前检查代码规范"</example>
+        <example>"项目交付前的规范检查"</example>
+      </user_input_examples>
+      
+      <team_workflow>
+        <step>检查新提交的文件是否符合规范</step>
+        <step>自动修复简单的规范问题</step>
+        <step>生成规范检查报告</step>
+        <step>为团队成员提供规范指导</step>
+      </team_workflow>
+    </scenario>
+  </common_scenarios>
+
+  <interactive_examples>
+    <example name="完整项目整理流程">
+      <dialog>
+        <user>我的量化交易项目文件很乱，根目录有很多Python文件，能帮我整理一下吗？</user>
+        
+        <assistant_steps>
+          <step>我来帮您整理项目文件，首先让我扫描当前项目结构</step>
+          <step>我发现了以下问题：
+            - 根目录有15个Python文件需要分类
+            - 缺少标准的7大核心模块目录
+            - 有多个临时文件和备份文件
+            - 部分文件命名不符合规范</step>
+          <step>我将按以下顺序进行修复：
+            1. 创建项目备份
+            2. 建立标准目录结构
+            3. 分析和移动文件到正确位置
+            4. 修复命名问题
+            5. 清理临时文件
+            6. 更新导入路径</step>
+          <step>开始执行修复...</step>
+          <step>修复完成！已将15个文件正确分类到7大模块，重命名了8个文件，删除了5个临时文件。</step>
+        </assistant_steps>
+        
+        <user>能生成一个修复报告吗？</user>
+        
+        <assistant_response>
+          当然！我已生成详细的修复报告，包括：
+          - 修复前后的目录结构对比
+          - 每个文件的移动记录
+          - 合规度评分提升情况
+          - 建议的后续维护措施
+          
+          项目合规度从65%提升到了95%，主要改进在文件分类和命名规范方面。
+        </assistant_response>
+      </dialog>
+    </example>
+
+    <example name="新模块添加指导">
+      <dialog>
+        <user>我想添加一个新的机器学习模块，应该放在哪里？</user>
+        
+        <assistant_response>
+          根据CLAUDE.md规范，机器学习模块应该归属到STRATEGIES模块下，因为它主要用于策略开发。
+          
+          建议的目录结构：
+          quant_system/STRATEGIES/ml/
+          ├── models/          # 机器学习模型
+          ├── features/        # 特征工程
+          ├── training/        # 模型训练
+          └── prediction/      # 预测服务
+          
+          这样分类的原因：
+          1. 机器学习主要服务于策略开发
+          2. 符合STRATEGIES模块的职责范围
+          3. 保持模块间的清晰边界
+        </assistant_response>
+        
+        <user>好的，那我创建这些文件后你能帮我检查一下是否符合规范吗？</user>
+        
+        <assistant_response>
+          当然可以！创建文件后，我会：
+          1. 检查目录结构是否合理
+          2. 验证文件命名是否符合snake_case规范
+          3. 确认模块职责边界清晰
+          4. 检查导入路径是否正确
+          5. 更新文档记录新增的模块
+          
+          请随时让我检查。
+        </assistant_response>
+      </dialog>
+    </example>
+  </interactive_examples>
+
+  <troubleshooting>
+    <problem name="文件移动后导入错误">
+      <symptoms>
+        <symptom>ImportError: No module named 'old_module'</symptom>
+        <symptom>ModuleNotFoundError: No module named 'xxx'</symptom>
+      </symptoms>
+      
+      <diagnosis>
+        文件移动后，其他文件中的导入语句未同步更新
+      </diagnosis>
+      
+      <solution>
+        <step>扫描所有Python文件查找导入语句</step>
+        <step>识别引用已移动文件的导入</step>
+        <step>批量更新导入路径</step>
+        <step>运行语法检查验证修复结果</step>
+      </solution>
+      
+      <prevention>
+        在移动文件前先分析依赖关系，确保同步更新所有引用
+      </prevention>
+    </problem>
+
+    <problem name="文件分类判断错误">
+      <symptoms>
+        <symptom>数据处理文件被误分类到策略模块</symptom>
+        <symptom>风险管理代码被放到执行模块</symptom>
+      </symptoms>
+      
+      <diagnosis>
+        文件内容分析不够准确，或者文件职责不清晰
+      </diagnosis>
+      
+      <solution>
+        <step>手动检查被误分类的文件</step>
+        <step>分析文件的主要功能和职责</step>
+        <step>根据7大核心模块定义重新分类</step>
+        <step>移动到正确的模块目录</step>
+      </solution>
+      
+      <prevention>
+        <measure>改进文件内容分析算法</measure>
+        <measure>提供手动确认机制</measure>
+        <measure>建立更详细的分类规则</measure>
+      </prevention>
+    </problem>
+
+    <problem name="大量文件移动性能问题">
+      <symptoms>
+        <symptom>文件移动操作耗时很长</symptom>
+        <symptom>系统响应缓慢</symptom>
+      </symptoms>
+      
+      <diagnosis>
+        大量文件操作导致I/O性能瓶颈
+      </diagnosis>
+      
+      <solution>
+        <step>分批处理文件移动操作</step>
+        <step>显示进度信息给用户</step>
+        <step>允许用户暂停和恢复操作</step>
+        <step>优化文件操作算法</step>
+      </solution>
+    </problem>
+  </troubleshooting>
+
+  <best_practices>
+    <practice name="规范执行前的准备">
+      <recommendations>
+        <item>确保项目已提交到版本控制系统</item>
+        <item>通知团队成员即将进行规范整理</item>
+        <item>选择适当的时间，避免影响正在进行的开发</item>
+        <item>备份重要的配置文件和数据</item>
+      </recommendations>
+    </practice>
+
+    <practice name="渐进式整理策略">
+      <recommendations>
+        <item>先处理简单的命名问题</item>
+        <item>再处理文件分类和移动</item>
+        <item>最后处理复杂的依赖关系</item>
+        <item>每个阶段都要验证结果</item>
+      </recommendations>
+    </practice>
+
+    <practice name="团队协作规范">
+      <recommendations>
+        <item>建立项目规范检查的定期流程</item>
+        <item>在代码审查中包含规范检查</item>
+        <item>提供新成员的规范培训</item>
+        <item>使用自动化工具预防规范偏离</item>
+      </recommendations>
+    </practice>
+
+    <practice name="持续维护">
+      <recommendations>
+        <item>每月进行一次规范检查</item>
+        <item>新功能开发后及时整理相关文件</item>
+        <item>保持文档与项目结构同步</item>
+        <item>收集团队反馈持续改进规范</item>
+      </recommendations>
+    </practice>
+  </best_practices>
+
+  <performance_metrics>
+    <metric name="规范合规度">
+      <target>≥95%</target>
+      <measurement>符合规范的文件数/总文件数</measurement>
+    </metric>
+    
+    <metric name="文件分类准确度">
+      <target>≥90%</target>
+      <measurement>正确分类的文件数/总文件数</measurement>
+    </metric>
+    
+    <metric name="修复操作成功率">
+      <target>≥98%</target>
+      <measurement>成功执行的修复操作数/总修复操作数</measurement>
+    </metric>
+    
+    <metric name="团队规范遵循度">
+      <target>≥85%</target>
+      <measurement>新提交符合规范的文件比例</measurement>
+    </metric>
+  </performance_metrics>
+
+  <integration_with_development_workflow>
+    <git_hooks>
+      <hook name="pre-commit">
+        <description>提交前检查文件是否符合规范</description>
+        <action>运行快速规范检查，阻止不符合规范的提交</action>
+      </hook>
+      
+      <hook name="pre-push">
+        <description>推送前进行完整规范验证</description>
+        <action>运行完整的项目规范检查</action>
+      </hook>
+    </git_hooks>
+    
+    <ci_cd_integration>
+      <step name="规范检查">
+        <trigger>每次代码提交</trigger>
+        <action>自动运行项目规范检查</action>
+        <result>生成规范合规报告</result>
+      </step>
+    </ci_cd_integration>
+  </integration_with_development_workflow>
+</usage_examples>

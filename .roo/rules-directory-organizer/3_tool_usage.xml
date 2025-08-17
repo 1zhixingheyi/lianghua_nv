@@ -1,0 +1,221 @@
+<tool_usage_guide>
+  <overview>
+    目录整理器的工具使用指南，详细说明如何使用各种工具来完成文件分析、
+    目录创建、文件移动等核心功能。
+  </overview>
+
+  <tool_priorities>
+    <priority level="1">
+      <tool>list_files</tool>
+      <when>始终首先使用，扫描项目目录结构</when>
+      <why>获取完整的文件清单，了解当前状态</why>
+    </priority>
+    
+    <priority level="2">
+      <tool>read_file</tool>
+      <when>读取规范文档和配置文件</when>
+      <why>理解项目标准和现有配置</why>
+    </priority>
+    
+    <priority level="3">
+      <tool>execute_command</tool>
+      <when>创建目录和移动文件</when>
+      <why>批量操作效率更高</why>
+    </priority>
+  </tool_priorities>
+
+  <tool_specific_guidance>
+    <tool name="list_files">
+      <purpose>分析目录结构和识别需要整理的文件</purpose>
+      <best_practices>
+        <practice>首先扫描根目录获取概览</practice>
+        <practice>使用recursive=false避免过深的目录遍历</practice>
+        <practice>重点关注散落在根目录的文件</practice>
+      </best_practices>
+      <example><![CDATA[
+<list_files>
+<path>.</path>
+<recursive>false</recursive>
+</list_files>
+      ]]></example>
+      <output_analysis>
+        <focus>识别不属于标准目录结构的文件</focus>
+        <patterns>寻找CSV、JSON、Python脚本、日志文件等</patterns>
+      </output_analysis>
+    </tool>
+
+    <tool name="search_files">
+      <purpose>查找特定类型的文件或检查文件内容</purpose>
+      <best_practices>
+        <practice>使用正则表达式匹配文件名模式</practice>
+        <practice>搜索特定扩展名的文件</practice>
+        <practice>检查可能需要路径更新的配置文件</practice>
+      </best_practices>
+      <examples>
+        <example name="查找Python脚本">
+          <code><![CDATA[
+<search_files>
+<path>.</path>
+<regex>.*演示.*\.py$</regex>
+</search_files>
+          ]]></code>
+        </example>
+        <example name="查找数据文件">
+          <code><![CDATA[
+<search_files>
+<path>.</path>
+<regex>.*\.(csv|json)$</regex>
+</search_files>
+          ]]></code>
+        </example>
+      </examples>
+    </tool>
+
+    <tool name="execute_command">
+      <purpose>批量创建目录和移动文件</purpose>
+      <best_practices>
+        <practice>先创建目标目录，再移动文件</practice>
+        <practice>使用mkdir -p创建嵌套目录</practice>
+        <practice>使用mv命令保持文件权限和时间戳</practice>
+        <practice>每次移动后验证结果</practice>
+      </best_practices>
+      <command_templates>
+        <template name="create_directory_structure">
+          <description>创建标准目录结构</description>
+          <command><![CDATA[
+mkdir -p data_files/{daily_data,financial,database,reports} scripts/{demos,setup,tools} logs/{demos,system,scraping} config packages
+          ]]></command>
+        </template>
+        
+        <template name="move_data_files">
+          <description>移动数据文件</description>
+          <command><![CDATA[
+mv *.csv *.json data_files/
+          ]]></command>
+          <note>需要根据具体文件类型细化分类</note>
+        </template>
+
+        <template name="move_demo_scripts">
+          <description>移动演示脚本</description>
+          <command><![CDATA[
+mv *演示*.py *demo*.py scripts/demos/
+          ]]></command>
+        </template>
+
+        <template name="move_log_files">
+          <description>移动日志文件</description>
+          <command><![CDATA[
+mv *.log logs/
+          ]]></command>
+        </template>
+      </command_templates>
+    </tool>
+
+    <tool name="read_file">
+      <purpose>读取规范文档和分析文件内容</purpose>
+      <best_practices>
+        <practice>优先读取项目规范文档</practice>
+        <practice>检查配置文件中的路径引用</practice>
+        <practice>分析脚本文件的import语句</practice>
+      </best_practices>
+      <key_files_to_read>
+        <file>docs/统一规范文档体系/03_开发规范.md</file>
+        <file>docs/文件整理计划.md</file>
+        <file>CLAUDE.md</file>
+        <file>README.md</file>
+      </key_files_to_read>
+    </tool>
+  </tool_specific_guidance>
+
+  <workflow_tool_sequence>
+    <phase name="analysis">
+      <step>list_files - 扫描项目根目录</step>
+      <step>read_file - 读取规范文档</step>
+      <step>search_files - 查找特定类型文件</step>
+    </phase>
+
+    <phase name="preparation">
+      <step>execute_command - 创建目标目录结构</step>
+      <step>list_files - 验证目录创建成功</step>
+    </phase>
+
+    <phase name="execution">
+      <step>execute_command - 按类型批量移动文件</step>
+      <step>list_files - 验证文件移动结果</step>
+      <step>search_files - 检查遗漏的文件</step>
+    </phase>
+
+    <phase name="validation">
+      <step>list_files - 检查根目录清理状态</step>
+      <step>read_file - 验证关键配置文件</step>
+    </phase>
+  </workflow_tool_sequence>
+
+  <error_handling>
+    <common_errors>
+      <error type="permission_denied">
+        <description>移动文件时权限不足</description>
+        <solution>使用execute_command检查文件权限，必要时请求用户确认</solution>
+      </error>
+
+      <error type="file_in_use">
+        <description>文件正在被使用无法移动</description>
+        <solution>跳过该文件，在报告中记录，建议用户手动处理</solution>
+      </error>
+
+      <error type="target_exists">
+        <description>目标位置已存在同名文件</description>
+        <solution>重命名文件（添加时间戳）或询问用户选择</solution>
+      </error>
+    </common_errors>
+
+    <recovery_strategies>
+      <strategy>保存操作历史，支持回滚</strategy>
+      <strategy>创建备份副本重要文件</strategy>
+      <strategy>逐步执行，每步确认结果</strategy>
+    </recovery_strategies>
+  </error_handling>
+
+  <batch_operations>
+    <operation name="bulk_file_classification">
+      <description>批量文件分类和移动</description>
+      <steps>
+        <step>使用list_files获取文件清单</step>
+        <step>根据分类规则生成移动命令</step>
+        <step>按文件类型分批执行移动</step>
+        <step>验证每批移动的结果</step>
+      </steps>
+    </operation>
+
+    <operation name="duplicate_handling">
+      <description>重复文件处理</description>
+      <steps>
+        <step>使用search_files查找相似文件名</step>
+        <step>比较文件大小和修改时间</step>
+        <step>生成重命名或删除建议</step>
+        <step>执行处理操作</step>
+      </steps>
+    </operation>
+  </batch_operations>
+
+  <reporting_requirements>
+    <before_operation>
+      <report_content>
+        <item>当前目录状态分析</item>
+        <item>识别的文件类型统计</item>
+        <item>需要创建的目录列表</item>
+        <item>计划移动的文件清单</item>
+      </report_content>
+    </before_operation>
+
+    <after_operation>
+      <report_content>
+        <item>已移动文件的详细列表</item>
+        <item>创建的新目录结构</item>
+        <item>处理的重复/临时文件</item>
+        <item>遇到的问题和解决方案</item>
+        <item>项目结构改进建议</item>
+      </report_content>
+    </after_operation>
+  </reporting_requirements>
+</tool_usage_guide>

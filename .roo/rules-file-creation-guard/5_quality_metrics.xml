@@ -1,0 +1,410 @@
+<quality_metrics>
+  <metrics_overview>
+    文档目录管理器模式的质量指标体系，用于评估5阶段检查流程的效果、
+    路径推荐的准确性、以及整体守门员功能的有效性。
+  </metrics_overview>
+
+  <core_performance_metrics>
+    <metric name="路径推荐准确率" priority="P0">
+      <definition>用户接受推荐路径的比例</definition>
+      <target_value>≥ 95%</target_value>
+      <measurement_method>
+        <formula>(用户采纳推荐路径次数 / 总推荐次数) × 100%</formula>
+        <data_source>用户反馈和实际文件创建记录</data_source>
+        <collection_frequency>每次文件创建操作</collection_frequency>
+      </measurement_method>
+      <performance_levels>
+        <level name="优秀" range="95-100%">路径推荐高度准确</level>
+        <level name="良好" range="85-94%">路径推荐基本准确</level>
+        <level name="需要改进" range="70-84%">路径推荐准确性不足</level>
+        <level name="不合格" range="<70%">路径推荐需要重大优化</level>
+      </performance_levels>
+    </metric>
+
+    <metric name="重复文件避免率" priority="P0">
+      <definition>成功避免重复创建的文件比例</definition>
+      <target_value>≥ 98%</target_value>
+      <measurement_method>
+        <formula>(成功避免重复创建次数 / 检测到潜在重复次数) × 100%</formula>
+        <data_source>相似性分析结果和用户最终决策</data_source>
+        <collection_frequency>每次相似性检查</collection_frequency>
+      </measurement_method>
+      <critical_thresholds>
+        <threshold level="严重问题">避免率 < 90%</threshold>
+        <threshold level="需要关注">避免率 90-95%</threshold>
+        <threshold level="正常范围">避免率 95-98%</threshold>
+        <threshold level="优秀表现">避免率 > 98%</threshold>
+      </critical_thresholds>
+    </metric>
+
+    <metric name="DRY规范符合度" priority="P0">
+      <definition>创建文件完全符合三层DRY规范的比例</definition>
+      <target_value>100%</target_value>
+      <measurement_method>
+        <formula>(符合DRY规范的文件数 / 总创建文件数) × 100%</formula>
+        <validation_criteria>
+          <criterion>文件位置符合模块架构</criterion>
+          <criterion>命名遵循项目规范</criterion>
+          <criterion>目录结构符合8大模块定义</criterion>
+          <criterion>体现CZSC技术特色要求</criterion>
+        </validation_criteria>
+        <collection_frequency>每次文件创建后的规范性审查</collection_frequency>
+      </measurement_method>
+    </metric>
+
+    <metric name="检查流程完整率" priority="P1">
+      <definition>执行完整5阶段检查流程的比例</definition>
+      <target_value>100%</target_value>
+      <five_stages_tracking>
+        <stage name="文件存在性检查">必须执行</stage>
+        <stage name="相似文件分析">必须执行</stage>
+        <stage name="路径规范性验证">必须执行</stage>
+        <stage name="精准路径计算">必须执行</stage>
+        <stage name="决策建议输出">必须执行</stage>
+      </five_stages_tracking>
+      <measurement_method>
+        <formula>(完整执行5阶段的次数 / 总检查次数) × 100%</formula>
+        <data_source>每阶段的执行日志和完成标记</data_source>
+      </measurement_method>
+    </metric>
+  </core_performance_metrics>
+
+  <quality_dimensions>
+    <dimension name="准确性指标">
+      <metric name="语义分析准确度">
+        <description>文件功能语义分析的准确程度</description>
+        <target>≥ 90%</target>
+        <measurement>人工验证语义分析结果的准确性</measurement>
+      </metric>
+
+      <metric name="相似度计算精度">
+        <description>相似文件识别和评分的精确度</description>
+        <target>≥ 92%</target>
+        <measurement>对比专家评估与算法计算的差异</measurement>
+      </metric>
+
+      <metric name="路径映射正确率">
+        <description>功能到路径映射的正确程度</description>
+        <target>≥ 95%</target>
+        <measurement>验证推荐路径与实际最佳路径的匹配度</measurement>
+      </metric>
+    </dimension>
+
+    <dimension name="效率指标">
+      <metric name="平均检查时间">
+        <description>完成5阶段检查的平均耗时</description>
+        <target>≤ 90秒</target>
+        <measurement>从检查开始到建议输出的总耗时</measurement>
+        <performance_breakdown>
+          <stage name="存在性检查">≤ 15秒</stage>
+          <stage name="相似性分析">≤ 25秒</stage>
+          <stage name="规范性验证">≤ 20秒</stage>
+          <stage name="路径计算">≤ 20秒</stage>
+          <stage name="决策输出">≤ 10秒</stage>
+        </performance_breakdown>
+      </metric>
+
+      <metric name="检查成功率">
+        <description>检查流程无错误完成的比例</description>
+        <target>≥ 99%</target>
+        <measurement>成功完成检查的次数与总检查次数的比例</measurement>
+      </metric>
+
+      <metric name="用户决策速度">
+        <description>用户基于建议做出决策的平均时间</description>
+        <target>≤ 120秒</target>
+        <measurement>从建议提供到用户确认的时间间隔</measurement>
+      </metric>
+    </dimension>
+
+    <dimension name="可用性指标">
+      <metric name="建议清晰度">
+        <description>用户对建议内容理解的清晰程度</description>
+        <target>≥ 95%</target>
+        <measurement>用户反馈调查中的清晰度评分</measurement>
+      </metric>
+
+      <metric name="决策支持有效性">
+        <description>建议对用户决策的帮助程度</description>
+        <target>≥ 90%</target>
+        <measurement>用户满意度调查中的帮助程度评分</measurement>
+      </metric>
+
+      <metric name="错误恢复能力">
+        <description>检查过程中错误处理和恢复的能力</description>
+        <target>≥ 98%</target>
+        <measurement>错误情况下成功恢复和提供fallback建议的比例</measurement>
+      </metric>
+    </dimension>
+  </quality_dimensions>
+
+  <monitoring_mechanisms>
+    <real_time_monitoring>
+      <indicator name="当前检查状态">
+        <display>实时显示正在执行的检查阶段</display>
+        <alert_conditions>
+          <condition>单阶段耗时超过预期30%</condition>
+          <condition>检查过程出现错误</condition>
+          <condition>相似度计算结果异常</condition>
+        </alert_conditions>
+      </indicator>
+
+      <indicator name="系统负载监控">
+        <display>检查并发数量和系统资源使用</display>
+        <thresholds>
+          <threshold level="正常">并发检查 ≤ 5个</threshold>
+          <threshold level="繁忙">并发检查 6-10个</threshold>
+          <threshold level="过载">并发检查 > 10个</threshold>
+        </thresholds>
+      </indicator>
+    </real_time_monitoring>
+
+    <periodic_reporting>
+      <report name="日报" frequency="每日">
+        <content>
+          - 检查总次数和成功率
+          - 路径推荐准确率趋势
+          - 重复文件避免效果
+          - 平均检查时间变化
+        </content>
+      </report>
+
+      <report name="周报" frequency="每周">
+        <content>
+          - 各维度质量指标汇总
+          - 用户满意度统计
+          - 问题类型分析
+          - 改进建议和行动计划
+        </content>
+      </report>
+
+      <report name="月报" frequency="每月">
+        <content>
+          - 整体性能评估
+          - 算法优化效果分析
+          - 项目规范演进跟踪
+          - 质量改进措施成效
+        </content>
+      </report>
+    </periodic_reporting>
+
+    <alerting_system>
+      <alert level="P0" condition="路径推荐准确率 < 85%">
+        <action>立即检查算法配置</action>
+        <action>分析近期失败案例</action>
+        <action>执行紧急优化措施</action>
+      </alert>
+
+      <alert level="P1" condition="重复文件避免率 < 95%">
+        <action>检查相似性分析算法</action>
+        <action>更新相似度计算权重</action>
+        <action>加强用户决策引导</action>
+      </alert>
+
+      <alert level="P2" condition="平均检查时间 > 120秒">
+        <action>分析性能瓶颈点</action>
+        <action>优化搜索和计算算法</action>
+        <action>考虑缓存机制改进</action>
+      </alert>
+    </alerting_system>
+  </monitoring_mechanisms>
+
+  <quality_improvement_framework>
+    <continuous_optimization>
+      <feedback_loop name="用户反馈循环">
+        <step>收集用户对路径建议的接受/拒绝反馈</step>
+        <step>分析用户修改路径的模式和原因</step>
+        <step>基于反馈调整算法参数</step>
+        <step>验证优化效果并持续迭代</step>
+      </feedback_loop>
+
+      <feedback_loop name="算法学习循环">
+        <step>定期分析成功和失败的案例</step>
+        <step>识别算法盲点和偏差模式</step>
+        <step>更新语义分析词汇库和规则</step>
+        <step>测试和部署算法改进版本</step>
+      </feedback_loop>
+
+      <feedback_loop name="规范同步循环">
+        <step>监控三层DRY规范的变更</step>
+        <step>评估规范变更对路径映射的影响</step>
+        <step>更新路径计算规则和映射关系</step>
+        <step>验证新规则的准确性和一致性</step>
+      </feedback_loop>
+    </continuous_optimization>
+
+    <benchmark_validation>
+      <benchmark name="标准测试集验证">
+        <description>使用预定义的文件创建场景测试准确性</description>
+        <frequency>每周执行</frequency>
+        <success_criteria>准确率 ≥ 95%</success_criteria>
+      </benchmark>
+
+      <benchmark name="跨项目适应性测试">
+        <description>在不同类型项目中测试算法的适应性</description>
+        <frequency>每月执行</frequency>
+        <success_criteria>适应性评分 ≥ 85%</success_criteria>
+      </benchmark>
+
+      <benchmark name="复杂场景压力测试">
+        <description>测试边缘案例和复杂依赖场景的处理能力</description>
+        <frequency>每季度执行</frequency>
+        <success_criteria>复杂场景处理成功率 ≥ 90%</success_criteria>
+      </benchmark>
+    </benchmark_validation>
+
+    <version_quality_tracking>
+      <version_metrics>
+        <metric name="版本改进效果">
+          <measurement>对比版本间的关键指标变化</measurement>
+          <tracking_points>
+            <point>路径推荐准确率变化</point>
+            <point>检查时间性能变化</point>
+            <point>用户满意度变化</point>
+            <point>bug修复和新功能效果</point>
+          </tracking_points>
+        </metric>
+
+        <metric name="回归测试通过率">
+          <measurement>新版本的功能回归情况</measurement>
+          <target>100%通过率</target>
+          <test_coverage>
+            <coverage>核心检查流程</coverage>
+            <coverage>路径计算算法</coverage>
+            <coverage>相似性分析功能</coverage>
+            <coverage>错误处理机制</coverage>
+          </test_coverage>
+        </metric>
+      </version_metrics>
+    </version_quality_tracking>
+  </quality_improvement_framework>
+
+  <diagnostic_tools>
+    <diagnostic_checklist name="准确率下降诊断">
+      <check item="项目结构是否发生重大变更">
+        <action>更新路径映射规则</action>
+      </check>
+      <check item="DRY规范是否有更新">
+        <action>同步规范变更到算法配置</action>
+      </check>
+      <check item="用户使用模式是否改变">
+        <action>调整算法以适应新的使用模式</action>
+      </check>
+      <check item="相似性计算权重是否需要调整">
+        <action>基于最新数据重新校准权重</action>
+      </check>
+    </diagnostic_checklist>
+
+    <diagnostic_checklist name="性能问题诊断">
+      <check item="搜索范围是否过大">
+        <action>优化搜索策略，实施分层搜索</action>
+      </check>
+      <check item="缓存机制是否有效">
+        <action>检查缓存命中率，优化缓存策略</action>
+      </check>
+      <check item="并发检查是否过多">
+        <action>实施队列管理和限流机制</action>
+      </check>
+      <check item="算法复杂度是否可优化">
+        <action>分析和简化计算密集的部分</action>
+      </check>
+    </diagnostic_checklist>
+
+    <diagnostic_checklist name="用户体验问题诊断">
+      <check item="建议说明是否清晰易懂">
+        <action>改进建议的表述和格式</action>
+      </check>
+      <check item="决策支持信息是否充分">
+        <action>增加更多的理由和上下文信息</action>
+      </check>
+      <check item="错误处理是否用户友好">
+        <action>改进错误信息和恢复建议</action>
+      </check>
+      <check item="交互流程是否顺畅">
+        <action>简化和优化用户决策流程</action>
+      </check>
+    </diagnostic_checklist>
+  </diagnostic_tools>
+
+  <success_indicators>
+    <primary_indicators>
+      <indicator name="守门员效果">
+        <metric>项目文件结构混乱度降低 ≥ 80%</metric>
+        <measurement>对比启用前后的文件组织质量</measurement>
+      </indicator>
+
+      <indicator name="开发效率提升">
+        <metric>文件定位和创建决策时间减少 ≥ 60%</metric>
+        <measurement>对比手动和自动化路径选择的时间差异</measurement>
+      </indicator>
+
+      <indicator name="规范遵循度">
+        <metric>DRY规范符合度提升至接近100%</metric>
+        <measurement>定期的规范符合性审查结果</measurement>
+      </indicator>
+    </primary_indicators>
+
+    <secondary_indicators>
+      <indicator name="团队协作效率">
+        <metric>文件冲突和重复问题减少 ≥ 90%</metric>
+        <measurement>团队协作中的文件管理问题统计</measurement>
+      </indicator>
+
+      <indicator name="知识传承效果">
+        <metric>新团队成员文件定位准确率 ≥ 95%</metric>
+        <measurement>新成员在模式帮助下的文件操作成功率</measurement>
+      </indicator>
+
+      <indicator name="项目维护性">
+        <metric>项目结构理解和导航效率提升 ≥ 70%</metric>
+        <measurement>代码审查和维护任务的时间效率</measurement>
+      </indicator>
+    </secondary_indicators>
+  </success_indicators>
+
+  <quality_governance>
+    <review_process>
+      <review name="每周质量回顾">
+        <participants>开发团队、架构师、质量负责人</participants>
+        <agenda>
+          <item>关键质量指标回顾</item>
+          <item>用户反馈和问题分析</item>
+          <item>改进措施制定和跟踪</item>
+        </agenda>
+      </review>
+
+      <review name="月度性能评估">
+        <participants>技术负责人、产品经理、用户代表</participants>
+        <agenda>
+          <item>整体性能趋势分析</item>
+          <item>用户满意度深度调研</item>
+          <item>下个月改进计划制定</item>
+        </agenda>
+      </review>
+
+      <review name="季度战略回顾">
+        <participants>项目负责人、技术委员会</participants>
+        <agenda>
+          <item>模式价值和ROI评估</item>
+          <item>技术发展趋势适应性</item>
+          <item>长期发展规划调整</item>
+        </agenda>
+      </review>
+    </review_process>
+
+    <quality_standards>
+      <standard name="发布质量门禁">
+        <gate>所有核心指标必须达到目标值</gate>
+        <gate>用户满意度调查必须 ≥ 90%</gate>
+        <gate>回归测试必须100%通过</gate>
+        <gate>性能不得较前版本退化超过5%</gate>
+      </standard>
+
+      <standard name="持续改进要求">
+        <requirement>每月至少一项算法或流程优化</requirement>
+        <requirement>每季度用户体验提升措施</requirement>
+        <requirement>每半年技术栈和方法论更新评估</requirement>
+      </standard>
+    </quality_standards>
+  </quality_governance>
+</quality_metrics>

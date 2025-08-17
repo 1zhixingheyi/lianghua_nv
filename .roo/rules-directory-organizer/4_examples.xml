@@ -1,0 +1,381 @@
+<directory_organization_examples>
+  <overview>
+    目录整理器的完整使用示例，展示如何处理典型的目录混乱情况，
+    并按照项目规范进行系统性的文件整理。
+  </overview>
+
+  <typical_scenarios>
+    <scenario name="root_directory_cleanup">
+      <description>清理根目录下散落的各类文件</description>
+      <initial_state>
+        <files>
+          <file>A股数据分析_20250726_183837.csv</file>
+          <file>数据模块实际使用场景演示.py</file>
+          <file>网页抓取.log</file>
+          <file>mysql_config.json</file>
+          <file>setup.py</file>
+          <file>Redis-x64-3.0.504.zip</file>
+        </files>
+      </initial_state>
+      
+      <step_by_step_process>
+        <step number="1">
+          <action>分析当前状态</action>
+          <command>
+            <list_files>
+              <path>.</path>
+              <recursive>false</recursive>
+            </list_files>
+          </command>
+          <expected_output>识别6个需要分类的文件</expected_output>
+        </step>
+
+        <step number="2">
+          <action>创建目标目录结构</action>
+          <command>
+            <execute_command>
+              <command>mkdir -p data_files scripts/demos scripts/setup logs config packages</command>
+            </execute_command>
+          </command>
+          <expected_output>成功创建标准目录结构</expected_output>
+        </step>
+
+        <step number="3">
+          <action>分类移动文件</action>
+          <commands>
+            <command>
+              <execute_command>
+                <command>mv A股数据分析_*.csv data_files/</command>
+              </execute_command>
+            </command>
+            <command>
+              <execute_command>
+                <command>mv *演示*.py scripts/demos/</command>
+              </execute_command>
+            </command>
+            <command>
+              <execute_command>
+                <command>mv *.log logs/</command>
+              </execute_command>
+            </command>
+            <command>
+              <execute_command>
+                <command>mv *_config.json config/</command>
+              </execute_command>
+            </command>
+            <command>
+              <execute_command>
+                <command>mv setup.py scripts/setup/</command>
+              </execute_command>
+            </command>
+            <command>
+              <execute_command>
+                <command>mv *.zip packages/</command>
+              </execute_command>
+            </command>
+          </commands>
+        </step>
+
+        <step number="4">
+          <action>验证整理结果</action>
+          <command>
+            <list_files>
+              <path>.</path>
+              <recursive>false</recursive>
+            </list_files>
+          </command>
+          <expected_output>根目录清洁，只保留必要文件</expected_output>
+        </step>
+      </step_by_step_process>
+
+      <final_structure>
+        <directory_tree><![CDATA[
+./
+├── data_files/
+│   └── A股数据分析_20250726_183837.csv
+├── scripts/
+│   ├── demos/
+│   │   └── 数据模块实际使用场景演示.py
+│   └── setup/
+│       └── setup.py
+├── logs/
+│   └── 网页抓取.log
+├── config/
+│   └── mysql_config.json
+├── packages/
+│   └── Redis-x64-3.0.504.zip
+├── quant_system/  (保持不变)
+├── docs/  (保持不变)
+└── README.md  (保持不变)
+        ]]></directory_tree>
+      </final_structure>
+    </scenario>
+
+    <scenario name="batch_data_processing">
+      <description>批量处理大量数据文件和脚本</description>
+      <initial_state>
+        <file_count>50+个散落的CSV和JSON文件</file_count>
+        <file_count>15+个Python演示脚本</file_count>
+        <file_count>10+个日志文件</file_count>
+      </initial_state>
+
+      <approach>
+        <step>使用search_files按文件类型批量识别</step>
+        <step>创建详细的子目录分类</step>
+        <step>按时间戳和功能进一步分类</step>
+        <step>处理重复文件</step>
+      </approach>
+
+      <commands_sequence>
+        <command_group name="数据文件处理">
+          <search_command>
+            <search_files>
+              <path>.</path>
+              <regex>.*\.(csv|json)$</regex>
+            </search_files>
+          </search_command>
+          <create_structure>
+            <execute_command>
+              <command>mkdir -p data_files/{daily_data,financial,reports,database}</command>
+            </execute_command>
+          </create_structure>
+          <classify_by_content>
+            <execute_command>
+              <command>mv *股票* *市场* data_files/financial/</command>
+            </execute_command>
+            <execute_command>
+              <command>mv *报告* *分析* data_files/reports/</command>
+            </execute_command>
+            <execute_command>
+              <command>mv *.db data_files/database/</command>
+            </execute_command>
+          </classify_by_content>
+        </command_group>
+
+        <command_group name="脚本文件处理">
+          <search_command>
+            <search_files>
+              <path>.</path>
+              <regex>.*\.py$</regex>
+            </search_files>
+          </search_command>
+          <classify_scripts>
+            <execute_command>
+              <command>mv *演示* *demo* scripts/demos/</command>
+            </execute_command>
+            <execute_command>
+              <command>mv *检查* *verify* scripts/tools/</command>
+            </execute_command>
+            <execute_command>
+              <command>mv setup* scripts/setup/</command>
+            </execute_command>
+          </classify_scripts>
+        </command_group>
+      </commands_sequence>
+    </scenario>
+
+    <scenario name="duplicate_file_handling">
+      <description>处理重复和临时文件</description>
+      <duplicate_patterns>
+        <pattern>相同文件名但不同时间戳</pattern>
+        <pattern>带有"副本"、"copy"、"备份"字样的文件</pattern>
+        <pattern>临时文件（.tmp、.temp、dump.rdb等）</pattern>
+      </duplicate_patterns>
+
+      <processing_steps>
+        <step name="识别重复文件">
+          <search_files>
+            <path>.</path>
+            <regex>.*(副本|copy|备份|backup).*</regex>
+          </search_files>
+        </step>
+
+        <step name="处理临时文件">
+          <search_files>
+            <path>.</path>
+            <regex>.*\.(tmp|temp)$|dump\.rdb$</regex>
+          </search_files>
+          <action>确认后删除或移动到临时目录</action>
+        </step>
+
+        <step name="重命名冲突文件">
+          <process>为重复文件添加时间戳后缀</process>
+          <example>
+            <execute_command>
+              <command>mv "文件.csv" "文件_20250814.csv"</command>
+            </execute_command>
+          </example>
+        </step>
+      </processing_steps>
+    </scenario>
+  </typical_scenarios>
+
+  <complete_workflow_example>
+    <scenario_description>
+      对lianghuakaifa项目进行完整的目录整理，基于docs/文件整理计划.md
+    </scenario_description>
+
+    <phase name="准备阶段">
+      <step>读取项目规范文档</step>
+      <commands>
+        <read_file>
+          <file>docs/文件整理计划.md</file>
+        </read_file>
+        <read_file>
+          <file>docs/统一规范文档体系/03_开发规范.md</file>
+        </read_file>
+      </commands>
+    </phase>
+
+    <phase name="分析阶段">
+      <step>全面扫描项目根目录</step>
+      <command>
+        <list_files>
+          <path>.</path>
+          <recursive>false</recursive>
+        </list_files>
+      </command>
+      
+      <step>识别各类文件</step>
+      <commands>
+        <search_files>
+          <path>.</path>
+          <regex>.*\.(csv|json)$</regex>
+        </search_files>
+        <search_files>
+          <path>.</path>
+          <regex>.*\.py$</regex>
+        </search_files>
+        <search_files>
+          <path>.</path>
+          <regex>.*\.log$</regex>
+        </search_files>
+      </commands>
+    </phase>
+
+    <phase name="执行阶段">
+      <step>创建标准目录结构</step>
+      <command>
+        <execute_command>
+          <command>mkdir -p data_files/{daily_data,financial/{balancesheet,cashflow,income,indicators,reports},financial_data,reports,stock_basic} scripts/{demos,setup,tools} logs/{demos,system,scraping} config packages</command>
+        </execute_command>
+      </command>
+
+      <step>按文件整理计划执行分类</step>
+      <data_files>
+        <execute_command>
+          <command>mv A股数据分析_*.csv A股策略回测_*.csv data_files/financial/</command>
+        </execute_command>
+        <execute_command>
+          <command>mv 智能抓取数据_*.csv 综合量化数据_*.csv data_files/daily_data/</command>
+        </execute_command>
+        <execute_command>
+          <command>mv *.json data_files/reports/</command>
+        </execute_command>
+        <execute_command>
+          <command>mv *.db data_files/database/</command>
+        </execute_command>
+      </data_files>
+
+      <scripts>
+        <execute_command>
+          <command>mv *演示*.py *数据库*.py *网页抓取*.py scripts/demos/</command>
+        </execute_command>
+        <execute_command>
+          <command>mv check_*.py verify_*.py *检查*.py scripts/tools/</command>
+        </execute_command>
+        <execute_command>
+          <command>mv setup*.py *.ps1 pytest.ini scripts/setup/</command>
+        </execute_command>
+      </scripts>
+
+      <logs>
+        <execute_command>
+          <command>mv *.log logs/</command>
+        </execute_command>
+      </logs>
+
+      <other_files>
+        <execute_command>
+          <command>mv *_config.json config/</command>
+        </execute_command>
+        <execute_command>
+          <command>mv *.zip packages/</command>
+        </execute_command>
+      </other_files>
+    </phase>
+
+    <phase name="验证阶段">
+      <step>检查整理结果</step>
+      <commands>
+        <list_files>
+          <path>.</path>
+          <recursive>false</recursive>
+        </list_files>
+        <list_files>
+          <path>data_files</path>
+          <recursive>true</recursive>
+        </list_files>
+        <list_files>
+          <path>scripts</path>
+          <recursive>true</recursive>
+        </list_files>
+      </commands>
+
+      <step>生成整理报告</step>
+      <report_content>
+        <item>移动的文件统计</item>
+        <item>创建的目录结构</item>
+        <item>处理的特殊情况</item>
+        <item>建议的后续改进</item>
+      </report_content>
+    </phase>
+  </complete_workflow_example>
+
+  <troubleshooting_examples>
+    <problem name="文件移动失败">
+      <symptoms>mv命令返回错误</symptoms>
+      <diagnosis>
+        <check>检查文件是否存在</check>
+        <check>验证目标目录是否已创建</check>
+        <check>确认文件权限</check>
+      </diagnosis>
+      <solution>
+        <execute_command>
+          <command>ls -la filename</command>
+        </execute_command>
+        <execute_command>
+          <command>mkdir -p target/directory</command>
+        </execute_command>
+        <execute_command>
+          <command>chmod 644 filename</command>
+        </execute_command>
+      </solution>
+    </problem>
+
+    <problem name="目标文件已存在">
+      <symptoms>mv提示目标文件已存在</symptoms>
+      <solution>
+        <backup_existing>
+          <execute_command>
+            <command>mv existing_file existing_file_backup_$(date +%Y%m%d_%H%M%S)</command>
+          </execute_command>
+        </backup_existing>
+        <then_move>
+          <execute_command>
+            <command>mv source_file target_location/</command>
+          </execute_command>
+        </then_move>
+      </solution>
+    </problem>
+  </troubleshooting_examples>
+
+  <success_criteria>
+    <criterion>根目录清洁，只保留核心文件</criterion>
+    <criterion>所有文件按功能正确分类</criterion>
+    <criterion>标准目录结构建立完整</criterion>
+    <criterion>重复和临时文件得到处理</criterion>
+    <criterion>项目功能未受影响</criterion>
+    <criterion>生成详细的整理报告</criterion>
+  </success_criteria>
+</directory_organization_examples>

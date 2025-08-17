@@ -1,0 +1,633 @@
+<examples>
+  <example_overview>
+    本文档提供工作流更新管理器模式的完整实际应用示例，
+    重点展示与三层DRY模块化规范的深度集成和自动同步更新机制。
+  </example_overview>
+
+  <complete_workflow_examples>
+    <example name="基于DRY规范的配置管理工作流更新">
+      <description>完整示例：发现配置管理工作流与DRY规范不一致，进行全面更新</description>
+      <scenario>
+        配置管理工作流中引用了不存在的ConfigManager v4.1，
+        需要基于三层DRY模块化规范中的配置v4.0权威定义进行更新
+      </scenario>
+      
+      <step_by_step_execution>
+        <phase name="差距识别阶段">
+          <step number="1" title="DRY规范结构扫描">
+            <tool_usage>
+              <command>list_files("lianghuakaifa/docs/三层DRY模块化规范", recursive=true)</command>
+              <purpose>获取完整的DRY规范文档结构</purpose>
+            </tool_usage>
+            <expected_output>
+              发现配置相关规范位于：
+              - 00_架构层/08_配置管理架构.md
+              - 01_通用规范层/02_配置管理API规范.md
+            </expected_output>
+          </step>
+
+          <step number="2" title="权威配置规范分析">
+            <tool_usage>
+              <command>read_file([
+                "lianghuakaifa/docs/三层DRY模块化规范/00_架构层/08_配置管理架构.md",
+                "lianghuakaifa/docs/三层DRY模块化规范/01_通用规范层/02_配置管理API规范.md"
+              ])</command>
+              <purpose>获取配置v4.0的权威定义</purpose>
+            </tool_usage>
+            <key_findings>
+              - 配置v4.0基于四层存储架构
+              - 权威API规范定义在通用规范层
+              - 强调热重载和环境分离
+            </key_findings>
+          </step>
+
+          <step number="3" title="现有工作流差距分析">
+            <tool_usage>
+              <command>read_file("lianghuakaifa/0_工作流开发/workflow/01_基础通用工作流/配置管理工作流.md")</command>
+              <purpose>分析当前配置管理工作流内容</purpose>
+            </tool_usage>
+            <gap_identification>
+              - ❌ 引用了不存在的ConfigManager v4.1
+              - ❌ 未使用标准DRY引用格式
+              - ❌ 缺少配置v4.0四层存储概念
+              - ❌ 未体现热重载特性
+            </gap_identification>
+          </step>
+
+          <step number="4" title="差距量化评估">
+            <evaluation_matrix>
+              | 评估维度 | 权重 | 当前状态 | 目标状态 | 得分 | 加权得分 |
+              |----------|------|----------|----------|------|----------|
+              | 架构匹配度 | 40% | 引用不存在组件 | 基于配置v4.0 | 20% | 8% |
+              | 功能匹配度 | 30% | 基础配置管理 | 四层存储+热重载 | 40% | 12% |
+              | 流程匹配度 | 20% | 简单读写流程 | 标准化配置流程 | 60% | 12% |
+              | 可执行性 | 10% | 部分可执行 | 完全可执行 | 70% | 7% |
+              | **总匹配度** | **100%** | | | **39%** | **🔴 严重差距** |
+            </evaluation_matrix>
+          </step>
+        </phase>
+
+        <phase name="更新规划阶段">
+          <step number="5" title="优先级评估">
+            <priority_calculation>
+              业务影响程度 (35%): 100分 (影响所有模块配置管理)
+              差距严重程度 (30%): 100分 (严重差距，匹配度仅39%)
+              更新复杂程度 (20%): 60分 (中等更新，需要重构)
+              依赖关系影响 (15%): 100分 (影响多个工作流)
+              
+              **总分**: 100×0.35 + 100×0.30 + 60×0.20 + 100×0.15 = 92分
+              **优先级**: P0 (立即更新)
+            </priority_calculation>
+          </step>
+
+          <step number="6" title="更新计划制定">
+            <update_plan>
+              工作流名称: 配置管理工作流
+              优先级: P0
+              预计时间: 2024-08-16 14:00 - 2024-08-16 18:00
+              主要任务:
+                - [ ] 移除ConfigManager v4.1假设
+                - [ ] 添加标准DRY规范引用
+                - [ ] 基于配置v4.0重新设计流程
+                - [ ] 增加热重载机制说明
+                - [ ] 更新示例代码和配置
+              验收标准: 匹配度达到90%以上
+            </update_plan>
+          </step>
+        </phase>
+
+        <phase name="更新执行阶段">
+          <step number="7" title="备份原始工作流">
+            <tool_usage>
+              <command>write_to_file("backup/workflow_updates/20240816_140000/配置管理工作流_原始版本.md", [原始内容])</command>
+              <purpose>创建安全备份</purpose>
+            </tool_usage>
+          </step>
+
+          <step number="8" title="标准化DRY引用">
+            <tool_usage>
+              <command>apply_diff("workflow/01_基础通用工作流/配置管理工作流.md", 引用格式更新diff)</command>
+              <diff_content><![CDATA[
+<<<<<<< SEARCH
+:start_line:15
+-------
+## 配置管理概述
+
+本工作流定义了项目配置管理的标准流程，基于ConfigManager v4.1提供统一的配置管理能力。
+=======
+## 配置管理概述
+
+> **引用架构层**: [配置管理架构](../../docs/三层DRY模块化规范/00_架构层/08_配置管理架构.md#配置v40四层存储) - 配置v4.0四层存储概念
+> **引用通用规范层**: [配置管理API规范](../../docs/三层DRY模块化规范/01_通用规范层/02_配置管理API规范.md) - 配置API详细规范
+
+### 配置v4.0核心优势
+基于架构层定义的配置v4.0四层存储架构，实现：
+- **降低30%维护成本**: 统一配置管理减少重复配置
+- **热重载能力**: 配置变更无需重启系统
+- **环境分离**: 开发/测试/生产环境配置隔离
+- **版本控制**: 配置变更的完整追踪
+>>>>>>> REPLACE
+              ]]></diff_content>
+            </tool_usage>
+          </step>
+
+          <step number="9" title="更新配置操作流程">
+            <tool_usage>
+              <command>apply_diff("workflow/01_基础通用工作流/配置管理工作流.md", 流程更新diff)</command>
+              <diff_content><![CDATA[
+<<<<<<< SEARCH
+:start_line:45
+-------
+### Step 2.1: 获取配置信息
+```python
+config = ConfigManager.get_config('data_sources')
+```
+=======
+### Step 2.1: 获取配置信息
+基于配置v4.0规范的标准获取方式：
+
+```python
+# 1. 直接读取YAML配置文件
+import yaml
+from pathlib import Path
+
+def load_config(config_name: str, env: str = 'dev') -> dict:
+    """
+    基于配置v4.0四层存储加载配置
+    
+    Args:
+        config_name: 配置文件名（如 'data_sources'）
+        env: 环境标识 ('dev'/'test'/'prod')
+    """
+    config_path = Path(f"config/modules/{config_name}_{env}.yaml")
+    
+    if not config_path.exists():
+        config_path = Path(f"config/modules/{config_name}.yaml")
+    
+    with open(config_path, 'r', encoding='utf-8') as f:
+        return yaml.safe_load(f)
+
+# 2. 使用示例
+data_config = load_config('data_sources', 'dev')
+tushare_token = data_config['tushare']['token']
+```
+
+**检查点**:
+- [ ] 配置文件路径正确
+- [ ] 环境配置生效
+- [ ] 配置内容格式验证
+>>>>>>> REPLACE
+              ]]></diff_content>
+            </tool_usage>
+          </step>
+
+          <step number="10" title="添加热重载机制">
+            <tool_usage>
+              <command>apply_diff("workflow/01_基础通用工作流/配置管理工作流.md", 热重载内容增加)</command>
+              <diff_content><![CDATA[
+<<<<<<< SEARCH
+:start_line:120
+-------
+## 📊 工作流配置参数
+=======
+### Step 3.3: 配置热重载机制
+
+> **引用架构层**: [配置管理架构](../../docs/三层DRY模块化规范/00_架构层/08_配置管理架构.md#热重载机制) - 热重载概念定义
+
+配置v4.0的热重载实现：
+
+```python
+import os
+import time
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+
+class ConfigReloadHandler(FileSystemEventHandler):
+    """配置文件变更监听器"""
+    
+    def __init__(self, config_loader):
+        self.config_loader = config_loader
+        
+    def on_modified(self, event):
+        if event.src_path.endswith('.yaml'):
+            print(f"配置文件变更: {event.src_path}")
+            self.config_loader.reload_config()
+
+# 启用配置热重载
+def setup_config_reload(config_loader):
+    event_handler = ConfigReloadHandler(config_loader)
+    observer = Observer()
+    observer.schedule(event_handler, "config/modules", recursive=True)
+    observer.start()
+    return observer
+```
+
+**检查点**:
+- [ ] 热重载监听器启动成功
+- [ ] 配置文件变更能被及时检测
+- [ ] 配置重载不影响运行中的任务
+
+## 📊 工作流配置参数
+>>>>>>> REPLACE
+              ]]></diff_content>
+            </tool_usage>
+          </step>
+
+          <step number="11" title="更新版本信息">
+            <tool_usage>
+              <command>apply_diff("workflow/01_基础通用工作流/配置管理工作流.md", 版本信息更新)</command>
+              <diff_content><![CDATA[
+<<<<<<< SEARCH
+:start_line:280
+-------
+- 版本: v1.0
+- 创建时间: 2024-08-15
+- 最后更新: 2024-08-15
+=======
+- 版本: v2.0
+- 创建时间: 2024-08-15
+- 最后更新: 2024-08-16
+- 更新说明: 基于三层DRY规范重构，实现配置v4.0标准
+- DRY符合性: ✅ 使用标准引用格式，基于架构层权威定义
+>>>>>>> REPLACE
+              ]]></diff_content>
+            </tool_usage>
+          </step>
+        </phase>
+
+        <phase name="验证测试阶段">
+          <step number="12" title="DRY引用格式验证">
+            <tool_usage>
+              <command>search_files("workflow/01_基础通用工作流", "引用架构层|引用通用规范层", "*.md")</command>
+              <purpose>验证DRY引用格式是否标准</purpose>
+            </tool_usage>
+            <validation_result>
+              ✅ 发现2处标准DRY引用格式
+              ✅ 引用路径有效且准确
+              ✅ 引用说明清晰明确
+            </validation_result>
+          </step>
+
+          <step number="13" title="配置v4.0概念一致性检查">
+            <tool_usage>
+              <command>search_files("workflow/01_基础通用工作流", "配置v4\\.0|四层存储|热重载", "*.md")</command>
+              <purpose>验证配置v4.0概念表述一致性</purpose>
+            </tool_usage>
+            <validation_result>
+              ✅ 配置v4.0概念表述与DRY规范一致
+              ✅ 四层存储概念正确引用
+              ✅ 热重载机制描述准确
+            </validation_result>
+          </step>
+
+          <step number="14" title="最终匹配度评估">
+            <final_evaluation>
+              | 评估维度 | 权重 | 更新后状态 | 得分 | 加权得分 |
+              |----------|------|-------------|------|----------|
+              | 架构匹配度 | 40% | 基于配置v4.0权威定义 | 95% | 38% |
+              | 功能匹配度 | 30% | 四层存储+热重载 | 90% | 27% |
+              | 流程匹配度 | 20% | 标准化配置流程 | 85% | 17% |
+              | 可执行性 | 10% | 完全可执行 | 95% | 9.5% |
+              | **总匹配度** | **100%** | | **91.5%** | **✅ 高度匹配** |
+              
+              **改进效果**: 39% → 91.5% (+52.5%)
+            </final_evaluation>
+          </step>
+        </phase>
+
+        <phase name="发布管理阶段">
+          <step number="15" title="生成更新报告">
+            <deliverable>
+              <title>配置管理工作流DRY规范对齐更新报告</title>
+              <content>
+                ## 更新概览
+                - 更新类型: P0紧急更新 - DRY规范对齐
+                - 更新时间: 2024-08-16 14:00-18:00
+                - 匹配度改善: 39% → 91.5% (+52.5%)
+                
+                ## 主要变更
+                ### 新增功能
+                - ✅ 基于配置v4.0的四层存储架构
+                - ✅ 配置热重载机制实现
+                - ✅ 环境分离配置管理
+                
+                ### 重要修复
+                - 🔧 移除不存在的ConfigManager v4.1引用
+                - 🔧 添加标准DRY规范引用格式
+                - 🔧 基于架构层权威定义重构流程
+                
+                ## DRY规范符合性
+                - ✅ 使用标准引用格式: `> **引用架构层**: [文档](路径) - 说明`
+                - ✅ 基于权威定义: 配置v4.0概念完全对齐
+                - ✅ 技术特色体现: 30%维护成本降低目标
+              </content>
+            </deliverable>
+          </step>
+        </phase>
+      </step_by_step_execution>
+      
+      <lessons_learned>
+        <lesson>DRY规范的权威性确保了工作流更新的准确性</lesson>
+        <lesson>标准化引用格式提高了文档间的一致性</lesson>
+        <lesson>基于实际架构的更新避免了理想化假设</lesson>
+        <lesson>量化评估方法使更新效果可衡量</lesson>
+      </lessons_learned>
+    </example>
+
+    <example name="CZSC策略工作流与DRY规范同步">
+      <description>示例：基于模块专用层规范更新CZSC策略开发工作流</description>
+      <scenario>
+        策略开发工作流中的CZSC技术特色描述与DRY规范中的权威定义不一致，
+        需要基于模块专用层STRATEGIES规范进行同步更新
+      </scenario>
+      
+      <key_steps>
+        <step title="模块专用层规范分析">
+          <tool_usage>
+            <command>read_file([
+              "lianghuakaifa/docs/三层DRY模块化规范/02_模块专用层/02_STRATEGIES_模块专用规范/02_核心功能.md",
+              "lianghuakaifa/docs/三层DRY模块化规范/00_架构层/07_技术标准规范.md"
+            ])</command>
+          </tool_usage>
+          <findings>
+            - 权威CZSC技术特色: 95.50%收益率目标
+            - 模块专用实现: STRATEGIES模块的差异化配置
+            - 技术栈要求: 与CZSC库的深度集成
+          </findings>
+        </step>
+
+        <step title="工作流CZSC概念同步">
+          <update_content>
+            添加标准DRY引用：
+            ```markdown
+            > **引用架构层**: [技术标准规范](../../docs/三层DRY模块化规范/00_架构层/07_技术标准规范.md#czsc技术特色概念) - CZSC技术特色概念（95.50%收益率目标）
+            > **引用模块专用层**: [CZSC策略开发](../../docs/三层DRY模块化规范/02_模块专用层/02_STRATEGIES_模块专用规范/02_核心功能.md) - STRATEGIES模块CZSC实现
+            
+            ### CZSC策略开发规范
+            基于CZSC技术特色，实现95.50%收益率目标...
+            ```
+          </update_content>
+        </step>
+      </key_steps>
+    </example>
+
+    <example name="数据质量工作流模块差异化更新">
+      <description>示例：基于DATA模块专用规范增强数据质量管理工作流</description>
+      <scenario>
+        数据质量管理工作流过于通用，缺少DATA模块的专用特性，
+        需要基于模块专用层规范增加差异化实现
+      </scenario>
+      
+      <enhancement_approach>
+        <step title="模块专用规范集成">
+          <dry_reference>
+            ```markdown
+            > **引用通用规范层**: [数据质量标准](../../docs/三层DRY模块化规范/01_通用规范层/02_数据规范/数据质量标准.md) - 跨模块数据质量标准
+            > **引用模块专用层**: [数据质量控制](../../docs/三层DRY模块化规范/02_模块专用层/01_DATA_模块专用规范/04_质量控制.md) - DATA模块专用质量控制
+            
+            ### DATA模块专用质量控制实现
+            基于通用数据质量标准，DATA模块的差异化实现：
+            1. **Tushare数据专用验证**: 针对Tushare数据源的特定检查
+            2. **L0-L3分层质量控制**: 不同数据层级的质量标准
+            3. **CZSC数据增强质量**: 技术指标计算的准确性验证
+            ```
+          </dry_reference>
+        </step>
+      </enhancement_approach>
+    </example>
+  </complete_workflow_examples>
+
+  <integration_patterns>
+    <pattern name="DRY规范驱动的工作流创建">
+      <description>基于三层DRY规范从零创建新工作流的标准模式</description>
+      <process>
+        <step>1. 确定工作流在8大模块中的归属</step>
+        <step>2. 查找对应的模块专用层规范</step>
+        <step>3. 识别需要引用的架构层概念</step>
+        <step>4. 确定适用的通用规范层标准</step>
+        <step>5. 按照DRY引用格式构建工作流</step>
+        <step>6. 体现模块专用的差异化特性</step>
+      </process>
+      
+      <template_structure>
+        ```markdown
+        # 工作流名称
+        
+        > **引用架构层**: [相关架构文档](路径) - 权威概念定义
+        > **引用通用规范层**: [通用规范文档](路径) - 跨模块标准
+        > **引用模块专用层**: [模块规范文档](路径) - 模块差异化实现
+        
+        ## 工作流概述
+        基于上述DRY规范，本工作流实现...
+        
+        ## 模块专用特性
+        ### [模块名]模块差异化实现
+        在遵循通用规范基础上，[模块名]模块的特定实现包括：
+        1. **技术特色体现**: 具体的技术特色实现
+        2. **专用流程**: 模块特有的处理流程
+        3. **集成要求**: 与其他模块的集成规范
+        ```
+      </template_structure>
+    </pattern>
+
+    <pattern name="规范变更的级联更新">
+      <description>当DRY规范发生变更时，自动识别和更新受影响的工作流</description>
+      <trigger_conditions>
+        <condition>架构层核心概念定义变更</condition>
+        <condition>通用规范层标准更新</condition>
+        <condition>模块专用层规范修改</condition>
+        <condition>技术特色概念调整</condition>
+      </trigger_conditions>
+      
+      <impact_analysis>
+        <level name="架构层变更影响">
+          - 影响范围: 所有引用该概念的工作流
+          - 更新优先级: P0 (立即更新)
+          - 更新内容: 概念定义、引用路径、相关流程
+        </level>
+        
+        <level name="通用规范层变更影响">
+          - 影响范围: 使用该规范的跨模块工作流
+          - 更新优先级: P1 (近期更新)
+          - 更新内容: 规范细节、实施方法、检查标准
+        </level>
+        
+        <level name="模块专用层变更影响">
+          - 影响范围: 特定模块的专用工作流
+          - 更新优先级: P2 (计划更新)
+          - 更新内容: 模块特性、差异化实现、集成方式
+        </level>
+      </impact_analysis>
+    </pattern>
+
+    <pattern name="工作流到模式的转换">
+      <description>将成熟的工作流转换为独立Roo Code模式的标准流程</description>
+      <conversion_steps>
+        <step number="1" title="工作流分析">
+          - 分析工作流的核心职责和专业领域
+          - 识别工作流的工具使用模式
+          - 确定工作流的文件操作权限需求
+        </step>
+        
+        <step number="2" title="模式配置设计">
+          - 设计模式的slug和显示名称
+          - 定义roleDefinition和whenToUse
+          - 配置适当的工具组权限
+          - 设置文件访问限制
+        </step>
+        
+        <step number="3" title="XML指令创建">
+          - 将工作流内容转换为XML指令格式
+          - 创建完整的5个XML指令文件
+          - 确保指令的可执行性和准确性
+        </step>
+        
+        <step number="4" title="DRY规范集成">
+          - 在模式中集成DRY规范的访问能力
+          - 建立模式与三层DRY规范的关联
+          - 确保模式能够基于规范进行动态更新
+        </step>
+      </conversion_steps>
+      
+      <example_conversion>
+        <source>数据模块设计工作流</source>
+        <target>数据架构师模式 (data-architect)</target>
+        <key_changes>
+          - roleDefinition: 专注数据架构设计和L0-L3分层处理
+          - fileRegex: 限制为数据相关文件和DRY规范
+          - 集成DATA模块专用层规范的自动引用能力
+        </key_changes>
+      </example_conversion>
+    </pattern>
+  </integration_patterns>
+
+  <troubleshooting_examples>
+    <example name="DRY引用路径失效处理">
+      <problem>工作流中的DRY规范引用路径失效</problem>
+      <diagnosis>
+        <step>使用search_files查找失效的引用模式</step>
+        <step>使用list_files验证DRY规范目录结构</step>
+        <step>对比引用路径与实际文件路径</step>
+      </diagnosis>
+      <solution>
+        <step>批量更新引用路径</step>
+        <step>验证新路径的有效性</step>
+        <step>建立路径变更的监控机制</step>
+      </solution>
+    </example>
+
+    <example name="概念定义不一致处理">
+      <problem>工作流中的概念与DRY规范权威定义不符</problem>
+      <diagnosis>
+        <step>定位概念在DRY规范中的权威定义</step>
+        <step>对比工作流中的概念表述</step>
+        <step>分析不一致的原因和影响</step>
+      </diagnosis>
+      <solution>
+        <step>基于权威定义更新工作流表述</step>
+        <step>添加正确的DRY规范引用</step>
+        <step>建立概念一致性检查机制</step>
+      </solution>
+    </example>
+
+    <example name="模块专用特性缺失处理">
+      <problem>工作流过于通用，缺少模块专用特性</problem>
+      <diagnosis>
+        <step>分析工作流所属的模块类别</step>
+        <step>查找对应的模块专用层规范</step>
+        <step>识别缺失的差异化特性</step>
+      </diagnosis>
+      <solution>
+        <step>增加模块专用层规范引用</step>
+        <step>添加模块差异化实现内容</step>
+        <step>体现模块的技术特色要求</step>
+      </solution>
+    </example>
+  </troubleshooting_examples>
+
+  <automation_examples>
+    <example name="DRY规范监控自动化">
+      <description>自动监控DRY规范变更并触发工作流更新</description>
+      <implementation_outline>
+        ```python
+        # 伪代码示例
+        class DRYSpecificationMonitor:
+            def __init__(self):
+                self.spec_path = "lianghuakaifa/docs/三层DRY模块化规范"
+                self.workflow_path = "lianghuakaifa/0_工作流开发/workflow"
+                
+            def monitor_changes(self):
+                # 监控DRY规范文件变更
+                for change in self.detect_spec_changes():
+                    affected_workflows = self.analyze_impact(change)
+                    self.trigger_update(affected_workflows, change)
+                    
+            def analyze_impact(self, change):
+                # 分析规范变更对工作流的影响
+                if change.layer == "架构层":
+                    return self.find_all_workflows_referencing(change.concept)
+                elif change.layer == "通用规范层":
+                    return self.find_cross_module_workflows(change.standard)
+                elif change.layer == "模块专用层":
+                    return self.find_module_specific_workflows(change.module)
+        ```
+      </implementation_outline>
+    </example>
+
+    <example name="批量DRY引用格式化">
+      <description>自动将工作流中的非标准引用转换为DRY标准格式</description>
+      <transformation_rules>
+        <rule>
+          <pattern>参考.*架构.*文档</pattern>
+          <replacement>引用架构层: [具体文档](路径) - 说明</replacement>
+        </rule>
+        <rule>
+          <pattern>基于.*规范</pattern>
+          <replacement>引用通用规范层: [具体规范](路径) - 说明</replacement>
+        </rule>
+        <rule>
+          <pattern>.*模块特定.*</pattern>
+          <replacement>引用模块专用层: [模块规范](路径) - 模块差异化实现</replacement>
+        </rule>
+      </transformation_rules>
+    </example>
+  </automation_examples>
+
+  <best_practices_summary>
+    <practice name="DRY规范优先原则">
+      <description>始终以三层DRY模块化规范为权威信息源</description>
+      <implementation>
+        - 任何概念定义都要回溯到DRY规范的权威定义
+        - 工作流更新必须基于DRY规范的最新版本
+        - 保持工作流与DRY规范的同步更新
+      </implementation>
+    </practice>
+
+    <practice name="标准化引用格式">
+      <description>严格使用DRY规范定义的引用格式</description>
+      <implementation>
+        - 使用标准格式: `> **引用[层级]**: [文档标题](路径) - 简要说明`
+        - 确保引用路径的准确性和有效性
+        - 提供清晰的引用说明
+      </implementation>
+    </practice>
+
+    <practice name="模块差异化体现">
+      <description>充分体现各模块的专用特性和技术特色</description>
+      <implementation>
+        - 基于模块专用层规范添加差异化内容
+        - 体现CZSC技术特色、配置v4.0优势等
+        - 避免过度通用化，突出模块特点
+      </implementation>
+    </practice>
+
+    <practice name="持续同步机制">
+      <description>建立工作流与DRY规范的持续同步机制</description>
+      <implementation>
+        - 定期检查DRY规范的变更
+        - 建立自动化的影响分析机制
+        - 及时更新受影响的工作流
+      </implementation>
+    </practice>
+  </best_practices_summary>
+</examples>

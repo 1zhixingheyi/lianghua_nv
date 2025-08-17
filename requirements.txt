@@ -1,0 +1,49 @@
+# 量化交易系统MVP依赖包
+# 核心框架
+vnpy==3.9.0
+vnpy-ctp==7.0.7.0
+vnpy-binance==1.0.25
+vnpy-rqdata==1.0.18
+
+# 数据源
+tushare>=1.2.89
+akshare>=1.12.0
+yfinance>=0.2.18
+
+# 数据库
+pymysql>=1.0.3
+redis>=4.5.5
+sqlalchemy>=2.0.15
+pandas>=2.0.2
+
+# 回测与分析
+backtrader>=1.9.78.123
+numpy>=1.24.3
+matplotlib>=3.7.1
+seaborn>=0.12.2
+scipy>=1.10.1
+
+# Web框架与监控
+flask>=2.3.2
+streamlit>=1.23.1
+plotly>=5.14.1
+dash>=2.10.1
+
+# 机器学习（可选）
+scikit-learn>=1.2.2
+lightgbm>=3.3.5
+
+# 工具包
+requests>=2.31.0
+schedule>=1.2.0
+python-dotenv>=1.0.0
+loguru>=0.7.0
+
+# 开发工具
+pytest>=7.3.1
+black>=23.3.0
+flake8>=6.0.0
+jupyter>=1.0.0
+
+# 缠论相关
+czsc>=0.9.20

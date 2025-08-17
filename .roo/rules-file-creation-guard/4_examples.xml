@@ -1,0 +1,486 @@
+<examples>
+  <example_overview>
+    本文档提供文档目录管理器模式的完整实际应用示例，
+    展示5阶段检查流程的详细执行过程和多维度路径定位算法的实际应用。
+  </example_overview>
+
+  <complete_workflow_examples>
+    <example name="新建数据处理器文件的完整检查流程">
+      <description>完整示例：用户请求创建数据清洗器，执行完整5阶段检查</description>
+      <scenario>
+        用户想要创建一个名为"advanced_data_cleaner.py"的数据清洗处理器，
+        需要确保不与现有文件重复，并定位到最佳路径位置
+      </scenario>
+      
+      <step_by_step_execution>
+        <phase name="阶段1: 文件存在性检查">
+          <step number="1" title="全项目文件搜索">
+            <tool_usage>
+              <command>search_files(".", "advanced.*clean|clean.*advanced", "*.py")</command>
+              <purpose>搜索可能存在的相似命名文件</purpose>
+            </tool_usage>
+            <expected_results>
+              发现现有相关文件：
+              - quant_system/data/processors/data_cleaner.py
+              - quant_system/data/utils/advanced_validator.py
+              - quant_system/data/tools/data_cleaning_tool.py
+            </expected_results>
+          </step>
+
+          <step number="2" title="扩展扩展名检查">
+            <tool_usage>
+              <command>search_files(".", "advanced_data_cleaner", "*.pyx,*.pyi,*.pxd")</command>
+              <purpose>检查Python扩展文件变体</purpose>
+            </tool_usage>
+            <expected_results>
+              未发现同名的.pyx, .pyi, .pxd文件
+            </expected_results>
+          </step>
+
+          <step number="3" title="存在性检查结论">
+            <conclusion>
+              ✅ 文件名"advanced_data_cleaner.py"不存在
+              ⚠️ 发现3个功能相似的现有文件
+              📍 需要进行相似性分析
+            </conclusion>
+          </step>
+        </phase>
+
+        <phase name="阶段2: 相似文件分析">
+          <step number="4" title="功能语义相似度分析">
+            <analysis_matrix>
+              | 现有文件 | 功能描述相似度 | 文件名相似度 | 模块归属相似度 | 综合相似度 |
+              |----------|----------------|--------------|----------------|------------|
+              | data_cleaner.py | 90% (数据清洗) | 70% (cleaner匹配) | 100% (同属data) | 85% |
+              | advanced_validator.py | 60% (数据处理) | 50% (advanced匹配) | 100% (同属data) | 63% |
+              | data_cleaning_tool.py | 85% (数据清洗) | 60% (cleaning相关) | 90% (tools子模块) | 75% |
+            </analysis_matrix>
+          </step>
+
+          <step number="5" title="相似度权重计算">
+            <scoring_algorithm>
+              data_cleaner.py:
+              - 功能描述: 90% × 40% = 36%
+              - 文件名: 70% × 30% = 21% 
+              - 模块归属: 100% × 20% = 20%
+              - 技术栈: 100% × 10% = 10%
+              - 总分: 87% (🔴 严重相似)
+            </scoring_algorithm>
+          </step>
+
+          <step number="6" title="相似性分析结论">
+            <conclusion>
+              🔴 data_cleaner.py 相似度87% - 强烈建议完善现有文件
+              🟡 data_cleaning_tool.py 相似度75% - 建议谨慎评估
+              🟢 advanced_validator.py 相似度63% - 功能差异明显
+            </conclusion>
+          </step>
+        </phase>
+
+        <phase name="阶段3: 路径规范性验证">
+          <step number="7" title="三层DRY规范映射">
+            <dry_specification_mapping>
+              文件功能: 数据清洗处理器
+              ↓
+              架构层映射: DATA模块 - 数据处理组件
+              ↓ 
+              模块专用层: DATA_模块专用规范/数据处理器实现
+              ↓
+              代码结构映射: quant_system/data/processors/
+            </dry_specification_mapping>
+          </step>
+
+          <step number="8" title="8大模块架构验证">
+            <module_compliance_check>
+              ✅ 属于DATA模块范围
+              ✅ 符合数据处理器功能定位
+              ✅ 遵循processors子目录结构
+              ✅ 体现CZSC技术特色（数据处理优化）
+            </module_compliance_check>
+          </step>
+        </phase>
+
+        <phase name="阶段4: 精准路径计算">
+          <step number="9" title="多维度定位算法">
+            <dimension_analysis>
+              <dimension name="语义分析" weight="40%">
+                advanced_data_cleaner → "高级数据清洗"
+                核心语义: 数据处理、清洗算法、高级功能
+                最佳匹配: quant_system/data/processors/
+                得分: 95%
+              </dimension>
+
+              <dimension name="模式匹配" weight="30%">
+                文件名模式: *_data_*er.py
+                现有模式: data_processor.py, price_processor.py
+                最佳匹配: quant_system/data/processors/
+                得分: 90%
+              </dimension>
+
+              <dimension name="依赖分析" weight="20%">
+                预期依赖: pandas, numpy, 数据验证模块
+                依赖位置: data/validators/, data/utils/
+                最佳匹配: quant_system/data/processors/
+                得分: 85%
+              </dimension>
+
+              <dimension name="相似文件位置" weight="10%">
+                data_cleaner.py 位于: data/processors/
+                cleaning相关文件: 主要在processors和tools
+                最佳匹配: quant_system/data/processors/
+                得分: 100%
+              </dimension>
+            </dimension_analysis>
+          </step>
+
+          <step number="10" title="路径综合评分">
+            <path_scoring>
+              候选路径1: quant_system/data/processors/advanced_data_cleaner.py
+              - 语义匹配: 95% × 40% = 38%
+              - 模式匹配: 90% × 30% = 27%
+              - 依赖关系: 85% × 20% = 17%
+              - 位置参考: 100% × 10% = 10%
+              - 总分: 92% ✅
+
+              候选路径2: quant_system/data/tools/advanced_data_cleaner.py
+              - 语义匹配: 80% × 40% = 32%
+              - 模式匹配: 70% × 30% = 21%
+              - 依赖关系: 90% × 20% = 18%
+              - 位置参考: 75% × 10% = 7.5%
+              - 总分: 78.5% 🟡
+            </path_scoring>
+          </step>
+        </phase>
+
+        <phase name="阶段5: 决策建议输出">
+          <step number="11" title="综合决策分析">
+            <decision_matrix>
+              <option type="完善现有文件" priority="最推荐">
+                <target_file>quant_system/data/processors/data_cleaner.py</target_file>
+                <rationale>
+                  - 功能高度重复(87%相似度)
+                  - 可通过扩展现有功能实现需求
+                  - 避免代码重复和维护复杂性
+                </rationale>
+                <implementation_approach>
+                  1. 在data_cleaner.py中添加AdvancedCleaner类
+                  2. 实现高级清洗算法作为可选方法
+                  3. 保持API向后兼容性
+                </implementation_approach>
+              </option>
+
+              <option type="创建新文件" priority="备选方案">
+                <target_path>quant_system/data/processors/advanced_data_cleaner.py</target_path>
+                <rationale>
+                  - 如果高级功能确实需要独立实现
+                  - 复杂度足够高，值得单独维护
+                  - 与现有cleaner有明确的功能边界
+                </rationale>
+                <requirements>
+                  1. 确保与data_cleaner.py有清晰的功能分工
+                  2. 建立适当的代码复用机制
+                  3. 添加详细的功能对比文档
+                </requirements>
+              </option>
+            </decision_matrix>
+          </step>
+
+          <step number="12" title="最终建议输出">
+            <recommendation>
+              ## 📁 文件创建决策建议
+
+              ### 🎯 推荐方案: 完善现有文件
+              **目标文件**: `quant_system/data/processors/data_cleaner.py`
+              
+              **理由分析**:
+              - ✅ 功能相似度87% - 高度重复
+              - ✅ 位于相同的processors子目录
+              - ✅ 符合DRY原则，避免代码重复
+              - ✅ 降低维护成本和学习曲线
+
+              **实施建议**:
+              1. 在现有data_cleaner.py中扩展AdvancedCleaner类
+              2. 实现高级清洗算法作为可配置选项
+              3. 保持现有API的向后兼容性
+              4. 添加高级功能的使用示例和文档
+
+              ### 🔄 备选方案: 创建新文件  
+              **建议路径**: `quant_system/data/processors/advanced_data_cleaner.py`
+              **路径准确度**: 92%
+
+              **适用条件**:
+              - 高级功能复杂度极高，确实需要独立实现
+              - 与基础cleaner有明确的功能和性能边界
+              - 团队决定采用多层次清洗器架构
+
+              **注意事项**:
+              - ⚠️ 必须建立与data_cleaner.py的清晰分工
+              - ⚠️ 考虑代码复用和接口统一性
+              - ⚠️ 添加功能对比和选择指南文档
+
+              ### 📋 推荐决策流程
+              1. **评估功能复杂度**: 新功能是否足够复杂和独特
+              2. **团队讨论**: 确认架构决策和长期维护方案  
+              3. **原型验证**: 先在现有文件中实现原型测试
+              4. **最终决策**: 基于原型效果决定是否独立文件
+            </recommendation>
+          </step>
+        </phase>
+      </step_by_step_execution>
+      
+      <lessons_learned>
+        <lesson>相似度分析是避免重复文件的关键环节</lesson>
+        <lesson>多维度路径定位算法提供了精确的位置建议</lesson>
+        <lesson>完善现有文件通常比创建新文件更符合DRY原则</lesson>
+        <lesson>决策建议需要提供清晰的理由和实施步骤</lesson>
+      </lessons_learned>
+    </example>
+
+    <example name="配置文件路径定位示例">
+      <description>示例：为新的模块配置文件定位最佳存放路径</description>
+      <scenario>
+        用户需要创建"strategies_advanced_config.yaml"配置文件，
+        需要基于配置v4.0架构和项目规范定位路径
+      </scenario>
+      
+      <key_steps>
+        <step title="配置v4.0架构分析">
+          <dry_reference_analysis>
+            基于三层DRY规范中的配置v4.0定义：
+            - 架构层: 四层存储架构概念
+            - 通用规范层: 配置管理API规范
+            - 模块专用层: STRATEGIES模块差异化配置
+          </dry_reference_analysis>
+        </step>
+
+        <step title="路径计算结果">
+          <path_recommendation>
+            **最佳路径**: `quant_system/config/modules/strategies_advanced_config.yaml`
+            **准确度**: 96%
+            
+            **理由**:
+            - ✅ 符合config/modules/模块配置标准结构
+            - ✅ strategies_前缀明确模块归属
+            - ✅ 遵循配置v4.0的模块化存储原则
+            - ✅ 便于配置管理和热重载机制
+          </path_recommendation>
+        </step>
+      </key_steps>
+    </example>
+
+    <example name="测试文件定位示例">
+      <description>示例：为新的测试文件确定标准位置</description>
+      <scenario>
+        开发人员准备为risk模块创建"test_risk_calculator.py"测试文件
+      </scenario>
+      
+      <analysis_process>
+        <dimension_analysis>
+          语义分析: risk模块 + calculator功能 + 测试文件
+          ↓
+          模式匹配: test_*.py 测试文件模式
+          ↓  
+          依赖分析: 测试risk/calculator.py实现
+          ↓
+          位置参考: 现有测试文件分布
+        </dimension_analysis>
+        
+        <final_recommendation>
+          **推荐路径**: `quant_system/risk/tests/test_risk_calculator.py`
+          **备选路径**: `quant_system/tests/risk/test_risk_calculator.py`
+          
+          **选择依据**:
+          - 模块内tests/目录更便于模块内测试管理
+          - 遵循就近原则，测试代码与实现代码邻近
+          - 符合Python项目的标准测试组织方式
+        </final_recommendation>
+      </analysis_process>
+    </example>
+  </complete_workflow_examples>
+
+  <edge_cases_examples>
+    <example name="处理特殊字符文件名">
+      <scenario>用户想创建包含特殊字符的文件："data-processor_v2.1.py"</scenario>
+      <handling_approach>
+        <step>检测特殊字符: 连字符、下划线、点号</step>
+        <step>验证命名规范: Python模块命名建议</step>
+        <step>提供标准化建议: "data_processor_v2_1.py"</step>
+        <step>说明规范原因: PEP 8命名约定</step>
+      </handling_approach>
+    </example>
+
+    <example name="跨模块依赖文件">
+      <scenario>创建需要引用多个模块的工具文件</scenario>
+      <resolution_strategy>
+        <step>分析主要功能归属: 确定主导模块</step>
+        <step>评估依赖复杂度: 判断是否需要独立工具目录</step>
+        <step>推荐组织方式: 基于主导功能的位置选择</step>
+        <step>依赖管理建议: 使用相对导入和接口规范</step>
+      </resolution_strategy>
+    </example>
+
+    <example name="版本升级场景">
+      <scenario>现有文件已存在v1.0，需要创建v2.0版本</scenario>
+      <version_strategy>
+        <approach name="渐进升级">
+          - 在原文件中添加v2功能
+          - 保持向后兼容性
+          - 使用版本参数控制行为
+        </approach>
+        <approach name="并行版本">
+          - 创建独立的v2文件
+          - 建立版本切换机制
+          - 制定迁移和废弃计划
+        </approach>
+      </version_strategy>
+    </example>
+  </edge_cases_examples>
+
+  <integration_examples>
+    <example name="与工作流更新管理器协作">
+      <description>文档目录管理器如何与工作流更新管理器模式协作</description>
+      <collaboration_scenario>
+        工作流更新过程中需要创建新的文档文件时，
+        自动调用文档目录管理器进行路径检查和定位
+      </collaboration_scenario>
+      
+      <workflow_integration>
+        <step>工作流更新管理器识别需要创建文档</step>
+        <step>调用文档目录管理器进行5阶段检查</step>
+        <step>获取路径建议和文件存在性分析</step>
+        <step>基于建议执行文件创建或更新操作</step>
+        <step>确保新文档符合三层DRY规范要求</step>
+      </workflow_integration>
+    </example>
+
+    <example name="与其他模式的集成模式">
+      <integration_pattern>
+        任何模式在执行文件创建操作前，
+        都应该通过文档目录管理器进行预检查：
+        
+        ```
+        其他模式 → 文件创建需求 → 文档目录管理器检查 → 执行决策
+        ```
+        
+        这确保了项目文件结构的一致性和规范性
+      </integration_pattern>
+    </example>
+  </integration_examples>
+
+  <troubleshooting_examples>
+    <example name="路径计算结果不准确">
+      <problem>多维度算法给出的路径建议不符合预期</problem>
+      <diagnosis_steps>
+        <step>检查各维度权重配置是否合理</step>
+        <step>验证语义分析的关键词匹配</step>
+        <step>确认依赖关系分析的准确性</step>
+        <step>核对相似文件位置的参考价值</step>
+      </diagnosis_steps>
+      <solution_approach>
+        <step>调整权重配置以提高准确度</step>
+        <step>扩展语义分析的词汇库</step>
+        <step>完善依赖关系的映射规则</step>
+        <step>建立人工验证和学习机制</step>
+      </solution_approach>
+    </example>
+
+    <example name="相似度计算异常">
+      <problem>相似文件分析给出明显错误的相似度评分</problem>
+      <root_causes>
+        <cause>文件功能描述不清晰或缺失</cause>
+        <cause>文件名语义分析算法局限</cause>
+        <cause>模块归属判断规则不完善</cause>
+      </root_causes>
+      <remediation>
+        <step>改进功能描述的提取和分析方法</step>
+        <step>优化文件名语义解析算法</step>
+        <step>完善模块归属的判断逻辑</step>
+        <step>引入人工校正和反馈机制</step>
+      </remediation>
+    </example>
+  </troubleshooting_examples>
+
+  <performance_examples>
+    <example name="大型项目的搜索优化">
+      <scenario>在包含数千文件的大型项目中快速执行检查</scenario>
+      <optimization_strategies>
+        <strategy name="分层搜索">
+          <step>首先在相关模块目录内搜索</step>
+          <step>然后扩展到相邻模块</step>
+          <step>最后进行全项目搜索</step>
+        </strategy>
+        
+        <strategy name="缓存机制">
+          <step>缓存常用文件路径映射</step>
+          <step>缓存相似度计算结果</step>
+          <step>缓存项目结构快照</step>
+        </strategy>
+        
+        <strategy name="并行处理">
+          <step>并行执行多个搜索查询</step>
+          <step>并行计算不同维度的路径得分</step>
+          <step>并行分析多个候选路径</step>
+        </strategy>
+      </optimization_strategies>
+    </example>
+
+    <example name="检查流程的时间控制">
+      <time_management>
+        <phase name="快速检查阶段" time_limit="30秒">
+          <task>文件存在性检查</task>
+          <task>基础相似性分析</task>
+          <task>路径规范性验证</task>
+        </phase>
+        
+        <phase name="详细分析阶段" time_limit="60秒">
+          <task>深度相似性分析</task>
+          <task>精准路径计算</task>
+          <task>决策建议生成</task>
+        </phase>
+        
+        <timeout_handling>
+          如果检查时间超限，提供基于基础分析的快速建议，
+          并说明可能需要进一步的手动验证
+        </timeout_handling>
+      </time_management>
+    </example>
+  </performance_examples>
+
+  <quality_validation_examples>
+    <example name="建议质量验证">
+      <validation_criteria>
+        <criterion name="路径准确性">
+          <metric>推荐路径的实际使用接受率 ≥ 95%</metric>
+          <measurement>用户采纳建议路径的统计</measurement>
+        </criterion>
+        
+        <criterion name="重复检测效果">
+          <metric>成功避免重复文件创建率 ≥ 98%</metric>
+          <measurement>避免重复创建的成功案例统计</measurement>
+        </criterion>
+        
+        <criterion name="规范符合度">
+          <metric>创建文件的DRY规范符合度 = 100%</metric>
+          <measurement>创建文件完全符合项目规范的比例</measurement>
+        </criterion>
+      </validation_criteria>
+    </example>
+
+    <example name="持续改进机制">
+      <improvement_process>
+        <feedback_collection>
+          <method>记录用户对路径建议的接受/修改</method>
+          <method>分析用户最终选择与建议的差异</method>
+          <method>收集文件创建后的使用效果</method>
+        </feedback_collection>
+        
+        <algorithm_optimization>
+          <action>基于反馈调整权重配置</action>
+          <action>优化语义分析词汇库</action>
+          <action>完善路径映射规则</action>
+          <action>增强相似度计算精度</action>
+        </algorithm_optimization>
+      </improvement_process>
+    </example>
+  </quality_validation_examples>
+</examples>
