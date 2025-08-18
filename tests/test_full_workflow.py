@@ -18,16 +18,16 @@ import numpy as np
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
-from data.tushare_client import TushareClient
-from data.database import DatabaseManager
-from strategies.strategy_manager import StrategyManager
-from strategies.ma_crossover import MACrossoverStrategy
-from strategies.rsi_strategy import RSIStrategy
-from backtest.engine import BacktestEngine
-from risk.risk_engine import RiskEngine
-from trading.trade_executor import TradeExecutor
-from monitor.dashboard import Dashboard
-from config.settings import Config
+from src.data.tushare_client import TushareClient
+from src.data.database import DatabaseManager
+from src.strategies.strategy_manager import StrategyManager
+from src.strategies.ma_crossover import MACrossoverStrategy
+from src.strategies.rsi_strategy import RSIStrategy
+from src.backtest.engine import BacktestEngine
+from src.risk.risk_engine import RiskEngine
+from src.trading.trade_executor import TradeExecutor
+from src.monitor.dashboard import Dashboard
+from src.config.settings import Config
 
 
 class TestFullWorkflow:

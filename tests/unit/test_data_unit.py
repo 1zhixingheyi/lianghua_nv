@@ -15,8 +15,8 @@ from unittest.mock import Mock, patch, MagicMock
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, project_root)
 
-from data.tushare_client import TushareClient
-from data.database import DatabaseManager
+from src.data.tushare_client import TushareClient
+from src.data.database import DatabaseManager
 
 
 class TestTushareClientUnit:

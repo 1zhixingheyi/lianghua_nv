@@ -15,11 +15,11 @@ from unittest.mock import Mock, patch
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, project_root)
 
-from strategies.strategy_manager import StrategyManager
-from strategies.ma_crossover import MACrossoverStrategy
-from strategies.rsi_strategy import RSIStrategy
-from strategies.base_strategy import BaseStrategy
-from backtest.engine import BacktestEngine
+from src.strategies.strategy_manager import StrategyManager
+from src.strategies.ma_crossover import MACrossoverStrategy
+from src.strategies.rsi_strategy import RSIStrategy
+from src.strategies.base_strategy import BaseStrategy
+from src.backtest.engine import BacktestEngine
 
 
 class TestStrategyIntegration:

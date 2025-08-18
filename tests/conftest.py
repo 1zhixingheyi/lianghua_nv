@@ -173,7 +173,7 @@ def mock_tushare_client():
 @pytest.fixture(scope="function")
 def mock_strategy():
     """模拟策略夹具"""
-    from strategies.base_strategy import BaseStrategy
+    from src.strategies.base_strategy import BaseStrategy
     
     class MockStrategy(BaseStrategy):
         def __init__(self):
@@ -212,7 +212,7 @@ def mock_portfolio():
 @pytest.fixture(scope="function")
 def mock_risk_manager():
     """模拟风控管理器夹具"""
-    from risk.risk_engine import RiskEngine
+    from src.risk.risk_engine import RiskEngine
     
     class MockRiskManager(RiskEngine):
         def __init__(self):

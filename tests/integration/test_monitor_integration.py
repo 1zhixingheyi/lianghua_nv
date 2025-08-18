@@ -18,10 +18,10 @@ import time
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, project_root)
 
-from monitor.dashboard import Dashboard
-from monitor.data_integration import DataIntegration
-from monitor.realtime_monitor import RealtimeMonitor
-from monitor.web_app import create_app
+from src.monitor.dashboard import Dashboard
+from src.monitor.data_integration import DataIntegration
+from src.monitor.realtime_monitor import RealtimeMonitor
+from src.monitor.web_app import create_app
 
 
 class TestMonitorIntegration:

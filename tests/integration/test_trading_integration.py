@@ -17,11 +17,11 @@ import time
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, project_root)
 
-from trading.trade_executor import TradeExecutor
-from trading.base_trader import BaseTrader
-from risk.risk_engine import RiskEngine
-from risk.position_manager import PositionManager
-from risk.money_manager import MoneyManager
+from src.trading.trade_executor import TradeExecutor
+from src.trading.base_trader import BaseTrader
+from src.risk.risk_engine import RiskEngine
+from src.risk.position_manager import PositionManager
+from src.risk.money_manager import MoneyManager
 
 
 class TestTradingIntegration:

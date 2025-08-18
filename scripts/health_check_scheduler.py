@@ -18,7 +18,7 @@ import os
 # 添加项目根目录到Python路径
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from validation import SystemChecker, PerformanceAnalyzer
+from src.validation import SystemChecker, PerformanceAnalyzer
 from scripts.mvp_validation_runner import MVPValidationRunner
 
 logger = logging.getLogger(__name__)
