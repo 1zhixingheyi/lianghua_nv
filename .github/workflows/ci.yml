@@ -1,0 +1,392 @@
+name: 量化交易系统CI/CD
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    # 每天凌晨2点运行完整测试
+    - cron: '0 2 * * *'
+
+env:
+  PYTHON_VERSION: '3.9'
+  TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
+
+jobs:
+  # 代码质量检查
+  lint:
+    name: 代码质量检查
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: 设置Python环境
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: 安装依赖
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 black isort mypy
+        pip install -r requirements.txt
+    
+    - name: 代码格式检查 (Black)
+      run: black --check --diff .
+    
+    - name: 导入排序检查 (isort)
+      run: isort --check-only --diff .
+    
+    - name: 代码风格检查 (flake8)
+      run: |
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
+    
+    - name: 类型检查 (mypy)
+      run: mypy --ignore-missing-imports --no-strict-optional .
+      continue-on-error: true
+
+  # 单元测试
+  unit-tests:
+    name: 单元测试
+    runs-on: ubuntu-latest
+    needs: lint
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10']
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: 设置Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+    
+    - name: 安装依赖
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-html pytest-xdist
+    
+    - name: 运行单元测试
+      run: |
+        python run_tests.py --type unit --coverage
+    
+    - name: 上传覆盖率报告
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./test_reports/coverage.xml
+        flags: unit-tests
+        name: codecov-unit-${{ matrix.python-version }}
+    
+    - name: 上传测试报告
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: unit-test-reports-${{ matrix.python-version }}
+        path: test_reports/
+
+  # 集成测试
+  integration-tests:
+    name: 集成测试
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    services:
+      # 测试数据库
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_trading
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: 设置Python环境
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: 安装依赖
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-html pytest-xdist psycopg2-binary
+    
+    - name: 等待数据库就绪
+      run: |
+        until pg_isready -h localhost -p 5432 -U postgres; do
+          echo "等待PostgreSQL启动..."
+          sleep 2
+        done
+    
+    - name: 设置测试数据库
+      run: |
+        PGPASSWORD=postgres psql -h localhost -U postgres -d test_trading -c "
+          CREATE TABLE IF NOT EXISTS test_table (id SERIAL PRIMARY KEY);
+        "
+      env:
+        PGPASSWORD: postgres
+    
+    - name: 运行集成测试
+      run: |
+        python run_tests.py --type integration
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_trading
+    
+    - name: 上传测试报告
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: integration-test-reports
+        path: test_reports/
+
+  # 性能测试
+  performance-tests:
+    name: 性能测试
+    runs-on: ubuntu-latest
+    needs: integration-tests
+    if: github.event_name == 'schedule' || contains(github.event.head_commit.message, '[perf]')
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: 设置Python环境
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: 安装依赖
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-html pytest-benchmark
+    
+    - name: 运行性能测试
+      run: |
+        python run_tests.py --type performance
+    
+    - name: 上传性能报告
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: performance-test-reports
+        path: test_reports/
+
+  # 安全扫描
+  security-scan:
+    name: 安全扫描
+    runs-on: ubuntu-latest
+    needs: lint
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: 设置Python环境
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: 安装安全扫描工具
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety
+        pip install -r requirements.txt
+    
+    - name: 运行Bandit安全扫描
+      run: |
+        bandit -r . -f json -o bandit-report.json
+      continue-on-error: true
+    
+    - name: 检查依赖安全性
+      run: |
+        safety check --json --output safety-report.json
+      continue-on-error: true
+    
+    - name: 上传安全报告
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json
+
+  # 构建和部署
+  build-deploy:
+    name: 构建和部署
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests]
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: 设置Python环境
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: 安装依赖
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install build twine
+    
+    - name: 构建分发包
+      run: |
+        python -m build
+    
+    - name: 验证分发包
+      run: |
+        python -m twine check dist/*
+    
+    - name: 上传构建产物
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist-packages
+        path: dist/
+    
+    # 如果是发布标签，发布到PyPI
+    - name: 发布到PyPI
+      if: startsWith(github.ref, 'refs/tags/')
+      run: |
+        python -m twine upload dist/*
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+
+  # 测试报告汇总
+  test-summary:
+    name: 测试报告汇总
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests]
+    if: always()
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: 下载所有测试报告
+      uses: actions/download-artifact@v3
+      with:
+        path: all-reports/
+    
+    - name: 设置Python环境
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: 生成汇总报告
+      run: |
+        python scripts/generate_summary_report.py all-reports/
+      continue-on-error: true
+    
+    - name: 发布测试结果
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: |
+          all-reports/**/junit*.xml
+        comment_mode: create new
+        check_name: "测试结果汇总"
+    
+    - name: 发送通知
+      if: failure()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: failure
+        channel: '#ci-cd'
+        text: '量化交易系统CI/CD流水线失败'
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # 代码覆盖率检查
+  coverage-check:
+    name: 覆盖率检查
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: 下载覆盖率报告
+      uses: actions/download-artifact@v3
+      with:
+        name: unit-test-reports-3.9
+        path: test_reports/
+    
+    - name: 检查覆盖率阈值
+      run: |
+        # 解析覆盖率并检查是否达到阈值
+        python -c "
+        import xml.etree.ElementTree as ET
+        import sys
+        
+        try:
+            tree = ET.parse('test_reports/coverage.xml')
+            root = tree.getroot()
+            line_rate = float(root.get('line-rate', 0)) * 100
+            
+            print(f'当前代码覆盖率: {line_rate:.1f}%')
+            
+            if line_rate < 80:
+                print(f'覆盖率 {line_rate:.1f}% 低于最低要求 80%')
+                sys.exit(1)
+            else:
+                print('覆盖率检查通过')
+        except Exception as e:
+            print(f'无法解析覆盖率报告: {e}')
+            sys.exit(1)
+        "
+    
+    - name: 覆盖率趋势分析
+      run: |
+        # 比较覆盖率趋势（需要历史数据）
+        echo "覆盖率趋势分析将在未来版本中实现"
+
+  # 依赖漏洞扫描
+  dependency-check:
+    name: 依赖漏洞扫描
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: 运行pip-audit
+      uses: pypa/gh-action-pip-audit@v1.0.8
+      with:
+        inputs: requirements.txt
+        format: json
+        output: dependency-audit.json
+    
+    - name: 上传审计报告
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: dependency-audit
+        path: dependency-audit.json
+
+# 工作流程配置
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# 环境变量
+env:
+  FORCE_COLOR: 1
+  PYTHONUNBUFFERED: 1

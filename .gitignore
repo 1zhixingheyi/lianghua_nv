@@ -1,0 +1,475 @@
+# ============================================
+# 量化交易系统 Git 忽略规则
+# ============================================
+
+# =============================================================================
+# 敏感配置文件 - 绝对不能提交到Git
+# =============================================================================
+
+# 环境变量文件
+#.env
+.env.local
+.env.production
+.env.staging
+.env.development
+.env.test
+*.local
+config/.env
+config/.env.*
+INFRASTRUCTURE/config/.env
+INFRASTRUCTURE/config/.env.*
+
+# 配置文件中的敏感信息
+config/secrets.yaml
+config/secrets/
+config/production.yaml
+config/production/
+config/local_config.py
+
+# API密钥和Token文件
+*.key
+*.token
+*.secret
+api_keys.txt
+tokens.txt
+
+# 数据库配置
+database.ini
+db_config.json
+
+# =============================================================================
+# Python 相关
+# =============================================================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+PIPFILE.lock
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.venv
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+pyvenv.cfg
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+site/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# =============================================================================
+# IDE 和编辑器
+# =============================================================================
+
+# PyCharm
+.idea/
+
+# VSCode
+.vscode/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# =============================================================================
+# 数据文件
+# =============================================================================
+
+# 原始数据文件
+DATA/raw/*.csv
+DATA/raw/*.xlsx
+DATA/raw/*.json
+DATA/raw/*.parquet
+DATA/raw/*.h5
+data/raw/
+data/cache/
+data/backup/
+data/temp/
+downloaded_data/
+
+# 处理后的数据文件
+DATA/processed/*.csv
+DATA/processed/*.xlsx
+DATA/processed/*.json
+DATA/processed/*.parquet
+DATA/processed/*.h5
+
+# 新的数据文件目录结构
+data_files/csv/*.csv
+data_files/json/*.json
+data_files/database/*.db
+data_files/database/*.sqlite*
+
+# 数据格式文件
+*.csv
+*.xlsx
+*.xls
+*.parquet
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+*.feather
+*.arrow
+
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+monitoring.db
+quant_system.db
+
+# ClickHouse数据
+DATA/clickhouse_data/
+
+# =============================================================================
+# 日志文件
+# =============================================================================
+
+# 系统日志
+INFRASTRUCTURE/logs/*.log
+INFRASTRUCTURE/logs/*.out
+INFRASTRUCTURE/logs/*.err
+logs/
+log/
+logging/
+*.log
+*.log.*
+
+# 新的日志目录结构
+logs/demos/
+logs/web_scraping/
+
+# 交易日志
+trade_logs/
+execution_logs/
+risk_logs/
+trade_records/
+order_logs/
+position_logs/
+
+# =============================================================================
+# 临时文件和缓存
+# =============================================================================
+
+# 临时文件
+tmp/
+temp/
+temp_files/
+*.tmp
+*.temp
+
+# 缓存文件
+cache/
+.cache/
+*.cache
+
+# Tushare 缓存
+tushare_cache/
+
+# 备份文件
+*.bak
+*.backup
+*.old
+
+# =============================================================================
+# 结果和报告文件
+# =============================================================================
+
+# 回测结果
+backtest_results/
+backtest_cache/
+performance_reports/
+performance_cache/
+results/
+reports/
+analysis_reports/
+strategy_results/
+*.html
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.svg
+
+# 实盘交易记录
+live_trading/
+positions/
+orders/
+
+# 风控配置
+risk_configs/production_*.yaml
+
+# 监控数据
+monitoring/data/
+metrics/
+market_data_cache/
+real_time_cache/
+
+# =============================================================================
+# 操作系统
+# =============================================================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# macOS
+.DS_Store
+.DS_Store?
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# 量化交易特定文件
+# =============================================================================
+
+# 策略配置文件（可能包含敏感参数）
+STRATEGIES/configs/production_*.yaml
+STRATEGIES/configs/live_*.yaml
+
+# 模型文件
+*.model
+*.joblib
+*.sav
+
+# =============================================================================
+# Docker 和部署 (已清理Docker支持)
+# =============================================================================
+
+# Docker 配置文件
+.dockerignore
+Dockerfile
+Dockerfile.*
+docker-compose.yml
+docker-compose.*.yml
+docker-compose.override.yml
+
+# Docker 数据和缓存
+.docker/
+docker-data/
+docker-volumes/
+
+# Docker 构建输出
+docker-build/
+.dockerbuild/
+
+# Kubernetes 配置
+kubernetes/
+kubernetes/secrets/
+*.secret.yaml
+k8s/
+
+# 容器运行时文件
+.containerd/
+.podman/
+
+# 备份目录（Docker清理后生成的备份）
+docker_backup*/
+
+# =============================================================================
+# 其他
+# =============================================================================
+
+# 压缩文件
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# 证书文件
+*.pem
+*.crt
+*.p12
+*.pfx
+
+# 文档生成
+docs/build/
+
+# 性能分析
+*.prof
+profile_output/
+
+# 项目特定忽略
+lianghua备份*/
+lianghua - 副本/
+lianghua/
+
+# Git相关
+.git/COMMIT_EDITMSG
+.git/index
+.git/logs/HEAD
+.git/logs/refs/heads/master
+.git/refs/heads/master
+.git/logs/
+.git/refs/

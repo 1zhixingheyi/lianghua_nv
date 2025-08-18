@@ -1,0 +1,501 @@
+# ============================================
+# 量化交易系统 Git 忽略规则 - 开发版本
+# 适用于开发环境和AI协作
+# ============================================
+
+# =============================================================================
+# 敏感配置文件 - 绝对不能提交到Git (保持严格)
+# =============================================================================
+
+# 环境变量文件
+#.env
+.env.local
+.env.production
+.env.staging
+.env.development
+.env.test
+*.local
+config/.env
+config/.env.*
+INFRASTRUCTURE/config/.env
+INFRASTRUCTURE/config/.env.*
+
+# 配置文件中的敏感信息
+config/secrets.yaml
+config/secrets/
+config/production.yaml
+config/production/
+config/local_config.py
+
+# API密钥和Token文件
+*.key
+*.token
+*.secret
+api_keys.txt
+tokens.txt
+
+# 数据库配置
+database.ini
+db_config.json
+
+# =============================================================================
+# Python 相关 (保持基本规则，但允许一些调试文件)
+# =============================================================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports (允许部分测试文件用于AI理解)
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+# nosetests.xml     # 允许AI查看测试结果
+# coverage.xml      # 允许AI查看覆盖率报告
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook (允许notebook文件用于分析)
+.ipynb_checkpoints
+# *.ipynb           # 开发版本允许notebook
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments (保持严格)
+.venv
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+pyvenv.cfg
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+site/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# =============================================================================
+# IDE 和编辑器 (放宽限制，允许一些配置文件)
+# =============================================================================
+
+# PyCharm (允许基本配置，忽略用户特定设置)
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries/
+.idea/shelf/
+.idea/dataSources.ids
+.idea/dataSources.local.xml
+.idea/sqlDataSources.xml
+.idea/dynamic.xml
+.idea/usage.statistics.xml
+.idea/httpRequests/
+.idea/codeStyles/
+
+# VSCode (允许基本配置)
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+.vscode/c_cpp_properties.json
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# =============================================================================
+# 数据文件 (放宽限制，允许小型示例数据)
+# =============================================================================
+
+# 大型原始数据文件
+DATA/raw/*.csv
+DATA/raw/*.xlsx
+DATA/raw/*.json
+DATA/raw/*.parquet
+DATA/raw/*.h5
+data/raw/
+data/cache/
+data/backup/
+data/temp/
+downloaded_data/
+
+# 处理后的数据文件
+DATA/processed/*.csv
+DATA/processed/*.xlsx
+DATA/processed/*.json
+DATA/processed/*.parquet
+DATA/processed/*.h5
+
+# 新的数据文件目录结构
+data_files/csv/*.csv
+data_files/json/*.json
+data_files/database/*.db
+data_files/database/*.sqlite*
+
+# 大型数据格式文件 (允许小型示例文件 <1MB)
+# *.csv             # 开发版本允许小型CSV
+# *.xlsx            # 开发版本允许小型Excel
+# *.xls             # 开发版本允许小型Excel
+*.parquet
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+*.feather
+*.arrow
+
+# 数据库文件 (保持严格)
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+monitoring.db
+quant_system.db
+
+# ClickHouse数据 (保持严格)
+DATA/clickhouse_data/
+
+# =============================================================================
+# 日志文件 (允许示例日志，忽略大型日志)
+# =============================================================================
+
+# 大型系统日志
+INFRASTRUCTURE/logs/*.log
+INFRASTRUCTURE/logs/*.out
+INFRASTRUCTURE/logs/*.err
+logs/
+log/
+logging/
+# *.log             # 开发版本允许小型日志文件
+*.log.*
+
+# 新的日志目录结构
+logs/demos/
+logs/web_scraping/
+
+# 交易日志 (保持严格)
+trade_logs/
+execution_logs/
+risk_logs/
+trade_records/
+order_logs/
+position_logs/
+
+# =============================================================================
+# 临时文件和缓存
+# =============================================================================
+
+# 临时文件
+tmp/
+temp/
+temp_files/
+*.tmp
+*.temp
+
+# 缓存文件
+cache/
+.cache/
+*.cache
+
+# Tushare 缓存
+tushare_cache/
+
+# 备份文件
+*.bak
+*.backup
+*.old
+
+# =============================================================================
+# 结果和报告文件 (允许示例报告)
+# =============================================================================
+
+# 大型回测结果
+backtest_results/
+backtest_cache/
+performance_reports/
+performance_cache/
+results/
+reports/
+analysis_reports/
+strategy_results/
+# *.html            # 开发版本允许HTML报告
+# *.pdf             # 开发版本允许PDF报告
+# *.png             # 开发版本允许图片
+# *.jpg             # 开发版本允许图片
+# *.jpeg            # 开发版本允许图片
+# *.svg             # 开发版本允许SVG
+
+# 实盘交易记录 (保持严格)
+live_trading/
+positions/
+orders/
+
+# 风控配置 (保持严格)
+risk_configs/production_*.yaml
+
+# 监控数据
+monitoring/data/
+metrics/
+market_data_cache/
+real_time_cache/
+
+# =============================================================================
+# 操作系统
+# =============================================================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# macOS
+.DS_Store
+.DS_Store?
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# 量化交易特定文件 (允许示例配置)
+# =============================================================================
+
+# 生产策略配置文件 (保持严格)
+STRATEGIES/configs/production_*.yaml
+STRATEGIES/configs/live_*.yaml
+
+# 模型文件 (允许小型模型用于理解)
+# *.model           # 开发版本允许小型模型
+*.joblib
+*.sav
+
+# =============================================================================
+# Docker 和部署 (允许配置文件用于理解架构)
+# =============================================================================
+
+# Docker 数据和缓存
+.docker/
+docker-data/
+docker-volumes/
+
+# Docker 构建输出
+docker-build/
+.dockerbuild/
+
+# Kubernetes 敏感配置
+kubernetes/secrets/
+*.secret.yaml
+
+# 容器运行时文件
+.containerd/
+.podman/
+
+# 备份目录
+docker_backup*/
+
+# =============================================================================
+# 其他
+# =============================================================================
+
+# 压缩文件
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# 证书文件 (保持严格)
+*.pem
+*.crt
+*.p12
+*.pfx
+
+# 文档生成
+docs/build/
+
+# 性能分析
+*.prof
+profile_output/
+
+# 项目特定忽略
+lianghua备份*/
+lianghua - 副本/
+lianghua/
+
+# Git相关
+.git/COMMIT_EDITMSG
+.git/index
+.git/logs/HEAD
+.git/logs/refs/heads/master
+.git/refs/heads/master
+.git/logs/
+.git/refs/
+
+# =============================================================================
+# 开发版本说明
+# =============================================================================
+# 
+# 此文件是开发专用版本，相比生产版本的主要变化：
+# 
+# 允许的文件类型（便于AI理解和开发）：
+# - 小型示例数据文件 (.csv, .xlsx等)
+# - 测试结果和覆盖率报告
+# - Jupyter notebook文件
+# - 小型日志文件
+# - HTML/PDF报告文件
+# - 图片和图表文件
+# - IDE配置文件（基本配置）
+# - Docker配置文件（架构理解）
+# - 小型模型文件
+# 
+# 使用方法：
+# 1. 开发时：cp .gitignore.dev .gitignore
+# 2. 提交前：cp .gitignore.prod .gitignore (如果有的话)
+# 3. 或使用 git config core.excludesfile .gitignore.dev
+# 

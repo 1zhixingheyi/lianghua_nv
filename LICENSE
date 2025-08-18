@@ -1,0 +1,113 @@
+MIT License
+
+Copyright (c) 2025 LiangHua Trading System
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+## 免责声明 / Disclaimer
+
+### 中文版本
+
+本软件是一个量化交易系统，仅供学习和研究目的使用。在使用本软件进行实际交易前，请务必：
+
+1. **风险提示**：
+   - 量化交易涉及金融风险，可能导致资金损失
+   - 历史回测结果不代表未来表现
+   - 市场条件变化可能影响策略有效性
+   - 请根据个人风险承受能力进行投资
+
+2. **合规性**：
+   - 确保在您所在司法管辖区内的使用符合当地法律法规
+   - 遵守相关金融监管要求
+   - 如涉及资金管理，请获得相应资质
+
+3. **技术风险**：
+   - 软件可能存在bug或技术缺陷
+   - 网络中断、系统故障等可能影响交易执行
+   - 建议充分测试后再用于生产环境
+
+4. **数据风险**：
+   - 依赖第三方数据源，数据准确性和及时性无法保证
+   - 数据延迟或错误可能影响策略执行效果
+
+5. **使用建议**：
+   - 建议先在模拟环境中充分测试
+   - 使用小额资金进行验证
+   - 定期监控和评估策略表现
+   - 建立完善的风险控制机制
+
+### English Version
+
+This software is a quantitative trading system intended for educational and research purposes only. Before using this software for actual trading, please ensure:
+
+1. **Risk Warning**:
+   - Quantitative trading involves financial risks and may result in capital loss
+   - Historical backtest results do not guarantee future performance
+   - Changing market conditions may affect strategy effectiveness
+   - Please invest according to your personal risk tolerance
+
+2. **Compliance**:
+   - Ensure usage complies with local laws and regulations in your jurisdiction
+   - Follow relevant financial regulatory requirements
+   - Obtain appropriate qualifications if involved in fund management
+
+3. **Technical Risks**:
+   - Software may contain bugs or technical defects
+   - Network interruptions, system failures may affect trade execution
+   - Recommend thorough testing before production use
+
+4. **Data Risks**:
+   - Relies on third-party data sources, accuracy and timeliness not guaranteed
+   - Data delays or errors may affect strategy execution
+
+5. **Usage Recommendations**:
+   - Recommend thorough testing in simulation environment first
+   - Use small amounts for verification
+   - Regularly monitor and evaluate strategy performance
+   - Establish comprehensive risk control mechanisms
+
+## 第三方组件许可 / Third-Party Licenses
+
+本项目使用了以下开源组件，特此感谢：
+
+- Flask (BSD-3-Clause License)
+- pandas (BSD 3-Clause License)
+- numpy (BSD License)
+- TA-Lib (BSD License)
+- Redis (BSD License)
+- MySQL (GPL v2 License)
+- Docker (Apache License 2.0)
+- Prometheus (Apache License 2.0)
+- Grafana (AGPL v3 License)
+
+详细的第三方许可信息请参考各组件的官方许可证文档。
+
+## 联系方式 / Contact
+
+如有问题或建议，请通过以下方式联系：
+
+- 项目主页: https://github.com/your-repo/lianghua_vn
+- 问题反馈: https://github.com/your-repo/lianghua_vn/issues
+- 邮箱联系: contact@lianghua.com
+
+---
+
+**注意**: 本软件按"现状"提供，不提供任何形式的明示或暗示担保。使用者需自行承担使用风险。
+
+**Note**: This software is provided "as is" without warranty of any kind. Users assume all risks associated with its use.
