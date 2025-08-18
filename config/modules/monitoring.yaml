@@ -1,0 +1,359 @@
+# 监控配置模块
+# 功能：实时监控、健康检查、智能告警
+# 创建时间：2025-08-13
+
+# 系统监控配置
+system_monitoring:
+  # 监控间隔（秒）
+  check_interval: 30
+  
+  # 性能指标阈值
+  thresholds:
+    cpu_usage_percent: 80.0         # CPU使用率告警阈值
+    memory_usage_percent: 85.0      # 内存使用率告警阈值  
+    disk_usage_percent: 90.0        # 磁盘使用率告警阈值
+    network_latency_ms: 1000        # 网络延迟告警阈值
+    
+  # 监控项目
+  metrics:
+    - name: "cpu_usage"
+      enabled: true
+      collection_interval: 10
+    - name: "memory_usage" 
+      enabled: true
+      collection_interval: 10
+    - name: "disk_usage"
+      enabled: true
+      collection_interval: 60
+    - name: "network_io"
+      enabled: true
+      collection_interval: 30
+    - name: "process_count"
+      enabled: true
+      collection_interval: 30
+
+# 业务监控配置
+business_monitoring:
+  # 交易系统监控
+  trading:
+    check_interval: 5
+    metrics:
+      - name: "daily_pnl"
+        threshold_high: 50000      # 日盈亏上限
+        threshold_low: -10000      # 日盈亏下限
+      - name: "position_count"
+        threshold_max: 50          # 最大持仓数
+      - name: "order_success_rate"
+        threshold_min: 0.95        # 订单成功率下限
+      - name: "strategy_performance"
+        enabled: true
+        
+  # 数据质量监控
+  data_quality:
+    check_interval: 300           # 5分钟检查一次
+    metrics:
+      - name: "data_completeness"
+        threshold_min: 0.95       # 数据完整性下限
+      - name: "data_timeliness"
+        threshold_max: 300        # 数据延迟上限（秒）
+      - name: "data_accuracy"
+        threshold_min: 0.98       # 数据准确性下限
+        
+  # 策略监控
+  strategy:
+    check_interval: 60
+    metrics:
+      - name: "strategy_signals"
+        enabled: true
+      - name: "strategy_execution_time"
+        threshold_max: 5000       # 策略执行时间上限（毫秒）
+      - name: "strategy_error_rate"
+        threshold_max: 0.05       # 策略错误率上限
+
+# 健康检查配置
+health_checks:
+  # 数据库连接检查
+  database:
+    mysql:
+      enabled: true
+      check_interval: 60
+      timeout: 10
+      retry_count: 3
+      
+    clickhouse:
+      enabled: true
+      check_interval: 60
+      timeout: 10
+      retry_count: 3
+      
+    redis:
+      enabled: true
+      check_interval: 30
+      timeout: 5
+      retry_count: 3
+      
+  # 外部服务检查
+  external_services:
+    data_providers:
+      - name: "tushare"
+        endpoint: "https://api.tushare.pro"
+        enabled: true
+        check_interval: 300
+        timeout: 30
+        
+      - name: "eastmoney"
+        endpoint: "https://push2his.eastmoney.com"
+        enabled: true
+        check_interval: 300
+        timeout: 30
+        
+    # 交易接口检查
+    trading_apis:
+      - name: "mock_trading"
+        enabled: true
+        check_interval: 60
+        timeout: 10
+
+# 告警配置
+alerting:
+  # 告警渠道
+  channels:
+    email:
+      enabled: ${ALERT_EMAIL_ENABLED:true}
+      smtp_server: ${SMTP_SERVER:smtp.qq.com}
+      smtp_port: ${SMTP_PORT:587}
+      username: ${SMTP_USERNAME:}
+      password: ${SMTP_PASSWORD:}
+      recipients:
+        - ${ADMIN_EMAIL:admin@quantsystem.com}
+      
+    wechat:
+      enabled: ${ALERT_WECHAT_ENABLED:false}
+      webhook_url: ${WECHAT_WEBHOOK_URL:}
+      
+    slack:
+      enabled: ${ALERT_SLACK_ENABLED:false}
+      webhook_url: ${SLACK_WEBHOOK_URL:}
+      
+    sms:
+      enabled: ${ALERT_SMS_ENABLED:false}
+      api_key: ${SMS_API_KEY:}
+      phone_numbers:
+        - ${ADMIN_PHONE:}
+  
+  # 告警规则
+  rules:
+    # 系统告警规则
+    system:
+      high_cpu_usage:
+        severity: "HIGH"
+        condition: "cpu_usage > 80"
+        channels: ["email", "wechat"]
+        cooldown: 300             # 告警冷却期（秒）
+        
+      high_memory_usage:
+        severity: "HIGH" 
+        condition: "memory_usage > 85"
+        channels: ["email", "wechat"]
+        cooldown: 300
+        
+      disk_space_low:
+        severity: "CRITICAL"
+        condition: "disk_usage > 90"
+        channels: ["email", "wechat", "sms"]
+        cooldown: 600
+        
+    # 业务告警规则
+    business:
+      large_loss:
+        severity: "CRITICAL"
+        condition: "daily_pnl < -10000"
+        channels: ["email", "wechat", "sms"]
+        cooldown: 0               # 立即告警，无冷却期
+        
+      strategy_failure:
+        severity: "HIGH"
+        condition: "strategy_error_rate > 0.05"
+        channels: ["email", "wechat"]
+        cooldown: 300
+        
+      data_quality_issue:
+        severity: "MEDIUM"
+        condition: "data_completeness < 0.95"
+        channels: ["email"]
+        cooldown: 600
+        
+    # 连接告警规则
+    connectivity:
+      database_down:
+        severity: "CRITICAL"
+        condition: "database_health == false"
+        channels: ["email", "wechat", "sms"]
+        cooldown: 120
+        
+      api_unavailable:
+        severity: "HIGH"
+        condition: "api_health == false"
+        channels: ["email", "wechat"]
+        cooldown: 300
+
+# 告警抑制配置
+alert_suppression:
+  # 全局抑制规则
+  global:
+    max_alerts_per_minute: 10     # 每分钟最大告警数
+    max_alerts_per_hour: 100      # 每小时最大告警数
+    
+  # 按严重级别抑制
+  by_severity:
+    CRITICAL:
+      cooldown: 0                 # 紧急告警不抑制
+      max_per_hour: 50
+    HIGH:
+      cooldown: 300               # 5分钟冷却期
+      max_per_hour: 30
+    MEDIUM:
+      cooldown: 600               # 10分钟冷却期
+      max_per_hour: 20
+    LOW:
+      cooldown: 1800              # 30分钟冷却期
+      max_per_hour: 10
+      
+  # 重复告警抑制
+  duplicate_suppression:
+    enabled: true
+    time_window: 3600             # 1小时内的重复告警
+    max_duplicates: 3             # 最多发送3次相同告警
+
+# 监控数据存储配置
+data_storage:
+  # 指标数据保留策略
+  retention:
+    raw_data: 7                   # 原始数据保留7天
+    hourly_aggregated: 30         # 小时聚合数据保留30天
+    daily_aggregated: 365         # 日聚合数据保留1年
+    
+  # 数据压缩配置
+  compression:
+    enabled: true
+    algorithm: "gzip"
+    level: 6
+    
+  # 数据导出配置
+  export:
+    enabled: true
+    format: "json"
+    schedule: "0 2 * * *"         # 每天凌晨2点导出
+    destination: "monitoring_exports/"
+
+# 监控面板配置
+dashboard:
+  # 实时监控面板
+  realtime:
+    refresh_interval: 5           # 5秒刷新
+    widgets:
+      - name: "system_overview"
+        type: "metrics_grid"
+        metrics: ["cpu_usage", "memory_usage", "disk_usage"]
+        
+      - name: "trading_summary"
+        type: "trading_panel"
+        metrics: ["daily_pnl", "position_count", "order_count"]
+        
+      - name: "alerts_panel"
+        type: "alerts_list"
+        max_items: 10
+        
+  # 历史数据面板
+  historical:
+    default_timerange: "24h"      # 默认显示24小时数据
+    available_ranges: ["1h", "6h", "24h", "7d", "30d"]
+    
+    charts:
+      - name: "performance_trend"
+        type: "line_chart"
+        metrics: ["daily_pnl", "cumulative_pnl"]
+        
+      - name: "system_metrics"
+        type: "multi_line_chart"
+        metrics: ["cpu_usage", "memory_usage"]
+        
+      - name: "data_quality_trend"
+        type: "area_chart"
+        metrics: ["data_completeness", "data_accuracy"]
+
+# 报告配置
+reporting:
+  # 日报配置
+  daily_report:
+    enabled: true
+    schedule: "0 8 * * *"         # 每天早上8点发送
+    recipients: ["${ADMIN_EMAIL:admin@quantsystem.com}"]
+    include_sections:
+      - "system_summary"
+      - "trading_summary"
+      - "alerts_summary"
+      - "performance_metrics"
+      
+  # 周报配置
+  weekly_report:
+    enabled: true
+    schedule: "0 9 * * 1"         # 每周一早上9点发送
+    recipients: ["${ADMIN_EMAIL:admin@quantsystem.com}"]
+    include_sections:
+      - "weekly_performance"
+      - "system_health_summary"
+      - "data_quality_summary"
+      - "strategy_performance"
+      
+  # 月报配置
+  monthly_report:
+    enabled: true
+    schedule: "0 10 1 * *"        # 每月1号早上10点发送
+    recipients: ["${ADMIN_EMAIL:admin@quantsystem.com}"]
+    include_sections:
+      - "monthly_performance"
+      - "system_reliability"
+      - "cost_analysis"
+      - "improvement_recommendations"
+
+# 性能优化配置
+performance:
+  # 数据采集优化
+  collection:
+    batch_size: 1000              # 批量处理大小
+    buffer_size: 10000            # 缓冲区大小
+    flush_interval: 60            # 刷新间隔（秒）
+    
+  # 计算优化
+  computation:
+    parallel_workers: 4           # 并行工作线程数
+    chunk_size: 5000              # 数据块大小
+    cache_size: 1000000           # 缓存大小（字节）
+    
+  # 网络优化
+  network:
+    connection_pool_size: 10      # 连接池大小
+    timeout: 30                   # 超时时间（秒）
+    retry_attempts: 3             # 重试次数
+    
+# 调试配置
+debug:
+  # 日志配置
+  logging:
+    level: "INFO"                 # 日志级别
+    file: "monitoring.log"        # 日志文件
+    max_size: "100MB"             # 日志文件最大大小
+    backup_count: 5               # 日志文件备份数量
+    
+  # 指标调试
+  metrics_debug:
+    enabled: false                # 是否启用指标调试
+    sample_rate: 0.1              # 采样率
+    output_file: "metrics_debug.log"
+    
+  # 性能分析
+  profiling:
+    enabled: false                # 是否启用性能分析
+    output_dir: "profiling_data/"
+    sample_interval: 1            # 采样间隔（秒）

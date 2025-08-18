@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 # 导入配置
 try:
-    from src.config.settings import get_config
+    from config.config_manager import get_config_manager
 except ImportError:
     logger.error("无法导入配置模块，请确保config/settings.py存在")
     sys.exit(1)
@@ -30,8 +30,9 @@ class SimpleTushareClient:
     """简化的Tushare客户端"""
     
     def __init__(self):
-        self.config = get_config()
-        self.token = self.config.TUSHARE_TOKEN
+        config_manager = get_config_manager()
+        api_config = config_manager.get_api_config('tushare')
+        self.token = api_config.get('token', os.getenv('TUSHARE_TOKEN', '')) if api_config else os.getenv('TUSHARE_TOKEN', '')
         
         if not self.token:
             logger.warning("未配置TUSHARE_TOKEN，将使用模拟数据")
@@ -94,7 +95,7 @@ class SimpleDatabase:
     """简化的数据库管理器"""
     
     def __init__(self):
-        self.config = get_config()
+        self.config = get_config_manager()
         self.engine = None
         self._test_connection()
     
@@ -208,7 +209,7 @@ def test_system_components():
     
     # 测试配置加载
     try:
-        config = get_config()
+        config = get_config_manager()
         logger.info("✓ 配置文件加载成功")
         logger.info(f"数据库: {config.MYSQL_DATABASE}")
         logger.info(f"Tushare Token: {'已配置' if config.TUSHARE_TOKEN else '未配置'}")

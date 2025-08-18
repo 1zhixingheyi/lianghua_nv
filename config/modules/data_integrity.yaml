@@ -1,0 +1,316 @@
+# 数据完整性验证器配置文件
+# Data Integrity Validator Configuration
+# 注意：表结构定义已迁移至 schema_definitions.yaml
+
+# 配置迁移通知
+migration_notice:
+  table_definitions_migrated_to: "schema_definitions.yaml -> mysql_tables/clickhouse_tables"
+  critical_fields_migrated_to: "schema_definitions.yaml -> field_definitions"
+  message: "表结构和字段定义已迁移至schema_definitions.yaml，此文件专注于数据质量验证规则"
+
+# 验证标准配置
+validation_standards:
+  # 股票覆盖率阈值 (95%)
+  stock_coverage_threshold: 0.95
+  
+  # 历史数据完整度阈值 (98%)
+  data_completeness_threshold: 0.98
+  
+  # 关键字段非空率阈值 (100%)
+  field_completeness_threshold: 1.0
+  
+  # 数据更新延迟阈值（天）
+  data_freshness_days: 1
+  
+  # 近3年最少交易日数
+  min_trading_days_3years: 720
+  
+  # 质量评分阈值
+  quality_score_threshold: 80.0
+
+# 验证范围配置
+validation_scope:
+  # 时间范围
+  time_range:
+    # 默认验证最近3年数据
+    default_years: 3
+    
+    # 最小验证时间范围（月）
+    min_months: 12
+    
+    # 数据新鲜度检查范围（天）
+    freshness_check_days: 7
+    
+  # 股票范围
+  stock_scope:
+    # 最大验证股票数量（性能考虑）
+    max_symbols: 100
+    
+    # 优先验证的股票类型
+    priority_types:
+      - "主板"
+      - "中小板" 
+      - "创业板"
+      
+    # 排除的股票状态
+    exclude_status:
+      - "退市"
+      - "暂停上市"
+      - "ST"
+      - "*ST"
+
+# 缺口检测配置
+gap_detection:
+  # 启用缺口检测
+  enabled: true
+  
+  # 连续缺口阈值（天）
+  consecutive_gap_threshold: 5
+  
+  # 最大分析股票数（性能考虑）
+  max_analysis_symbols: 50
+  
+  # 缺口容忍度配置
+  tolerance:
+    # 单日缺口容忍率
+    single_day_tolerance: 0.02  # 2%
+    
+    # 连续缺口容忍率
+    consecutive_tolerance: 0.005  # 0.5%
+    
+    # 总体缺失容忍率
+    overall_tolerance: 0.05  # 5%
+
+# 报告配置
+report_config:
+  # 报告输出路径
+  output_dir: "./reports"
+  
+  # 报告文件命名格式
+  filename_format: "data_integrity_report_{timestamp}"
+  
+  # 报告格式
+  formats:
+    - json    # JSON格式
+    - markdown # Markdown格式
+    - html    # HTML格式（可选）
+    
+  # 报告内容配置
+  content:
+    # 包含详细错误信息
+    include_detailed_errors: true
+    
+    # 包含字段完整性详情
+    include_field_details: true
+    
+    # 包含数据样本
+    include_data_samples: false
+    
+    # 包含性能指标
+    include_performance_metrics: true
+    
+  # 报告保留策略
+  retention:
+    # 保留天数
+    retention_days: 30
+    
+    # 自动清理过期报告
+    auto_cleanup: true
+
+# 性能配置
+performance:
+  # 并发配置
+  concurrency:
+    # 最大并发任务数
+    max_concurrent_tasks: 10
+    
+    # 数据库连接超时（秒）
+    connection_timeout: 30
+    
+    # 查询超时（秒）
+    query_timeout: 300
+    
+  # 内存配置
+  memory:
+    # 批处理大小
+    batch_size: 10000
+    
+    # 最大内存使用（MB）
+    max_memory_mb: 1024
+    
+  # 缓存配置
+  cache:
+    # 启用缓存
+    enabled: true
+    
+    # 缓存TTL（秒）
+    ttl_seconds: 3600
+    
+    # 缓存大小限制
+    max_size: 1000
+
+# 告警配置
+alerting:
+  # 启用告警
+  enabled: true
+  
+  # 告警阈值
+  thresholds:
+    # 总体评分低于此值时告警
+    overall_score_threshold: 70
+    
+    # 错误表数量阈值
+    error_table_threshold: 2
+    
+    # 数据新鲜度告警阈值（天）
+    freshness_alert_threshold: 3
+    
+  # 告警级别配置
+  levels:
+    critical:
+      - "表不存在"
+      - "无数据"
+      - "关键字段完整度不足"
+      
+    warning:
+      - "数据更新延迟"
+      - "覆盖率不足"
+      - "质量评分偏低"
+      
+    info:
+      - "建议优化"
+      - "性能提醒"
+
+# 数据源验证配置
+data_source_validation:
+  # 数据一致性检查
+  consistency_check:
+    enabled: true
+    
+    # 跨数据源比较
+    cross_source_comparison: true
+    
+    # 容差范围
+    tolerance_percentage: 0.01  # 1%
+    
+  # 数据完整性检查
+  completeness_check:
+    enabled: true
+    
+    # 必须字段检查
+    required_fields_check: true
+    
+    # 数据格式验证
+    format_validation: true
+    
+  # 业务规则验证
+  business_rules:
+    # 价格合理性检查
+    price_reasonability:
+      enabled: true
+      min_price: 0.01
+      max_price: 10000
+      max_daily_change: 0.2  # 20%
+      
+    # 成交量合理性检查
+    volume_reasonability:
+      enabled: true
+      min_volume: 0
+      max_volume_multiple: 100  # 100倍平均成交量
+      
+    # 时间序列连续性检查
+    time_series_continuity:
+      enabled: true
+      max_gap_days: 10
+
+# 数据质量规则
+quality_rules:
+  # 完整性规则
+  completeness_rules:
+    # 必填字段验证
+    required_field_validation:
+      enabled: true
+      critical_fields_reference: "schema_definitions.yaml -> critical_fields"
+      
+    # 记录数量验证
+    record_count_validation:
+      enabled: true
+      expected_counts_reference: "schema_definitions.yaml -> table_categories"
+      
+  # 准确性规则
+  accuracy_rules:
+    # 数值范围验证
+    numeric_range_validation:
+      enabled: true
+      price_range: [0.01, 10000]
+      volume_range: [0, null]
+      
+    # 格式验证
+    format_validation:
+      enabled: true
+      date_format: "YYYY-MM-DD"
+      code_format: "\\d{6}\\.(SH|SZ)"
+      
+  # 一致性规则
+  consistency_rules:
+    # 跨表一致性
+    cross_table_consistency:
+      enabled: true
+      reference_integrity: true
+      
+    # 时间序列一致性
+    time_series_consistency:
+      enabled: true
+      chronological_order: true
+      
+  # 时效性规则
+  timeliness_rules:
+    # 数据新鲜度检查
+    data_freshness:
+      enabled: true
+      max_delay_hours: 24
+      
+    # 更新频率检查
+    update_frequency:
+      enabled: true
+      expected_frequency: "daily"
+
+# 环境特定配置
+environments:
+  development:
+    validation_scope:
+      time_range:
+        default_years: 1
+      stock_scope:
+        max_symbols: 20
+    gap_detection:
+      max_analysis_symbols: 10
+    performance:
+      concurrency:
+        max_concurrent_tasks: 5
+        
+  testing:
+    validation_scope:
+      time_range:
+        default_years: 1
+      stock_scope:
+        max_symbols: 10
+    gap_detection:
+      enabled: false
+    performance:
+      concurrency:
+        max_concurrent_tasks: 3
+        
+  production:
+    validation_scope:
+      time_range:
+        default_years: 3
+      stock_scope:
+        max_symbols: 100
+    gap_detection:
+      max_analysis_symbols: 50
+    performance:
+      concurrency:
+        max_concurrent_tasks: 20
+    alerting:
+      enabled: true

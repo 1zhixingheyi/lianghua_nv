@@ -12,7 +12,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
-from src.config.settings import get_config
+from config.config_manager import get_mysql_config
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -29,7 +29,26 @@ class DatabaseManager:
         Args:
             config_name: 配置名称，如果为None则使用默认配置
         """
-        self.config = get_config(config_name)
+        # 获取MySQL配置
+        mysql_config = get_mysql_config()
+        if not mysql_config:
+            raise Exception("MySQL配置未找到")
+        
+        # 创建配置对象以兼容现有代码
+        class MySQLConfig:
+            def __init__(self, mysql_config):
+                db_config = mysql_config.get('database', {})
+                self.MYSQL_HOST = db_config.get('host', 'localhost')
+                self.MYSQL_PORT = int(db_config.get('port', 3306))
+                self.MYSQL_USER = db_config.get('username', 'root')
+                self.MYSQL_PASSWORD = db_config.get('password', '')
+                self.MYSQL_DATABASE = db_config.get('database', 'quantdb')
+                
+            @property
+            def database_url(self):
+                return f"mysql+pymysql://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}@{self.MYSQL_HOST}:{self.MYSQL_PORT}/{self.MYSQL_DATABASE}"
+        
+        self.config = MySQLConfig(mysql_config)
         self.engine = None
         self.session_factory = None
         self.metadata = None

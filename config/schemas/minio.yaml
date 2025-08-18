@@ -1,0 +1,371 @@
+# MinIO对象存储层配置
+# COLD层 - 归档存储和长期数据保存
+
+# 数据库连接配置
+database:
+  endpoint: "${MINIO_ENDPOINT:localhost:9000}"
+  console_endpoint: "${MINIO_CONSOLE_ENDPOINT:localhost:9001}"
+  access_key: "${MINIO_ACCESS_KEY:minioadmin}"
+  secret_key: "${MINIO_SECRET_KEY:minioadmin}"
+  secure: "${MINIO_SECURE:false}"
+  region: "${MINIO_REGION:us-east-1}"
+
+# 连接配置
+connection:
+  connect_timeout: 60
+  read_timeout: 300
+  write_timeout: 300
+  max_retries: 3
+  retry_backoff_factor: 2
+  max_concurrent_uploads: 10
+  max_concurrent_downloads: 20
+  multipart_upload_threshold: 64  # MB
+  multipart_chunk_size: 16        # MB
+  
+# S3配置（备选）
+s3:
+  enabled: "${COLD_S3_ENABLED:false}"
+  bucket: "${COLD_S3_BUCKET:quant-system}"
+  region: "${COLD_S3_REGION:us-east-1}"
+  access_key: "${COLD_S3_ACCESS_KEY:}"
+  secret_key: "${COLD_S3_SECRET_KEY:}"
+
+# 存储配置
+storage:
+  default_bucket: "quant-system"
+  compression: true
+  compression_format: "gzip"
+  encryption: false
+
+# COLD层存储配置（来自storage.yaml）
+cold_layer:
+  name: "COLD层"
+  description: "MinIO/S3 - 归档存储层"
+  enabled: "${COLD_LAYER_ENABLED:true}"
+  
+  # 性能指标
+  performance:
+    target_latency_ms: 2000    # 目标延迟 < 2s
+    retention: "永久"           # 永久保留
+    storage_limit: "无限制"     # 无限制存储容量
+    
+  # 数据类型配置
+  data_types:
+    - name: "归档历史数据"
+      path_pattern: "archive/historical/{year}/{month}/"
+      compression: true
+      lifecycle_days: -1  # 永久保留
+      
+    - name: "备份数据"
+      path_pattern: "backup/{type}/{date}/"
+      compression: true
+      lifecycle_days: 2555  # 7年
+      
+    - name: "审计日志"
+      path_pattern: "audit/{year}/{month}/"
+      compression: true
+      lifecycle_days: 2555  # 7年
+      
+    - name: "合规数据"
+      path_pattern: "compliance/{type}/{year}/"
+      compression: true
+      lifecycle_days: -1  # 永久保留
+
+# 存储桶配置
+buckets:
+  # 主要数据存储桶
+  main:
+    name: "quant-system"
+    description: "主要的冷存储数据桶"
+    versioning: true
+    lifecycle_enabled: true
+    
+  # 备份存储桶
+  backup:
+    name: "quant-backup-storage"
+    description: "备份数据存储桶"
+    versioning: true
+    lifecycle_enabled: true
+    cross_region_replication: false
+    
+  # 归档存储桶
+  archive:
+    name: "quant-archive-storage"
+    description: "长期归档数据存储桶"
+    versioning: false
+    lifecycle_enabled: true
+    storage_class: "GLACIER"
+    
+  # 日志存储桶
+  logs:
+    name: "quant-logs-storage"
+    description: "系统日志和审计数据存储桶"
+    versioning: true
+    lifecycle_enabled: true
+
+# 数据分类和路径规划
+data_classification:
+  # 市场数据归档
+  market_data:
+    path_prefix: "market_data"
+    subcategories:
+      - name: "daily_quotes"
+        path: "daily_quotes/{year}/{month}"
+        retention_years: 10
+        
+      - name: "minute_quotes"
+        path: "minute_quotes/{year}/{month}"
+        retention_years: 5
+        
+      - name: "tick_data"
+        path: "tick_data/{year}/{month}/{day}"
+        retention_years: 3
+        
+  # 财务数据归档
+  financial_data:
+    path_prefix: "financial_data"
+    subcategories:
+      - name: "annual_reports"
+        path: "annual_reports/{year}"
+        retention_years: 20
+        
+      - name: "quarterly_reports"
+        path: "quarterly_reports/{year}/Q{quarter}"
+        retention_years: 10
+        
+      - name: "financial_indicators"
+        path: "indicators/{year}/{month}"
+        retention_years: 10
+        
+  # 交易数据归档
+  trading_data:
+    path_prefix: "trading_data"
+    subcategories:
+      - name: "order_history"
+        path: "orders/{year}/{month}"
+        retention_years: 7
+        
+      - name: "trade_history"
+        path: "trades/{year}/{month}"
+        retention_years: 7
+        
+      - name: "portfolio_snapshots"
+        path: "portfolio/{year}/{month}"
+        retention_years: 10
+        
+  # 系统数据归档
+  system_data:
+    path_prefix: "system_data"
+    subcategories:
+      - name: "application_logs"
+        path: "logs/app/{year}/{month}/{day}"
+        retention_years: 3
+        
+      - name: "audit_logs"
+        path: "logs/audit/{year}/{month}"
+        retention_years: 7
+        
+      - name: "performance_metrics"
+        path: "metrics/{year}/{month}"
+        retention_years: 2
+
+# 生命周期管理策略
+lifecycle_policies:
+  # 自动分层存储策略
+  tiering_policies:
+    - name: "standard_to_ia"
+      description: "标准存储转换为低频访问存储"
+      transition_days: 30
+      source_storage_class: "STANDARD"
+      target_storage_class: "STANDARD_IA"
+      
+    - name: "ia_to_glacier"
+      description: "低频访问存储转换为冰川存储"
+      transition_days: 90
+      source_storage_class: "STANDARD_IA"
+      target_storage_class: "GLACIER"
+      
+    - name: "glacier_to_deep_archive"
+      description: "冰川存储转换为深度归档存储"
+      transition_days: 365
+      source_storage_class: "GLACIER"
+      target_storage_class: "DEEP_ARCHIVE"
+      
+  # 自动删除策略
+  expiration_policies:
+    - name: "temp_data_cleanup"
+      description: "临时数据自动清理"
+      path_pattern: "temp/*"
+      expiration_days: 30
+      
+    - name: "log_cleanup"
+      description: "日志数据自动清理"
+      path_pattern: "logs/app/*"
+      expiration_days: 1095  # 3年
+      
+  # 版本管理策略
+  versioning_policies:
+    - name: "critical_data_versioning"
+      description: "关键数据版本保留"
+      path_pattern: "critical/*"
+      max_versions: 10
+      version_expiration_days: 365
+
+# 数据同步和复制配置
+replication:
+  # 跨区域复制
+  cross_region:
+    enabled: false
+    target_region: "${BACKUP_REGION:us-west-2}"
+    target_bucket: "quant-backup-replica"
+    
+  # 本地镜像复制
+  local_mirror:
+    enabled: false
+    target_endpoint: "${BACKUP_MINIO_ENDPOINT:}"
+    target_bucket: "quant-local-mirror"
+
+# 访问控制和安全配置
+security:
+  # 访问策略
+  access_policies:
+    - name: "read_only_policy"
+      description: "只读访问策略"
+      effect: "Allow"
+      actions: ["s3:GetObject", "s3:ListBucket"]
+      resources: ["quant-system/*"]
+      
+    - name: "full_access_policy"
+      description: "完全访问策略"
+      effect: "Allow"
+      actions: ["s3:*"]
+      resources: ["quant-system/*"]
+      
+  # 加密配置
+  encryption:
+    enabled: "${MINIO_ENCRYPTION_ENABLED:false}"
+    algorithm: "AES256"
+    kms_key_id: "${MINIO_KMS_KEY_ID:}"
+    
+  # 访问日志
+  access_logging:
+    enabled: true
+    target_bucket: "quant-access-logs"
+    target_prefix: "access-logs/"
+
+# 性能优化配置
+performance:
+  # 并发配置
+  concurrency:
+    max_concurrent_uploads: 10
+    max_concurrent_downloads: 20
+    multipart_upload_threshold: 64  # MB
+    multipart_chunk_size: 16        # MB
+    
+  # 连接配置
+  connection:
+    connect_timeout: 60
+    read_timeout: 300
+    max_retries: 3
+    retry_backoff_factor: 2
+    
+  # 缓存配置
+  cache:
+    enabled: true
+    metadata_cache_ttl: 3600  # 1小时
+    max_cache_entries: 10000
+
+# 监控和告警配置
+monitoring:
+  enabled: true
+  
+  # 存储使用监控
+  storage_monitoring:
+    enabled: true
+    usage_alert_threshold: 0.8      # 80%使用率告警
+    cost_alert_threshold: 1000      # 月度成本1000元告警
+    
+  # 性能监控
+  performance_monitoring:
+    enabled: true
+    latency_threshold_ms: 5000      # 5秒延迟告警
+    error_rate_threshold: 0.05      # 5%错误率告警
+    
+  # 数据完整性监控
+  integrity_monitoring:
+    enabled: true
+    checksum_verification: true
+    periodic_verification_enabled: true
+    verification_schedule: "0 2 * * 0"  # 每周日凌晨2点
+
+# 数据迁移配置
+migration:
+  # 从其他存储系统迁移
+  source_systems:
+    - name: "local_filesystem"
+      type: "filesystem"
+      path: "/data/archive"
+      
+    - name: "old_s3_bucket"
+      type: "s3"
+      bucket: "old-quant-data"
+      
+  # 迁移策略
+  migration_strategy:
+    batch_size: 1000
+    concurrent_transfers: 5
+    verify_after_transfer: true
+    cleanup_source_after_success: false
+
+# 灾难恢复配置
+disaster_recovery:
+  # 备份策略
+  backup_strategy:
+    enabled: true
+    backup_frequency: "daily"
+    backup_retention_days: 30
+    
+  # 恢复策略
+  recovery_strategy:
+    recovery_time_objective_hours: 24   # RTO: 24小时
+    recovery_point_objective_hours: 4   # RPO: 4小时
+    
+  # 测试恢复
+  recovery_testing:
+    enabled: true
+    test_frequency: "monthly"
+    test_data_percentage: 0.1  # 测试10%的数据
+
+# 环境特定配置
+environments:
+  development:
+    storage:
+      compression: false
+    monitoring:
+      enabled: false
+    lifecycle_policies:
+      expiration_policies:
+        - name: "dev_data_cleanup"
+          expiration_days: 7
+          
+  testing:
+    buckets:
+      main:
+        name: "quant-test-storage"
+    lifecycle_policies:
+      expiration_policies:
+        - name: "test_data_cleanup"
+          expiration_days: 30
+          
+  production:
+    replication:
+      cross_region:
+        enabled: true
+    security:
+      encryption:
+        enabled: true
+    monitoring:
+      enabled: true
+    disaster_recovery:
+      backup_strategy:
+        enabled: true

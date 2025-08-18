@@ -1,0 +1,232 @@
+# MySQL结构化数据层配置
+# 基于database_config.yaml的MySQL部分重构
+
+# 数据库连接配置
+database:
+  host: "${MYSQL_HOST:localhost}"
+  port: "${MYSQL_PORT:3306}"
+  username: "${MYSQL_USERNAME:root}"
+  password: "${MYSQL_PASSWORD:860721}"
+  database: "${MYSQL_DATABASE:lianghua_mysql}"
+  charset: "utf8mb4"
+  collation: "utf8mb4_unicode_ci"
+
+# 连接池配置
+connection_pool:
+  pool_size: "${MYSQL_POOL_SIZE:10}"
+  max_overflow: "${MYSQL_MAX_OVERFLOW:20}"
+  pool_timeout_seconds: 30
+  pool_recycle_seconds: 3600
+  pool_pre_ping: true
+  max_connections: 20
+  min_connections: 5
+
+# 连接配置
+connection:
+  connect_timeout_seconds: 60
+  read_timeout_seconds: 60
+  write_timeout_seconds: 60
+  autocommit: true
+  isolation_level: "READ_COMMITTED"
+
+# SSL配置
+ssl:
+  enabled: "${MYSQL_SSL_ENABLED:false}"
+  ca_cert: "${MYSQL_SSL_CA:}"
+  client_cert: "${MYSQL_SSL_CERT:}"
+  client_key: "${MYSQL_SSL_KEY:}"
+
+# 性能配置
+performance:
+  query_cache_size: "128M"
+  innodb_buffer_pool_size: "1G"
+  max_connections: 200
+
+# 备份配置
+backup:
+  enabled: true
+  schedule: "0 2 * * *"  # 每天凌晨2点
+  retention_days: 30
+  compression: true
+
+# 表结构定义（来自schema_definitions.yaml）
+tables:
+  # 股票基础信息表
+  stock_basic:
+    table_name: "stock_basic"
+    description: "股票基础信息表"
+    priority: 1
+    required: true
+    expected_records: 4500
+    
+    fields:
+      ts_code:
+        type: "VARCHAR(20)"
+        primary_key: true
+        nullable: false
+        description: "股票代码"
+      symbol:
+        type: "VARCHAR(10)"
+        nullable: false
+        description: "股票简码"
+      name:
+        type: "VARCHAR(50)"
+        nullable: false
+        description: "股票名称"
+      area:
+        type: "VARCHAR(20)"
+        nullable: true
+        description: "地域"
+      industry:
+        type: "VARCHAR(50)"
+        nullable: true
+        description: "行业"
+      list_date:
+        type: "DATE"
+        nullable: true
+        description: "上市日期"
+      market:
+        type: "VARCHAR(10)"
+        nullable: true
+        description: "市场类型"
+      exchange:
+        type: "VARCHAR(10)"
+        nullable: true
+        description: "交易所"
+        
+    indexes:
+      - name: "idx_symbol"
+        type: "BTREE"
+        fields: ["symbol"]
+      - name: "idx_market_industry"
+        type: "BTREE"
+        fields: ["market", "industry"]
+        
+    constraints:
+      - name: "uk_ts_code"
+        type: "UNIQUE"
+        fields: ["ts_code"]
+
+  # 交易日历表
+  trade_calendar:
+    table_name: "trade_calendar"
+    description: "交易日历表"
+    priority: 1
+    required: true
+    expected_records: 2000
+    
+    fields:
+      cal_date:
+        type: "DATE"
+        primary_key: true
+        nullable: false
+        description: "日历日期"
+      is_open:
+        type: "TINYINT(1)"
+        nullable: false
+        default: 0
+        description: "是否开市"
+      pretrade_date:
+        type: "DATE"
+        nullable: true
+        description: "上一交易日"
+        
+    indexes:
+      - name: "idx_is_open"
+        type: "BTREE"
+        fields: ["is_open"]
+      - name: "idx_pretrade_date"
+        type: "BTREE"
+        fields: ["pretrade_date"]
+
+  # 指数基础信息表
+  index_basic:
+    table_name: "index_basic"
+    description: "指数基础信息表"
+    priority: 2
+    required: true
+    expected_records: 500
+    
+    fields:
+      ts_code:
+        type: "VARCHAR(20)"
+        primary_key: true
+        nullable: false
+        description: "指数代码"
+      name:
+        type: "VARCHAR(100)"
+        nullable: false
+        description: "指数名称"
+      market:
+        type: "VARCHAR(10)"
+        nullable: true
+        description: "市场"
+      publisher:
+        type: "VARCHAR(50)"
+        nullable: true
+        description: "发布方"
+      category:
+        type: "VARCHAR(30)"
+        nullable: true
+        description: "指数类别"
+      base_date:
+        type: "DATE"
+        nullable: true
+        description: "基准日期"
+        
+    indexes:
+      - name: "idx_market_category"
+        type: "BTREE"
+        fields: ["market", "category"]
+      - name: "idx_publisher"
+        type: "BTREE"
+        fields: ["publisher"]
+
+# 监控配置
+monitoring:
+  enabled: true
+  connection_monitoring:
+    enabled: true
+    check_interval_seconds: 30
+    pool_monitoring:
+      enabled: true
+      pool_size_threshold: 0.8
+    health_check:
+      enabled: true
+      timeout_seconds: 5
+  
+  performance_monitoring:
+    enabled: true
+    query_performance:
+      enabled: true
+      slow_query_threshold_seconds: 1.0
+      log_slow_queries: true
+    transaction_monitoring:
+      enabled: true
+      long_transaction_threshold_seconds: 5.0
+    lock_monitoring:
+      enabled: true
+      deadlock_detection: true
+
+# 环境特定配置
+environments:
+  development:
+    connection_pool:
+      pool_size: 5
+      max_overflow: 10
+    monitoring:
+      enabled: false
+      
+  testing:
+    database: "quant_test_db"
+    connection_pool:
+      pool_size: 3
+      
+  production:
+    connection_pool:
+      pool_size: 20
+      max_overflow: 50
+    ssl:
+      enabled: true
+    monitoring:
+      enabled: true

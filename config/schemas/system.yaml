@@ -1,0 +1,55 @@
+
+# 系统级统一配置
+
+# 基础信息
+project_name: "量化交易系统"
+version: "2.0.0"
+environment: "${ENVIRONMENT:development}"
+debug: "${DEBUG:false}"
+
+# 系统路径
+project_root: "."
+data_root: "./data"
+log_root: "./logs"
+config_root: "./config"
+reports_root: "./reports"
+
+# 性能配置
+max_workers: ${MAX_WORKERS:10}
+max_memory_mb: ${MAX_MEMORY_MB:4096}
+max_cpu_percent: ${MAX_CPU_PERCENT:80}
+
+# 安全配置
+encryption_key: "${ENCRYPTION_KEY:}"
+secret_key: "${SECRET_KEY:}"
+api_rate_limit: ${API_RATE_LIMIT:1000}
+
+# 监控配置
+enable_monitoring: true
+monitoring_interval: 60
+metrics_retention_days: 30
+
+# 告警配置
+enable_alerts: true
+alert_channels:
+  - "email"
+  - "webhook"
+
+# 环境特定配置
+environments:
+  development:
+    debug: true
+    max_workers: 5
+    enable_monitoring: false
+  
+  testing:
+    debug: false
+    max_workers: 8
+    enable_alerts: false
+  
+  production:
+    debug: false
+    max_workers: 20
+    max_memory_mb: 8192
+    enable_monitoring: true
+    enable_alerts: true

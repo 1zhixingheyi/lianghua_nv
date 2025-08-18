@@ -25,7 +25,7 @@ from datetime import datetime
 import json
 
 # 导入配置
-from src.config.settings import Config
+from config.config_manager import get_config_manager, get_mysql_config, get_trading_config
 
 # 导入后端模块
 from src.data import get_database_manager, get_tushare_client
@@ -41,22 +41,30 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-def create_app(config_class=Config):
+def create_app(config_class=None):
     """
     创建Flask应用实例
     
     Args:
-        config_class: 配置类
+        config_class: 配置类（兼容参数，现在使用新配置系统）
         
     Returns:
         Flask应用实例
     """
-    app = Flask(__name__, 
+    app = Flask(__name__,
                 template_folder='templates',
                 static_folder='static')
     
+    # 使用新配置系统
+    config_manager = get_config_manager()
+    system_config = config_manager.get_system_config()
+    
     # 应用配置
-    app.config.from_object(config_class)
+    app.config.update({
+        'DEBUG': system_config.get('debug', False),
+        'TESTING': system_config.get('testing', False),
+        'SECRET_KEY': system_config.get('secret_key', 'your-secret-key-here')
+    })
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
     app.config['JSON_AS_ASCII'] = False
     

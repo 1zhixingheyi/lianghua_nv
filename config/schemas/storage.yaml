@@ -1,0 +1,249 @@
+# 四层分层存储架构配置文件
+# HOT层(Redis) -> WARM层(ClickHouse) -> COOL层(MySQL) -> COLD层(MinIO/S3)
+
+# 四层存储架构配置
+storage_layers:
+  # HOT层 - Redis Cluster (超低延迟实时数据层)
+  hot:
+    type: 'redis_cluster'
+    description: '超低延迟实时数据层'
+    access_latency: '<10ms'
+    retention_period: 1800  # 30分钟 (秒)
+    storage_capacity: '2GB'
+    data_types:
+      - 'real_time_tick_data'
+      - 'latest_price_data' 
+      - 'active_trading_signals'
+      - 'real_time_market_stream'
+    config:
+      nodes:
+        - host: 'localhost'
+          port: 7000
+        - host: 'localhost'
+          port: 7001
+        - host: 'localhost'
+          port: 7002
+        - host: 'localhost'
+          port: 7003
+        - host: 'localhost'
+          port: 7004
+        - host: 'localhost'
+          port: 7005
+      decode_responses: true
+      skip_full_coverage_check: true
+      max_connections: 100
+      retry_on_timeout: true
+      socket_keepalive: true
+      socket_keepalive_options: {}
+      health_check_interval: 30
+
+  # WARM层 - ClickHouse (时序数据分析层)
+  warm:
+    type: 'clickhouse'
+    description: '时序数据分析层'
+    access_latency: '<100ms'
+    retention_period: 31536000  # 365天 (秒)
+    storage_capacity: '500GB'
+    data_types:
+      - 'minute_kline_data'
+      - 'daily_ohlcv_data'
+      - 'technical_indicator_results'
+      - 'factor_data'
+    config:
+      host: 'localhost'
+      port: 9000
+      user: 'default'
+      password: ''
+      database: 'quant_warm_layer'
+      settings:
+        use_numpy: true
+        max_execution_time: 60
+        max_memory_usage: 4000000000  # 4GB
+        max_threads: 8
+      compression: true
+      secure: false
+
+  # COOL层 - MySQL 8.0 (关系数据存储层)
+  cool:
+    type: 'mysql'
+    description: '关系数据存储层'
+    access_latency: '<500ms'
+    retention_period: 157680000  # 5年 (秒)
+    storage_capacity: '200GB'
+    data_types:
+      - 'fundamental_data'
+      - 'historical_data'
+      - 'metadata_info'
+      - 'reference_data'
+    config:
+      host: 'localhost'
+      port: 3306
+      user: 'quant_user'
+      password: 'quant_password'
+      database: 'quant_cool_layer'
+      charset: 'utf8mb4'
+      collation: 'utf8mb4_unicode_ci'
+      autocommit: true
+      pool_size: 20
+      max_overflow: 30
+      pool_timeout: 30
+      pool_recycle: 3600
+
+  # COLD层 - MinIO/S3 (归档存储层)
+  cold:
+    type: 'minio'
+    description: '归档存储层'
+    access_latency: '<2s'
+    retention_period: null  # 永久存储
+    storage_capacity: 'unlimited'
+    data_types:
+      - 'archived_historical_data'
+      - 'backup_data'
+      - 'audit_logs'
+      - 'compliance_data'
+    config:
+      endpoint: 'localhost:9000'
+      access_key: 'minioadmin'
+      secret_key: 'minioadmin'
+      secure: false
+      bucket_name: 'quant-system'
+      region: 'us-east-1'
+
+# 智能路由策略配置
+data_routing_strategy:
+  rules:
+    - name: 'real_time_data'
+      condition: 'data.type == "tick" and data.age_minutes < 30'
+      target_layer: 'hot'
+      priority: 1
+    - name: 'recent_kline_data'
+      condition: 'data.type == "kline" and data.age_days < 365'
+      target_layer: 'warm'
+      priority: 2
+    - name: 'fundamental_data'
+      condition: 'data.type in ["fundamental", "metadata"] and data.age_days < 1825'
+      target_layer: 'cool'
+      priority: 3
+    - name: 'archive_data'
+      condition: 'data.age_days >= 1825 or data.type == "archive"'
+      target_layer: 'cold'
+      priority: 4
+  fallback_layer: 'cold'
+
+# 数据生命周期管理配置
+lifecycle_management:
+  migration_rules:
+    - from_layer: 'hot'
+      to_layer: 'warm'
+      condition: 'age > 30 minutes'
+      schedule: '*/5 * * * *'  # 每5分钟检查一次
+    - from_layer: 'warm'
+      to_layer: 'cool'
+      condition: 'age > 1 year'
+      schedule: '0 2 * * *'  # 每天凌晨2点检查
+    - from_layer: 'cool'
+      to_layer: 'cold'
+      condition: 'age > 5 years'
+      schedule: '0 3 * * 0'  # 每周日凌晨3点检查
+  cleanup_rules:
+    - layer: 'hot'
+      condition: 'age > 1 hour'
+      action: 'delete'
+      schedule: '0 * * * *'  # 每小时清理一次
+
+# 多级缓存配置
+cache_config:
+  l1_memory:
+    type: 'memory'
+    max_size: 1000  # 最大缓存项数
+    ttl: 300        # 5分钟TTL
+    policy: 'LRU'
+  l2_redis:
+    type: 'redis'
+    host: 'localhost'
+    port: 6379
+    db: 1
+    max_connections: 50
+    ttl: 3600       # 1小时TTL
+    compression: true
+
+# 连接池配置
+connection_pools:
+  redis:
+    max_connections: 100
+    retry_on_timeout: true
+    socket_keepalive: true
+    health_check_interval: 30
+  clickhouse:
+    pool_size: 20
+    max_overflow: 10
+    pool_timeout: 30
+    pool_recycle: 3600
+  mysql:
+    pool_size: 20
+    max_overflow: 30
+    pool_timeout: 30
+    pool_recycle: 3600
+
+# 监控和告警配置
+monitoring_config:
+  metrics:
+    - 'storage_layer_latency'
+    - 'storage_layer_throughput'
+    - 'storage_layer_capacity'
+    - 'cache_hit_ratio'
+    - 'error_rate'
+    - 'connection_pool_usage'
+  alerts:
+    - name: 'high_latency'
+      condition: 'latency > threshold'
+      threshold:
+        hot: 50     # ms
+        warm: 500   # ms
+        cool: 2000  # ms
+        cold: 10000 # ms
+      action: 'send_alert'
+    - name: 'low_cache_hit_ratio'
+      condition: 'cache_hit_ratio < 0.8'
+      action: 'send_alert'
+    - name: 'storage_capacity_warning'
+      condition: 'capacity_usage > 0.85'
+      action: 'send_alert'
+  health_checks:
+    interval: 30  # 秒
+    timeout: 10   # 秒
+    retries: 3
+
+# 容错和故障转移配置
+fault_tolerance_config:
+  circuit_breaker:
+    failure_threshold: 5
+    recovery_timeout: 60
+    expected_exception: 'Exception'
+  retry_policy:
+    max_attempts: 3
+    backoff_factor: 2
+    initial_delay: 1
+  fallback_strategy:
+    hot: ['warm', 'cool']
+    warm: ['cool', 'cold']
+    cool: ['cold']
+    cold: []
+
+# 数据索引策略
+indexing_strategy:
+  primary_index: ['stock_code', 'date']
+  secondary_indexes:
+    time_index: ['timestamp']
+    symbol_index: ['stock_code']
+    date_range_index: ['date', 'stock_code']
+  composite_indexes:
+    - ['stock_code', 'date', 'timestamp']
+    - ['market_type', 'stock_code', 'date']
+
+# 数据压缩配置
+compression_config:
+  hot: 'none'      # 不压缩，追求速度
+  warm: 'lz4'      # 快速压缩
+  cool: 'zstd'     # 平衡压缩
+  cold: 'gzip'     # 高压缩比

@@ -29,7 +29,7 @@ try:
         get_strategy_catalog
     )
     from src.data import get_database_manager, get_tushare_client
-    from src.config.settings import get_config
+    from config.config_manager import get_config_manager
 except ImportError as e:
     logger.error(f"导入模块失败: {e}")
     sys.exit(1)

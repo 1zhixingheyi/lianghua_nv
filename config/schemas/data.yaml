@@ -1,0 +1,363 @@
+# 数据配置文件
+# 定义数据获取、处理和存储的配置
+# 注意：数据库连接配置已迁移至 database_config.yaml
+
+# 配置迁移通知
+migration_notice:
+  database_connections_migrated_to: "database_config.yaml -> databases"
+  table_definitions_migrated_to: "schema_definitions.yaml -> mysql_tables/clickhouse_tables"
+  message: "数据库相关配置已迁移至新的模块化配置架构"
+
+# 基础路径配置
+paths:
+  base_dir: "${DATA_BASE_DIR:./DATA}"
+  data_dir: "${DATA_DIR:./DATA/csv_files}"
+  reports_dir: "${REPORTS_DIR:./DATA/REPORTS}"
+  logs_dir: "${LOGS_DIR:./DATA/logs}"
+
+# 数据库层级配置（保留DATA模块特有配置）
+database_layers:
+  raw_layer: "raw_stock_data"
+  clean_layer: "clean_stock_data"
+  agg_layer: "agg_stock_data"
+  app_layer: "app_stock_data"
+
+# 数据验证配置
+validation:
+  price_threshold: 0.10  # 价格异常阈值 ±10%
+  max_missing_days: 5    # 最大允许缺失交易日数
+  volume_threshold: 0    # 成交量异常阈值
+  market_codes: ["SH", "SZ"]  # 支持的市场代码
+
+# 重试机制配置
+retry:
+  max_attempts: 3
+  retry_delays_seconds: [300, 900, 1800]  # 重试间隔：5分钟、15分钟、30分钟
+  timeout_seconds: 30  # 请求超时时间
+
+# 数据源配置 (整合DATA模块配置)
+data_sources:
+  # Tushare数据源
+  tushare:
+    api_key: "${TUSHARE_API_KEY}"
+    config: {}
+    enabled: true
+    max_requests_per_minute: 120
+    name: tushare
+    points_limit: 2000
+    priority: 1
+    max_attempts: 3
+    retry_delay_seconds: 1.0
+    timeout_seconds: 30
+
+  # AKShare数据源
+  akshare:
+    api_key: null
+    config: {}
+    enabled: true
+    max_requests_per_minute: 60
+    name: akshare
+    priority: 2
+    max_attempts: 3
+    retry_delay_seconds: 1.0
+    timeout_seconds: 30
+
+  # YFinance数据源
+  yfinance:
+    api_key: null
+    config: {}
+    enabled: true
+    max_requests_per_minute: 200
+    name: yfinance
+    priority: 3
+    max_attempts: 3
+    retry_delay_seconds: 1.0
+    timeout_seconds: 30
+
+  # 股票基础数据源
+  stock_basic:
+    enabled: true
+    providers:
+      - name: "eastmoney"
+        priority: 1
+        enabled: true
+      - name: "tencent"
+        priority: 2
+        enabled: true
+    update_frequency: "daily"
+    cache_ttl: 86400  # 24小时
+    
+  # 默认数据源配置
+  default:
+    source: "akshare"
+    period: "1y"  # 过去一年数据
+    frequency: "daily"
+    fields: ["date", "open", "high", "low", "close", "volume"]
+
+  # 实时行情数据源
+  realtime_quotes:
+    enabled: true
+    providers:
+      - name: "sina"
+        priority: 1
+        enabled: true
+      - name: "tencent"
+        priority: 2
+        enabled: true
+    update_frequency: "real_time"
+    cache_ttl: 60  # 1分钟
+
+  # 历史K线数据源
+  historical_klines:
+    enabled: true
+    providers:
+      - name: "eastmoney"
+        priority: 1
+        enabled: true
+      - name: "tonghuashun"
+        priority: 2
+        enabled: true
+    update_frequency: "daily"
+    cache_ttl: 3600  # 1小时
+
+  # 财务数据源
+  financial_data:
+    enabled: true
+    providers:
+      - name: "eastmoney"
+        priority: 1
+        enabled: true
+    update_frequency: "quarterly"
+    cache_ttl: 2592000  # 30天
+
+# 报告配置
+reports:
+  formats: ["json", "markdown"]
+  include_charts: true
+  chart_types: ["anomaly_distribution", "missing_data_heatmap", "validation_summary"]
+
+# A股市场信息
+market_info:
+  trading_hours:
+    morning: ["09:30", "11:30"]
+    afternoon: ["13:00", "15:00"]
+  holidays: []  # 可以添加节假日列表
+  market_codes:
+    SH: "上海证券交易所"
+    SZ: "深圳证券交易所"
+
+# 技术指标配置
+technical_indicators:
+  sma_periods: [5, 10, 20, 50, 200]
+  ema_periods: [12, 26]
+  rsi_period: 14
+  macd_params:
+    fast: 12
+    slow: 26
+    signal: 9
+  bollinger_bands:
+    period: 20
+    std_dev: 2
+
+# 系统元数据配置
+metadata:
+  task_status_table: "system_task_status"
+  stock_metadata_table: "stock_metadata"
+  update_frequency: "daily"
+  retention_period: "2y"  # 数据保留期
+
+# 数据处理配置
+processing:
+  # 数据清洗配置
+  cleaning:
+    enabled: true
+    rules:
+      - name: "remove_duplicates"
+        enabled: true
+      - name: "fill_missing_values"
+        enabled: true
+        method: "forward_fill"
+      - name: "outlier_detection"
+        enabled: true
+        method: "iqr"
+        threshold: 3.0
+
+  # 数据验证配置
+  validation:
+    enabled: true
+    rules:
+      - name: "price_range_check"
+        enabled: true
+        min_price: 0.01
+        max_price: 10000.0
+      - name: "volume_check"
+        enabled: true
+        min_volume: 0
+      - name: "timestamp_check"
+        enabled: true
+
+  # 数据转换配置
+  transformation:
+    enabled: true
+    operations:
+      - name: "normalize_stock_codes"
+        enabled: true
+      - name: "calculate_technical_indicators"
+        enabled: true
+        indicators: ["ma", "ema", "rsi", "macd", "bollinger"]
+      - name: "split_adjustment"
+        enabled: true
+
+# 数据存储配置（业务层面配置，技术配置已迁移）
+storage:
+  # 批量插入配置
+  bulk_insert:
+    enabled: true
+    batch_size: 1000
+    timeout_seconds: 30
+    max_attempts: 3
+
+  # 数据分区配置
+  partitioning:
+    enabled: true
+    strategy: "date"
+    partition_size: "monthly"
+
+  # 数据压缩配置
+  compression:
+    enabled: true
+    algorithm: "lz4"
+    level: 1
+
+  # 四层分层存储架构配置
+  storage_layers:
+    hot:
+      access_key: ''
+      bucket_name: quant-data
+      config: {}
+      connection_pool_size: 10
+      database: ''
+      enabled: true
+      host: localhost
+      password: ''
+      port: 9000
+      secret_key: ''
+      secure: false
+      timeout_seconds: 30
+      username: ''
+    cool:
+      autocommit: true
+      charset: utf8mb4
+      config: {}
+      connection_pool_size: 10
+      database: quant_data
+      enabled: true
+      host: localhost
+      password: ''
+      port: 3306
+      timeout_seconds: 30
+      username: root
+    warm:
+      compression: lz4
+      config: {}
+      connection_pool_size: 10
+      database: quant_data
+      enabled: true
+      host: localhost
+      partition_by: toYYYYMM(date)
+      password: ''
+      port: 9000
+      timeout_seconds: 30
+      username: default
+
+# 数据同步配置
+synchronization:
+  # 增量同步
+  incremental:
+    enabled: true
+    check_interval_seconds: 300  # 5分钟
+    last_update_tracking: true
+
+  # 全量同步
+  full_sync:
+    enabled: true
+    schedule: "0 2 * * 0"  # 每周日凌晨2点
+    backup_before_sync: true
+
+# 数据质量监控
+quality_monitoring:
+  # 数据完整性检查
+  completeness:
+    enabled: true
+    check_interval_seconds: 3600  # 1小时
+    missing_data_threshold: 0.05  # 5%
+
+  # 数据一致性检查
+  consistency:
+    enabled: true
+    cross_source_validation: true
+    tolerance: 0.01  # 1%
+
+  # 数据时效性检查
+  timeliness:
+    enabled: true
+    max_delay_seconds: 1800  # 30分钟
+    alert_threshold_seconds: 3600  # 1小时
+
+# 数据导出配置
+export:
+  # 支持的格式
+  formats:
+    - csv
+    - json
+    - parquet
+    - excel
+
+  # 导出限制
+  limits:
+    max_records_per_export: 1000000
+    max_file_size_mb: 500
+    concurrent_exports: 3
+
+  # 导出调度
+  scheduled_exports:
+    enabled: false
+    exports: []
+
+# 下载配置 (从DATA模块整合)
+download_config:
+  auto_data_cleaning: true
+  data_quality_threshold: 0.8
+  default_end_date: '2024-12-31'
+  default_start_date: '2024-01-01'
+  download_batch_size: 100
+  download_daily: true
+  download_fundamental: true
+  download_highfreq: false
+  download_macro: true
+  download_tick: false
+  enabled: true
+  exchanges:
+  - SSE
+  - SZSE
+  exclude_st: true
+  market_types:
+  - 主板
+  - 中小板
+  - 创业板
+  max_concurrent_downloads: 10
+  max_retries: 3
+  min_market_cap: 0
+  retry_delay: 1.0
+  year_download_chunk_size: 50
+  year_download_delay: 0.1
+  year_download_enabled: true
+
+# 系统监控配置
+monitoring:
+  enable_performance_monitoring: true
+  log_file: quant_system.log
+  log_level: INFO
+  max_log_size: 100
+  backup_count: 5
+  metrics_collection_interval: 60

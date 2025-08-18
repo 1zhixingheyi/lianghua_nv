@@ -11,7 +11,8 @@ import tushare as ts
 from typing import Optional, Dict, Any, List
 from datetime import datetime, timedelta
 
-from src.config.settings import get_config
+from config.config_manager import get_config_manager
+import os
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -28,8 +29,16 @@ class TushareClient:
         Args:
             token: Tushare API token，如果为None则从配置文件读取
         """
-        config = get_config()
-        self.token = token or config.TUSHARE_TOKEN
+        # 获取Tushare配置
+        config_manager = get_config_manager()
+        api_config = config_manager.get_api_config('tushare')
+        if not api_config:
+            # 尝试从环境变量获取
+            tushare_token = os.getenv('TUSHARE_TOKEN', '')
+        else:
+            tushare_token = api_config.get('token', os.getenv('TUSHARE_TOKEN', ''))
+        
+        self.token = token or tushare_token
         if not self.token:
             raise ValueError("Tushare token 未配置，请在.env文件中设置TUSHARE_TOKEN")
         

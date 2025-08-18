@@ -1,0 +1,360 @@
+# 交易配置文件
+# 定义交易策略、风控和执行相关的配置
+
+# 交易账户配置
+accounts:
+  # 模拟交易账户
+  paper_trading:
+    enabled: true
+    account_id: "paper_001"
+    initial_capital: 1000000.0
+    currency: "CNY"
+    commission:
+      rate: 0.0003
+      minimum: 5.0
+      maximum: null
+    margin:
+      enabled: false
+      ratio: 1.0
+    
+  # 实盘交易账户
+  live_trading:
+    enabled: false
+    account_id: ""
+    broker: ""
+    api_key: ""
+    secret_key: ""
+    commission:
+      rate: 0.0003
+      minimum: 5.0
+      maximum: null
+    margin:
+      enabled: false
+      ratio: 2.0
+
+# 交易策略配置
+strategies:
+  # 均线策略
+  moving_average:
+    enabled: true
+    parameters:
+      short_period: 5
+      long_period: 20
+      signal_threshold: 0.02
+    position_size: 0.1  # 10%仓位
+    
+  # RSI策略
+  rsi_strategy:
+    enabled: true
+    parameters:
+      period: 14
+      oversold_threshold: 30
+      overbought_threshold: 70
+    position_size: 0.15  # 15%仓位
+    
+  # MACD策略
+  macd_strategy:
+    enabled: true
+    parameters:
+      fast_period: 12
+      slow_period: 26
+      signal_period: 9
+    position_size: 0.1  # 10%仓位
+    
+  # 布林带策略
+  bollinger_bands:
+    enabled: false
+    parameters:
+      period: 20
+      std_dev: 2.0
+    position_size: 0.1  # 10%仓位
+
+# 风险管理配置
+risk_management:
+  # 仓位管理
+  position_management:
+    max_position_size: 0.2  # 单个策略最大仓位20%
+    max_total_position: 0.8  # 总仓位不超过80%
+    min_cash_reserve: 0.1   # 最低现金储备10%
+    
+  # 止损配置
+  stop_loss:
+    enabled: true
+    default_percentage: 0.05  # 默认5%止损
+    trailing_stop: true
+    trailing_percentage: 0.03  # 追踪止损3%
+    
+  # 止盈配置
+  take_profit:
+    enabled: true
+    default_percentage: 0.15  # 默认15%止盈
+    partial_profit_taking: true
+    profit_levels:
+      - percentage: 0.08
+        sell_ratio: 0.3  # 8%收益时卖出30%
+      - percentage: 0.15
+        sell_ratio: 0.5  # 15%收益时卖出50%
+        
+  # 最大回撤控制
+  drawdown_control:
+    enabled: true
+    max_daily_drawdown: 0.02    # 日最大回撤2%
+    max_weekly_drawdown: 0.05   # 周最大回撤5%
+    max_monthly_drawdown: 0.10  # 月最大回撤10%
+    emergency_stop: 0.15        # 紧急停止回撤15%
+    
+  # 集中度风险控制
+  concentration_limits:
+    max_single_stock: 0.1      # 单只股票最大10%
+    max_sector_exposure: 0.3   # 单个行业最大30%
+    max_correlation: 0.7       # 最大相关性0.7
+
+# 订单执行配置
+order_execution:
+  # 订单类型配置
+  order_types:
+    market_order:
+      enabled: true
+      slippage_tolerance: 0.005  # 0.5%滑点容忍度
+    limit_order:
+      enabled: true
+      price_offset: 0.001        # 0.1%价格偏移
+      timeout_seconds: 300       # 5分钟超时
+    stop_order:
+      enabled: true
+      trigger_offset: 0.002      # 0.2%触发偏移
+      
+  # 执行时间配置
+  timing:
+    market_open_delay_seconds: 300      # 开市后5分钟开始交易
+    market_close_advance_seconds: 600   # 收市前10分钟停止交易
+    lunch_break_pause: true     # 午休时间暂停交易
+    
+  # 分批执行配置
+  batch_execution:
+    enabled: true
+    max_batch_size: 1000000     # 单批最大100万
+    batch_interval_seconds: 60  # 批次间隔60秒
+    volume_participation: 0.1   # 成交量参与度10%
+
+# 回测配置
+backtesting:
+  # 回测数据配置
+  data:
+    start_date: "2020-01-01"
+    end_date: "2023-12-31"
+    frequency: "daily"
+    benchmark: "000300.SH"  # 沪深300指数
+    
+  # 回测参数
+  parameters:
+    initial_capital: 1000000.0
+    commission_rate: 0.0003
+    slippage_rate: 0.001
+    impact_cost: 0.0005
+    
+  # 回测指标
+  metrics:
+    - total_return
+    - annual_return
+    - volatility
+    - sharpe_ratio
+    - max_drawdown
+    - calmar_ratio
+    - win_rate
+    - profit_factor
+
+# 实时交易配置 (整合DATA模块配置)
+live_trading:
+  # 数据源配置
+  data_sources:
+    # 股票数据源
+    stock:
+      primary:
+        name: "tushare"
+        api_key: "${TUSHARE_API_KEY}"
+        base_url: "http://api.tushare.pro"
+        timeout_seconds: 30
+        max_attempts: 3
+        retry_delay_seconds: 1
+        rate_limit: 200  # 每分钟请求数
+      backup:
+        - name: "akshare"
+          enabled: true
+          timeout_seconds: 30
+          max_attempts: 2
+        - name: "baostock"
+          enabled: true
+          timeout_seconds: 30
+          max_attempts: 2
+    
+    # 期货数据源
+    futures:
+      primary:
+        name: "ctp"
+        broker_id: "${CTP_BROKER_ID}"
+        user_id: "${CTP_USER_ID}"
+        password: "${CTP_PASSWORD}"
+        md_server: "tcp://180.168.146.187:10131"
+        td_server: "tcp://180.168.146.187:10130"
+
+  # 实时数据流配置
+  realtime_stream:
+    enabled: true
+    buffer_size: 10000  # 缓冲区大小
+    batch_size: 100  # 批处理大小
+    flush_interval_seconds: 1.0  # 刷新间隔（秒）
+    max_latency_seconds: 0.1  # 最大延迟（秒）
+    compression: true  # 数据压缩
+    heartbeat_interval_seconds: 30.0  # 心跳间隔（秒）
+    
+    # WebSocket配置
+    websocket:
+      enabled: true
+      reconnect_interval_seconds: 5.0
+      max_reconnect_attempts: 10
+      ping_interval_seconds: 20.0
+      ping_timeout_seconds: 10.0
+
+  # 数据质量配置
+  data_quality:
+    enabled: true
+    realtime_checks:
+      price_range_check:
+        enabled: true
+        max_change_percent: 20.0  # 最大涨跌幅
+        action: "warn"  # warn, reject, correct
+      volume_check:
+        enabled: true
+        min_volume: 0
+        max_volume_multiplier: 100.0  # 相对于平均成交量的倍数
+        action: "warn"
+      timestamp_check:
+        enabled: true
+        max_delay_seconds: 10.0  # 最大延迟（秒）
+        action: "reject"
+      duplicate_check:
+        enabled: true
+        window_size: 100  # 检查窗口大小
+        action: "reject"
+    data_validation:
+      required_fields: ["symbol", "timestamp", "price", "volume"]
+      numeric_fields: ["price", "volume", "open", "high", "low", "close"]
+      positive_fields: ["volume"]
+      non_negative_fields: ["price", "open", "high", "low", "close"]
+
+  # 信号生成配置
+  signal_generation:
+    frequency: "1min"           # 信号生成频率
+    lookback_period: 100        # 回看周期
+    signal_strength_threshold: 0.6  # 信号强度阈值
+    
+  # 订单管理配置
+  order_management:
+    max_pending_orders: 10      # 最大挂单数量
+    order_timeout_seconds: 1800 # 订单超时30分钟
+    auto_cancel_eod: true       # 日终自动取消挂单
+    
+  # 监控配置
+  monitoring:
+    position_check_interval_seconds: 60     # 仓位检查间隔60秒
+    pnl_update_interval_seconds: 300        # PnL更新间隔5分钟
+    risk_check_interval_seconds: 180        # 风险检查间隔3分钟
+    
+  # 故障恢复配置
+  failover:
+    enabled: true
+    detection_interval_seconds: 5.0  # 故障检测间隔（秒）
+    recovery_timeout_seconds: 60.0  # 恢复超时（秒）
+    max_failover_attempts: 3
+    circuit_breaker:
+      enabled: true
+      failure_threshold: 5  # 失败阈值
+      recovery_timeout_seconds: 30.0  # 恢复超时（秒）
+      half_open_max_calls: 3  # 半开状态最大调用次数
+
+# 交易日历配置
+trading_calendar:
+  # 交易时间
+  trading_hours:
+    morning_session:
+      start: "09:30:00"
+      end: "11:30:00"
+    afternoon_session:
+      start: "13:00:00"
+      end: "15:00:00"
+      
+  # 特殊交易日配置
+  special_trading_days:
+    # 节假日
+    holidays: []
+    # 半日交易
+    half_days: []
+    
+  # 交易暂停配置
+  trading_halts:
+    market_volatility_threshold: 0.05  # 市场波动5%暂停
+    individual_stock_threshold: 0.1    # 个股波动10%暂停
+
+# 报告和通知配置
+reporting:
+  # 交易报告
+  trade_reports:
+    enabled: true
+    frequency: "daily"
+    email_recipients: []
+    include_charts: true
+    
+  # 风险报告
+  risk_reports:
+    enabled: true
+    frequency: "daily"
+    alert_threshold_breach: true
+    
+  # 绩效报告
+  performance_reports:
+    enabled: true
+    frequency: "weekly"
+    benchmark_comparison: true
+
+# 数据订阅配置
+data_subscriptions:
+  # 实时行情订阅
+  realtime_quotes:
+    enabled: true
+    symbols: []  # 空表示订阅所有
+    depth: 5     # 5档行情
+    
+  # 实时交易数据订阅
+  trade_data:
+    enabled: true
+    include_volume: true
+    include_turnover: true
+    
+  # 新闻和公告订阅
+  news_feed:
+    enabled: false
+    sources: []
+    keywords: []
+
+# 调试和测试配置
+debugging:
+  # 日志配置
+  logging:
+    level: "INFO"
+    trade_log: true
+    signal_log: true
+    error_log: true
+    
+  # 模拟模式
+  simulation:
+    dry_run: false
+    paper_trading_only: true
+    skip_market_hours_check: false
+    
+  # 性能监控
+  performance_monitoring:
+    enabled: true
+    strategy_timing: true
+    execution_timing: true
+    memory_usage: true

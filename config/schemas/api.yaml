@@ -1,0 +1,180 @@
+# API配置文件
+# 定义各种API接口的配置信息
+
+# 数据提供商API配置
+data_providers:
+  # 东方财富API配置
+  eastmoney:
+    base_url: "http://push2.eastmoney.com"
+    endpoints:
+      stock_basic: "/api/qt/clist/get"
+      stock_realtime: "/api/qt/stock/get"
+      stock_kline: "/api/qt/stock/kline/get"
+      market_overview: "/api/qt/ulist.np/get"
+    timeout: 30
+    retry_count: 3
+    rate_limit:
+      requests_per_second: 10
+      requests_per_minute: 300
+
+  # 同花顺API配置
+  tonghuashun:
+    base_url: "http://d.10jqka.com.cn"
+    endpoints:
+      stock_basic: "/v6/line/hs_a/01/latest.json"
+      stock_realtime: "/v6/line/hs_a/01/today.json"
+      stock_kline: "/v6/line/hs_a/01/last.json"
+    timeout: 25
+    retry_count: 2
+    rate_limit:
+      requests_per_second: 5
+      requests_per_minute: 200
+
+  # 腾讯财经API配置
+  tencent:
+    base_url: "http://qt.gtimg.cn"
+    endpoints:
+      stock_realtime: "/q="
+      stock_kline: "/r="
+    timeout: 20
+    retry_count: 3
+    rate_limit:
+      requests_per_second: 15
+      requests_per_minute: 500
+
+  # 新浪财经API配置
+  sina:
+    base_url: "http://hq.sinajs.cn"
+    endpoints:
+      stock_realtime: "/list="
+      stock_kline: "/rn="
+    timeout: 20
+    retry_count: 2
+    rate_limit:
+      requests_per_second: 20
+      requests_per_minute: 600
+
+# 交易接口API配置
+trading_apis:
+  # 模拟交易API
+  paper_trading:
+    enabled: true
+    initial_capital: 1000000.0
+    commission_rate: 0.0003
+    min_commission: 5.0
+    
+  # 实盘交易API（示例配置）
+  live_trading:
+    enabled: false
+    broker: "unknown"
+    account_id: ""
+    api_key: ""
+    secret_key: ""
+    timeout: 10
+    retry_count: 1
+
+# 外部服务API配置
+external_services:
+  # 消息推送服务
+  notification:
+    # 钉钉机器人
+    dingtalk:
+      enabled: false
+      webhook_url: ""
+      secret: ""
+      timeout: 10
+    
+    # 企业微信机器人
+    wechat_work:
+      enabled: false
+      webhook_url: ""
+      timeout: 10
+    
+    # 邮件服务
+    email:
+      enabled: false
+      smtp_server: ""
+      smtp_port: 587
+      username: ""
+      password: ""
+      timeout: 30
+
+  # 云存储服务
+  cloud_storage:
+    # 阿里云OSS
+    aliyun_oss:
+      enabled: false
+      endpoint: ""
+      access_key_id: ""
+      access_key_secret: ""
+      bucket_name: ""
+      timeout: 60
+    
+    # 腾讯云COS
+    tencent_cos:
+      enabled: false
+      region: ""
+      secret_id: ""
+      secret_key: ""
+      bucket: ""
+      timeout: 60
+
+# API通用配置
+common:
+  # 请求配置
+  request:
+    user_agent: "QuantSystem/1.0"
+    headers:
+      Accept: "application/json"
+      Content-Type: "application/json"
+    verify_ssl: true
+    allow_redirects: true
+    
+  # 重试配置
+  retry:
+    max_retries: 3
+    backoff_factor: 1.0
+    status_forcelist: [500, 502, 503, 504]
+    
+  # 超时配置
+  timeout:
+    connect: 10
+    read: 30
+    total: 60
+    
+  # 代理配置
+  proxy:
+    enabled: false
+    http_proxy: ""
+    https_proxy: ""
+    
+  # 日志配置
+  logging:
+    log_requests: true
+    log_responses: false
+    log_level: "INFO"
+    max_log_size: 1048576  # 1MB
+
+# API监控配置
+monitoring:
+  # 健康检查
+  health_check:
+    enabled: true
+    interval: 300  # 5分钟
+    timeout: 10
+    
+  # 性能监控
+  performance:
+    enabled: true
+    track_response_time: true
+    track_success_rate: true
+    alert_threshold:
+      response_time: 5.0  # 秒
+      success_rate: 0.95  # 95%
+      
+  # 流量监控
+  traffic:
+    enabled: true
+    track_request_count: true
+    track_data_volume: true
+    daily_limit: 100000  # 每日请求限制

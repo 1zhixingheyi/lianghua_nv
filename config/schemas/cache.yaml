@@ -1,0 +1,187 @@
+# 缓存配置文件
+# 定义各种缓存策略和配置
+
+# Redis缓存配置
+redis:
+  # 连接配置
+  connection:
+    host: "localhost"
+    port: 6379
+    password: ""
+    db: 0
+    socket_timeout: 30
+    socket_connect_timeout: 30
+    socket_keepalive: true
+    socket_keepalive_options: {}
+    connection_pool_max_connections: 50
+    retry_on_timeout: true
+    health_check_interval: 30
+
+  # 集群配置
+  cluster:
+    enabled: false
+    startup_nodes:
+      - host: "localhost"
+        port: 7000
+      - host: "localhost"
+        port: 7001
+    max_connections: 32
+    skip_full_coverage_check: false
+
+  # 哨兵配置
+  sentinel:
+    enabled: false
+    service_name: "mymaster"
+    sentinels:
+      - host: "localhost"
+        port: 26379
+    socket_timeout: 0.1
+
+# 内存缓存配置
+memory:
+  # LRU缓存配置
+  lru:
+    max_size: 10000
+    ttl: 3600  # 1小时
+    
+  # 多级缓存配置
+  multilevel:
+    enabled: true
+    levels:
+      - name: "L1"
+        type: "memory"
+        max_size: 1000
+        ttl: 300  # 5分钟
+      - name: "L2"
+        type: "redis"
+        max_size: 100000
+        ttl: 3600  # 1小时
+
+# 缓存策略配置
+strategies:
+  # 股票基础数据缓存
+  stock_basic:
+    enabled: true
+    cache_type: "redis"
+    ttl: 86400  # 24小时
+    key_prefix: "stock:basic"
+    compression: true
+    
+  # 实时行情缓存
+  realtime_quotes:
+    enabled: true
+    cache_type: "memory"
+    ttl: 60  # 1分钟
+    key_prefix: "quotes:realtime"
+    max_size: 5000
+    
+  # 历史K线缓存
+  historical_klines:
+    enabled: true
+    cache_type: "redis"
+    ttl: 3600  # 1小时
+    key_prefix: "klines:history"
+    compression: true
+    
+  # 技术指标缓存
+  technical_indicators:
+    enabled: true
+    cache_type: "multilevel"
+    ttl: 1800  # 30分钟
+    key_prefix: "indicators"
+    
+  # 交易信号缓存
+  trading_signals:
+    enabled: true
+    cache_type: "redis"
+    ttl: 300  # 5分钟
+    key_prefix: "signals"
+    
+  # 用户会话缓存
+  user_sessions:
+    enabled: true
+    cache_type: "redis"
+    ttl: 7200  # 2小时
+    key_prefix: "session"
+
+# 缓存清理配置
+cleanup:
+  # 自动清理
+  auto_cleanup:
+    enabled: true
+    interval: 3600  # 1小时执行一次
+    max_memory_usage: 0.8  # 内存使用率超过80%时触发清理
+    
+  # 过期键清理
+  expired_keys:
+    enabled: true
+    batch_size: 1000
+    scan_interval: 300  # 5分钟
+    
+  # 手动清理规则
+  manual_rules:
+    - pattern: "temp:*"
+      max_age: 3600  # 1小时
+    - pattern: "cache:test:*"
+      max_age: 300   # 5分钟
+
+# 缓存监控配置
+monitoring:
+  # 性能指标
+  metrics:
+    enabled: true
+    collect_interval: 60  # 1分钟
+    metrics:
+      - hit_rate
+      - miss_rate
+      - memory_usage
+      - connection_count
+      - response_time
+      
+  # 告警配置
+  alerts:
+    hit_rate_threshold: 0.8  # 命中率低于80%告警
+    memory_usage_threshold: 0.9  # 内存使用率超过90%告警
+    connection_threshold: 45  # 连接数超过45告警
+    response_time_threshold: 100  # 响应时间超过100ms告警
+
+# 序列化配置
+serialization:
+  # 默认序列化器
+  default: "pickle"
+  
+  # 可用序列化器
+  serializers:
+    json:
+      module: "json"
+      compress: false
+    pickle:
+      module: "pickle"
+      protocol: 4
+      compress: true
+    msgpack:
+      module: "msgpack"
+      use_bin_type: true
+      compress: true
+
+# 缓存预热配置
+preloading:
+  # 启动时预热
+  startup:
+    enabled: true
+    tasks:
+      - name: "stock_basic_data"
+        priority: 1
+        cache_key_pattern: "stock:basic:*"
+      - name: "market_indices"
+        priority: 2
+        cache_key_pattern: "index:*"
+        
+  # 定时预热
+  scheduled:
+    enabled: true
+    schedule: "0 */6 * * *"  # 每6小时执行一次
+    tasks:
+      - name: "popular_stocks"
+        data_source: "stock_service.get_popular_stocks"
+        cache_prefix: "stock:popular"

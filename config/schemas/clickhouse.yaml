@@ -1,0 +1,330 @@
+# ClickHouse分析层配置
+# 时序数据分析和高频数据存储
+
+# 数据库连接配置
+database:
+  host: "${CLICKHOUSE_HOST:localhost}"
+  port: "${CLICKHOUSE_PORT:9000}"
+  http_port: "${CLICKHOUSE_HTTP_PORT:8123}"
+  username: "${CLICKHOUSE_USERNAME:default}"
+  password: "${CLICKHOUSE_PASSWORD:860721}"
+  database: "${CLICKHOUSE_DATABASE:lianghua_clickhouse}"
+
+# 连接配置
+connection:
+  connect_timeout_seconds: 60
+  send_receive_timeout_seconds: 300
+  sync_request_timeout_seconds: 300
+  compression: true
+  compress_block_size: 1048576
+  secure: "${CLICKHOUSE_SECURE:false}"
+  use_numpy: true
+
+# 集群配置
+cluster:
+  enabled: "${CLICKHOUSE_CLUSTER_ENABLED:false}"
+  cluster_name: "${CLICKHOUSE_CLUSTER_NAME:}"
+  nodes:
+    - host: "${CLICKHOUSE_NODE1_HOST:}"
+      port: "${CLICKHOUSE_NODE1_PORT:9000}"
+    - host: "${CLICKHOUSE_NODE2_HOST:}"
+      port: "${CLICKHOUSE_NODE2_PORT:9000}"
+
+# 性能配置
+performance:
+  max_memory_usage: 10000000000
+  max_threads: 8
+  max_execution_time_seconds: 300
+
+# 数据配置
+data:
+  compression_method: "LZ4"
+  compression_level: 1
+  partition_by: "toYYYYMM(date)"
+  order_by: "(symbol, date, timestamp)"
+  ttl_days: 1095  # 数据保留天数（3年）
+
+# 备份配置
+backup:
+  enabled: true
+  schedule: "0 3 * * 0"  # 每周日凌晨3点
+  retention_weeks: 12
+
+# 表结构定义（来自schema_definitions.yaml）
+tables:
+  # 股票日线数据表
+  stock_real_bar1d:
+    table_name: "stock_real_bar1d"
+    description: "股票日线数据表"
+    priority: 1
+    required: false
+    expected_records: 5000000
+    engine: "MergeTree"
+    
+    fields:
+      ts_code:
+        type: "String"
+        nullable: false
+        description: "股票代码"
+      trade_date:
+        type: "Date"
+        nullable: false
+        description: "交易日期"
+      open:
+        type: "Decimal64(4)"
+        nullable: false
+        description: "开盘价"
+      high:
+        type: "Decimal64(4)"
+        nullable: false
+        description: "最高价"
+      low:
+        type: "Decimal64(4)"
+        nullable: false
+        description: "最低价"
+      close:
+        type: "Decimal64(4)"
+        nullable: false
+        description: "收盘价"
+      volume:
+        type: "UInt64"
+        nullable: false
+        description: "成交量"
+      amount:
+        type: "Decimal64(2)"
+        nullable: false
+        description: "成交额"
+      adj_factor:
+        type: "Decimal64(6)"
+        nullable: true
+        description: "复权因子"
+        
+    # 分区和排序键
+    partition_by: "toYYYYMM(trade_date)"
+    order_by: "(ts_code, trade_date)"
+    
+    # 数据压缩配置
+    compression:
+      method: "LZ4"
+      level: 1
+
+  # 股票分钟线数据表
+  stock_real_bar1m:
+    table_name: "stock_real_bar1m"
+    description: "股票分钟线数据表"
+    priority: 3
+    required: false
+    expected_records: 50000000
+    engine: "MergeTree"
+    
+    fields:
+      ts_code:
+        type: "String"
+        nullable: false
+        description: "股票代码"
+      trade_time:
+        type: "DateTime"
+        nullable: false
+        description: "交易时间"
+      open:
+        type: "Decimal64(4)"
+        nullable: false
+        description: "开盘价"
+      high:
+        type: "Decimal64(4)"
+        nullable: false
+        description: "最高价"
+      low:
+        type: "Decimal64(4)"
+        nullable: false
+        description: "最低价"
+      close:
+        type: "Decimal64(4)"
+        nullable: false
+        description: "收盘价"
+      volume:
+        type: "UInt64"
+        nullable: false
+        description: "成交量"
+      amount:
+        type: "Decimal64(2)"
+        nullable: false
+        description: "成交额"
+        
+    # 分区和排序键
+    partition_by: "toYYYYMM(trade_time)"
+    order_by: "(ts_code, trade_time)"
+    
+    # 数据压缩配置
+    compression:
+      method: "LZ4"
+      level: 1
+
+  # 股票Tick数据表
+  stock_real_tick:
+    table_name: "stock_real_tick"
+    description: "股票Tick数据表"
+    priority: 3
+    required: false
+    expected_records: 500000000
+    engine: "MergeTree"
+    
+    fields:
+      ts_code:
+        type: "String"
+        nullable: false
+        description: "股票代码"
+      timestamp:
+        type: "DateTime64(3)"
+        nullable: false
+        description: "时间戳"
+      price:
+        type: "Decimal64(4)"
+        nullable: false
+        description: "价格"
+      volume:
+        type: "UInt32"
+        nullable: false
+        description: "成交量"
+      amount:
+        type: "Decimal64(2)"
+        nullable: false
+        description: "成交额"
+      direction:
+        type: "Int8"
+        nullable: true
+        description: "买卖方向"
+        
+    # 分区和排序键
+    partition_by: "toYYYYMMDD(timestamp)"
+    order_by: "(ts_code, timestamp)"
+    
+    # 数据压缩配置
+    compression:
+      method: "ZSTD"
+      level: 3
+
+  # 指数日线数据表
+  index_daily:
+    table_name: "index_daily"
+    description: "指数日线数据表"
+    priority: 2
+    required: true
+    expected_records: 100000
+    engine: "MergeTree"
+    
+    fields:
+      ts_code:
+        type: "String"
+        nullable: false
+        description: "指数代码"
+      trade_date:
+        type: "Date"
+        nullable: false
+        description: "交易日期"
+      open:
+        type: "Decimal64(4)"
+        nullable: false
+        description: "开盘价"
+      high:
+        type: "Decimal64(4)"
+        nullable: false
+        description: "最高价"
+      low:
+        type: "Decimal64(4)"
+        nullable: false
+        description: "最低价"
+      close:
+        type: "Decimal64(4)"
+        nullable: false
+        description: "收盘价"
+      volume:
+        type: "UInt64"
+        nullable: false
+        description: "成交量"
+      amount:
+        type: "Decimal64(2)"
+        nullable: false
+        description: "成交额"
+        
+    # 分区和排序键
+    partition_by: "toYYYYMM(trade_date)"
+    order_by: "(ts_code, trade_date)"
+    
+    # 数据压缩配置
+    compression:
+      method: "LZ4"
+      level: 1
+
+# WARM层存储配置（来自storage.yaml）
+warm_layer:
+  name: "WARM层"
+  description: "ClickHouse - 时序数据分析层"
+  enabled: "${WARM_LAYER_ENABLED:true}"
+  
+  # 性能指标
+  performance:
+    target_latency_ms: 100     # 目标延迟 < 100ms
+    retention_days: 365        # 保留1年
+    max_storage_gb: 500        # 最大存储容量 500GB
+    
+  # 数据类型配置
+  data_types:
+    - name: "分钟级K线数据"
+      table: "kline_1m"
+      retention_days: 365
+      partition_key: "toYYYYMM(date)"
+      
+    - name: "日频OHLCV数据"
+      table: "daily_ohlcv"
+      retention_days: 365
+      partition_key: "toYYYYMM(date)"
+      
+    - name: "技术指标计算结果"
+      table: "technical_indicators"
+      retention_days: 365
+      partition_key: "toYYYYMM(date)"
+      
+    - name: "因子数据"
+      table: "factor_data"
+      retention_days: 365
+      partition_key: "toYYYYMM(date)"
+
+# 监控配置
+monitoring:
+  enabled: true
+  performance_monitoring:
+    enabled: true
+    query_performance:
+      enabled: true
+      slow_query_threshold_seconds: 1.0
+      log_slow_queries: true
+  resource_monitoring:
+    enabled: true
+    cpu_monitoring:
+      enabled: true
+      threshold_percent: 80
+    memory_monitoring:
+      enabled: true
+      threshold_percent: 85
+    disk_monitoring:
+      enabled: true
+      threshold_percent: 90
+
+# 环境特定配置
+environments:
+  development:
+    enabled: false
+    
+  testing:
+    database: "quant_test_clickhouse"
+    performance:
+      max_threads: 4
+      
+  production:
+    cluster:
+      enabled: true
+    monitoring:
+      enabled: true
+    backup:
+      enabled: true

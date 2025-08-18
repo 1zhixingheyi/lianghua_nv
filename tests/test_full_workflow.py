@@ -27,7 +27,7 @@ from src.backtest.engine import BacktestEngine
 from src.risk.risk_engine import RiskEngine
 from src.trading.trade_executor import TradeExecutor
 from src.monitor.dashboard import Dashboard
-from src.config.settings import Config
+from config.config_manager import get_config_manager, get_mysql_config, get_trading_config
 
 
 class TestFullWorkflow:

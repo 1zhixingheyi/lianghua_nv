@@ -1,0 +1,287 @@
+# Redis缓存层配置
+# 内存缓存和实时数据存储
+
+# 数据库连接配置
+database:
+  host: "${REDIS_HOST:localhost}"
+  port: "${REDIS_PORT:6379}"
+  password: "${REDIS_PASSWORD:}"
+  database: "${REDIS_DB:0}"
+
+# 连接池配置
+connection_pool:
+  max_connections: 100
+  min_connections: 5
+  connection_timeout: 10
+  socket_timeout: 5
+  socket_keepalive: true
+  socket_keepalive_options: {}
+  retry_on_timeout: true
+  health_check_interval: 30
+
+# 连接配置
+connection:
+  decode_responses: true
+  encoding: "utf-8"
+  encoding_errors: "strict"
+  max_idle_time: 300
+  client_name: "quant_system"
+  
+# 集群配置
+cluster:
+  enabled: "${REDIS_CLUSTER_ENABLED:false}"
+  startup_nodes:
+    - host: "${REDIS_CLUSTER_NODE1_HOST:}"
+      port: "${REDIS_CLUSTER_NODE1_PORT:7000}"
+    - host: "${REDIS_CLUSTER_NODE2_HOST:}"
+      port: "${REDIS_CLUSTER_NODE2_PORT:7001}"
+    - host: "${REDIS_CLUSTER_NODE3_HOST:}"
+      port: "${REDIS_CLUSTER_NODE3_PORT:7002}"
+  decode_responses: true
+  skip_full_coverage_check: false
+  max_connections: 32
+
+# 哨兵配置
+sentinel:
+  enabled: "${REDIS_SENTINEL_ENABLED:false}"
+  service_name: "${REDIS_SENTINEL_SERVICE:mymaster}"
+  sentinels:
+    - host: "${REDIS_SENTINEL1_HOST:}"
+      port: "${REDIS_SENTINEL1_PORT:26379}"
+    - host: "${REDIS_SENTINEL2_HOST:}"
+      port: "${REDIS_SENTINEL2_PORT:26379}"
+    - host: "${REDIS_SENTINEL3_HOST:}"
+      port: "${REDIS_SENTINEL3_PORT:26379}"
+  socket_timeout: 0.1
+
+# 性能配置
+performance:
+  max_memory: "2G"
+  max_memory_policy: "allkeys-lru"
+  save_config: "900 1 300 10 60 10000"
+  tcp_keepalive: 60
+
+# 缓存配置
+cache:
+  default_ttl: 3600
+  max_ttl: 86400
+  key_prefix: "quant:"
+
+# HOT层存储配置（来自storage.yaml）
+hot_layer:
+  name: "HOT层"
+  description: "Redis Cluster - 超低延迟实时数据层"
+  enabled: "${HOT_LAYER_ENABLED:true}"
+  
+  # 性能指标
+  performance:
+    target_latency_ms: 10      # 目标延迟 < 10ms
+    ttl_seconds: 1800          # 30分钟 TTL
+    max_memory_gb: 2           # 最大存储容量 2GB
+    
+  # Redis Cluster配置
+  redis_cluster:
+    enabled: true
+    nodes:
+      - host: "${HOT_REDIS_NODE1_HOST:localhost}"
+        port: "${HOT_REDIS_NODE1_PORT:7000}"
+      - host: "${HOT_REDIS_NODE2_HOST:localhost}"  
+        port: "${HOT_REDIS_NODE2_PORT:7001}"
+      - host: "${HOT_REDIS_NODE3_HOST:localhost}"
+        port: "${HOT_REDIS_NODE3_PORT:7002}"
+    
+    # 连接配置
+    connection:
+      password: "${HOT_REDIS_PASSWORD:}"
+      decode_responses: true
+      skip_full_coverage_check: false
+      socket_timeout: 5
+      socket_connect_timeout: 5
+      max_connections_per_node: 50
+      
+    # 性能配置
+    performance:
+      max_memory: "2048mb"
+      max_memory_policy: "allkeys-lru"
+      tcp_keepalive: 60
+      
+  # 数据类型配置
+  data_types:
+    - name: "实时tick数据"
+      key_pattern: "tick:{symbol}:{timestamp}"
+      ttl: 1800  # 30分钟
+      compression: false
+      
+    - name: "最新价格数据"
+      key_pattern: "price:{symbol}:latest"
+      ttl: 60    # 1分钟
+      compression: false
+      
+    - name: "活跃交易信号"
+      key_pattern: "signal:{symbol}:{type}"
+      ttl: 300   # 5分钟
+      compression: false
+      
+    - name: "实时市场数据流"
+      key_pattern: "market:{symbol}:stream"
+      ttl: 180   # 3分钟
+      compression: false
+
+# 缓存策略配置
+cache_strategy:
+  # L1内存缓存
+  l1_memory:
+    enabled: true
+    max_size_mb: 512
+    ttl_seconds: 300
+    eviction_policy: "lru"
+    
+  # L2 Redis缓存
+  l2_redis:
+    enabled: true
+    max_size_mb: 2048
+    ttl_seconds: 1800
+    eviction_policy: "allkeys-lru"
+    
+  # 缓存规则
+  cache_rules:
+    - data_type: "realtime_price"
+      cache_levels: ["l1", "l2"]
+      ttl_seconds: 60
+      
+    - data_type: "kline_data"
+      cache_levels: ["l2"]
+      ttl_seconds: 3600
+      
+    - data_type: "fundamental_data"
+      cache_levels: ["l2"]
+      ttl_seconds: 86400
+
+# 数据结构模板
+data_structures:
+  # 字符串类型
+  strings:
+    - name: "股票最新价格"
+      key_template: "stock:price:{symbol}"
+      ttl: 300
+      description: "存储股票最新价格"
+      
+    - name: "市场状态"
+      key_template: "market:status"
+      ttl: 60
+      description: "存储市场开闭市状态"
+      
+  # 哈希类型  
+  hashes:
+    - name: "股票详细信息"
+      key_template: "stock:info:{symbol}"
+      ttl: 3600
+      fields: ["name", "market", "industry", "pe", "pb"]
+      description: "存储股票详细信息"
+      
+    - name: "实时行情快照"
+      key_template: "stock:snapshot:{symbol}"
+      ttl: 60
+      fields: ["open", "high", "low", "close", "volume", "amount"]
+      description: "存储股票实时行情快照"
+      
+  # 列表类型
+  lists:
+    - name: "交易信号队列"
+      key_template: "signals:queue:{strategy}"
+      ttl: 1800
+      max_length: 1000
+      description: "存储待处理的交易信号"
+      
+    - name: "价格历史"
+      key_template: "stock:price_history:{symbol}"
+      ttl: 3600
+      max_length: 240  # 4小时的分钟数据
+      description: "存储最近价格历史"
+      
+  # 集合类型
+  sets:
+    - name: "活跃股票集合"
+      key_template: "stocks:active"
+      ttl: 300
+      description: "存储当前活跃交易的股票"
+      
+    - name: "关注股票集合"
+      key_template: "stocks:watchlist:{user_id}"
+      ttl: 86400
+      description: "存储用户关注的股票列表"
+      
+  # 有序集合类型
+  sorted_sets:
+    - name: "股票涨幅榜"
+      key_template: "stocks:gainers"
+      ttl: 300
+      description: "按涨幅排序的股票榜单"
+      
+    - name: "交易量排行"
+      key_template: "stocks:volume_rank"
+      ttl: 300
+      description: "按成交量排序的股票榜单"
+
+# 监控配置
+monitoring:
+  enabled: true
+  
+  # 连接监控
+  connection_monitoring:
+    enabled: true
+    check_interval: 30
+    connection_pool_threshold: 0.8
+    
+  # 性能监控
+  performance_monitoring:
+    enabled: true
+    memory_usage_threshold: 0.85
+    latency_threshold_ms: 100
+    
+  # 错误监控
+  error_monitoring:
+    enabled: true
+    connection_error_threshold: 0.05
+    timeout_threshold: 0.01
+
+# 数据生命周期管理
+lifecycle_management:
+  enabled: true
+  
+  # 自动过期清理
+  auto_cleanup:
+    enabled: true
+    check_interval_minutes: 10
+    
+  # 内存压力管理
+  memory_pressure:
+    enabled: true
+    threshold_percent: 90
+    action: "lru_evict"
+
+# 环境特定配置
+environments:
+  development:
+    database: 1
+    connection_pool:
+      max_connections: 20
+    monitoring:
+      enabled: false
+      
+  testing:
+    database: 2
+    connection_pool:
+      max_connections: 10
+    cache:
+      default_ttl: 60
+      
+  production:
+    sentinel:
+      enabled: true
+    cluster:
+      enabled: true
+    monitoring:
+      enabled: true
+    performance:
+      max_memory: "8G"

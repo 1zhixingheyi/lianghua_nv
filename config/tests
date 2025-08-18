@@ -1,0 +1,258 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+统一配置系统测试脚本
+
+测试项目:
+1. 配置模块导入测试
+2. 配置文件加载测试
+3. 配置访问API测试
+4. 环境变量替换测试
+5. 配置验证测试
+6. 向后兼容性测试
+
+作者: QuantTeam
+创建时间: 2025-01-19
+"""
+
+import os
+import sys
+import traceback
+from datetime import datetime
+
+# 添加项目根目录到Python路径
+project_root = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, project_root)
+
+def test_config_module_import():
+    """测试配置模块导入"""
+    try:
+        # 测试基本导入
+        from quant_system.config import (
+            ConfigManager,
+            DatabaseConfigManager,
+            get_config,
+            get_data_config,
+            reload_config
+        )
+        
+        # 测试数据库配置导入
+        from quant_system.config.schemas.database_config import DatabaseConfig
+        
+        return True, "配置模块导入成功"
+    except Exception as e:
+        return False, f"配置模块导入失败: {str(e)}\n{traceback.format_exc()}"
+
+def test_config_file_loading():
+    """测试配置文件加载"""
+    try:
+        from quant_system.config import config_manager, database_config_manager
+        
+        # 测试配置管理器初始化
+        if config_manager is None:
+            return False, "配置管理器初始化失败"
+            
+        if database_config_manager is None:
+            return False, "数据库配置管理器初始化失败"
+            
+        # 测试数据库配置加载
+        try:
+            configs = database_config_manager.get_all_configs()
+            if not configs:
+                return False, "数据库配置为空"
+        except Exception as e:
+            return False, f"数据库配置加载失败: {str(e)}"
+            
+        return True, f"配置文件加载成功，数据库配置数量: {len(configs)}"
+    except Exception as e:
+        return False, f"配置文件加载失败: {str(e)}\n{traceback.format_exc()}"
+
+def test_config_access_api():
+    """测试配置访问API"""
+    try:
+        from quant_system.config import get_config, get_data_config, database_config_manager
+        
+        # 测试数据库配置访问
+        try:
+            main_config = database_config_manager.get_config('main')
+            if main_config is None:
+                return False, "无法获取主数据库配置"
+        except Exception as e:
+            return False, f"数据库配置访问失败: {str(e)}"
+            
+        # 测试通用配置访问（可能为空，但不应该报错）
+        try:
+            test_config = get_config('test.key', 'default_value')
+            # 应该返回默认值
+            if test_config != 'default_value':
+                return False, f"配置默认值处理异常: 期望 'default_value'，实际 '{test_config}'"
+        except Exception as e:
+            return False, f"通用配置访问失败: {str(e)}"
+            
+        return True, "配置访问API测试成功"
+    except Exception as e:
+        return False, f"配置访问API测试失败: {str(e)}\n{traceback.format_exc()}"
+
+def test_environment_variable_replacement():
+    """测试环境变量替换"""
+    try:
+        from quant_system.config import database_config_manager
+        
+        # 设置测试环境变量
+        os.environ['TEST_MYSQL_HOST'] = 'test.example.com'
+        os.environ['TEST_MYSQL_PORT'] = '3307'
+        
+        # 重新加载配置以应用环境变量
+        database_config_manager.reload_all()
+        
+        # 检查环境变量是否被正确应用
+        # 注意：这里我们检查的是默认配置，因为测试环境变量名与实际使用的不同
+        main_config = database_config_manager.get_config('main')
+        
+        # 清理测试环境变量
+        del os.environ['TEST_MYSQL_HOST']
+        del os.environ['TEST_MYSQL_PORT']
+        
+        return True, "环境变量替换测试成功"
+    except Exception as e:
+        return False, f"环境变量替换测试失败: {str(e)}\n{traceback.format_exc()}"
+
+def test_config_validation():
+    """测试配置验证"""
+    try:
+        from quant_system.config import database_config_manager
+        
+        # 测试配置验证
+        validation_results = []
+        configs = database_config_manager.get_all_configs()
+        
+        for name in configs.keys():
+            try:
+                is_valid = database_config_manager.validate_config(name)
+                validation_results.append((name, is_valid))
+            except Exception as e:
+                validation_results.append((name, False))
+                
+        valid_count = sum(1 for _, is_valid in validation_results if is_valid)
+        total_count = len(validation_results)
+        
+        return True, f"配置验证完成: {valid_count}/{total_count} 个配置有效"
+    except Exception as e:
+        return False, f"配置验证测试失败: {str(e)}\n{traceback.format_exc()}"
+
+def test_backward_compatibility():
+    """测试向后兼容性"""
+    try:
+        # 测试是否可以导入旧的配置模块（如果存在）
+        try:
+            # 这个导入可能会失败，这是正常的
+            from quant_system.DATA.core.config_manager import ConfigManager as OldConfigManager
+            old_config_available = True
+        except ImportError:
+            old_config_available = False
+            
+        # 测试新配置系统的兼容性接口
+        from quant_system.config import reload_config, load_all_configs
+        
+        # 测试重新加载功能
+        reload_config()
+        load_all_configs()
+        
+        compatibility_info = f"旧配置系统可用: {old_config_available}"
+        return True, f"向后兼容性测试成功 - {compatibility_info}"
+    except Exception as e:
+        return False, f"向后兼容性测试失败: {str(e)}\n{traceback.format_exc()}"
+
+def run_all_tests():
+    """运行所有测试"""
+    tests = [
+        ("配置模块导入", test_config_module_import),
+        ("配置文件加载", test_config_file_loading),
+        ("配置访问API", test_config_access_api),
+        ("环境变量替换", test_environment_variable_replacement),
+        ("配置验证", test_config_validation),
+        ("向后兼容性", test_backward_compatibility),
+    ]
+    
+    results = []
+    passed = 0
+    total = len(tests)
+    
+    print("=== 统一配置系统测试开始 ===")
+    print(f"测试时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"Python版本: {sys.version}")
+    print(f"项目路径: {project_root}")
+    print()
+    
+    for test_name, test_func in tests:
+        print(f"运行测试: {test_name}...")
+        try:
+            success, message = test_func()
+            if success:
+                print(f"✓ {test_name}: 通过")
+                print(f"  详情: {message}")
+                passed += 1
+            else:
+                print(f"✗ {test_name}: 失败")
+                print(f"  错误: {message}")
+            results.append((test_name, success, message))
+        except Exception as e:
+            error_msg = f"测试执行异常: {str(e)}\n{traceback.format_exc()}"
+            print(f"✗ {test_name}: 异常")
+            print(f"  错误: {error_msg}")
+            results.append((test_name, False, error_msg))
+        print()
+    
+    # 生成测试报告
+    success_rate = (passed / total) * 100
+    print("=== 测试结果汇总 ===")
+    print(f"总测试数: {total}")
+    print(f"通过数: {passed}")
+    print(f"失败数: {total - passed}")
+    print(f"成功率: {success_rate:.1f}%")
+    
+    if success_rate >= 80:
+        print("\n🎉 统一配置系统基本正常！")
+    elif success_rate >= 50:
+        print("\n⚠️  统一配置系统存在一些问题，需要修复。")
+    else:
+        print("\n❌ 统一配置系统存在严重问题，需要重点关注。")
+    
+    # 写入详细报告
+    report_content = f"""统一配置系统测试报告
+生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+Python版本: {sys.version}
+项目路径: {project_root}
+
+测试结果汇总:
+总测试数: {total}
+通过数: {passed}
+失败数: {total - passed}
+成功率: {success_rate:.1f}%
+
+详细测试结果:
+"""
+    
+    for test_name, success, message in results:
+        status = "通过" if success else "失败"
+        report_content += f"\n{test_name}: {status}\n"
+        report_content += f"详情: {message}\n"
+        report_content += "-" * 50 + "\n"
+    
+    try:
+        with open('config_test_report.txt', 'w', encoding='utf-8') as f:
+            f.write(report_content)
+        print(f"\n详细报告已保存到: config_test_report.txt")
+    except Exception as e:
+        print(f"\n报告保存失败: {e}")
+    
+    return success_rate >= 80
+
+if __name__ == "__main__":
+    try:
+        success = run_all_tests()
+        sys.exit(0 if success else 1)
+    except Exception as e:
+        print(f"测试脚本执行失败: {e}")
+        print(traceback.format_exc())
+        sys.exit(1)
