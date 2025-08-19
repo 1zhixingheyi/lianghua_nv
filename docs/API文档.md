@@ -569,7 +569,7 @@ GET /api/orders/{order_id}
 
 ### 1. 获取风控配置
 
-获取当前的风控配置参数。
+获取当前的风控配置参数。基于四层存储架构的企业级配置管理。
 
 **请求**
 ```http
@@ -581,14 +581,26 @@ GET /api/risk/config
 {
   "success": true,
   "data": {
-    "max_position_ratio": 0.1,
-    "max_sector_ratio": 0.3,
-    "stop_loss_ratio": 0.05,
-    "take_profit_ratio": 0.15,
-    "max_drawdown": 0.1,
-    "risk_level": "medium",
-    "enable_auto_stop": true,
-    "enable_position_limit": true
+    "risk_management": {
+      "max_position_ratio": 0.1,
+      "max_sector_ratio": 0.3,
+      "stop_loss_ratio": 0.05,
+      "take_profit_ratio": 0.15,
+      "max_drawdown": 0.1,
+      "risk_level": "medium",
+      "enable_auto_stop": true,
+      "enable_position_limit": true
+    },
+    "storage_config": {
+      "mysql_enabled": true,
+      "redis_enabled": true,
+      "clickhouse_enabled": true,
+      "minio_enabled": true
+    },
+    "hot_reload": {
+      "enabled": true,
+      "check_interval_seconds": 30
+    }
   },
   "message": "风控配置获取成功"
 }
@@ -632,7 +644,7 @@ Content-Type: application/json
 
 ### 1. 获取系统状态
 
-获取系统的运行状态信息。
+获取系统运行状态和四层存储架构的连接状态。
 
 **请求**
 ```http
@@ -649,12 +661,104 @@ GET /api/system/status
     "memory_usage": 0.65,
     "cpu_usage": 0.35,
     "disk_usage": 0.25,
-    "database_status": "connected",
+    "environment": "production",
+    "config_status": {
+      "hot_reload_enabled": true,
+      "last_config_update": "2025-08-18T11:30:00",
+      "total_configs": 7
+    },
+    "storage_status": {
+      "mysql": {
+        "status": "connected",
+        "host": "localhost:3306",
+        "database": "lianghua_trading",
+        "pool_size": 10
+      },
+      "clickhouse": {
+        "status": "connected",
+        "host": "localhost:9000",
+        "database": "lianghua_analytics"
+      },
+      "redis": {
+        "status": "connected",
+        "host": "localhost:6379",
+        "memory_usage": "45.2MB"
+      },
+      "minio": {
+        "status": "connected",
+        "endpoint": "localhost:9000",
+        "buckets": ["strategy-data", "backtest-results"]
+      }
+    },
     "trading_status": "enabled",
     "risk_engine_status": "running",
     "active_connections": 25
   },
   "message": "系统状态获取成功"
+}
+```
+
+### 2. 获取配置状态
+
+获取配置系统的详细状态信息。
+
+**请求**
+```http
+GET /api/system/config/status
+```
+
+**响应示例**
+```json
+{
+  "success": true,
+  "data": {
+    "config_manager": {
+      "version": "4.1",
+      "total_configs": 7,
+      "hot_reload_enabled": true,
+      "environment": "production"
+    },
+    "config_validation": {
+      "is_valid": true,
+      "last_validation": "2025-08-18T12:00:00",
+      "errors": []
+    },
+    "storage_configs": {
+      "mysql": {
+        "loaded": true,
+        "file_path": "config/schemas/mysql.yaml",
+        "last_modified": "2025-08-18T10:30:00"
+      },
+      "clickhouse": {
+        "loaded": true,
+        "file_path": "config/schemas/clickhouse.yaml",
+        "last_modified": "2025-08-18T10:30:00"
+      },
+      "redis": {
+        "loaded": true,
+        "file_path": "config/schemas/redis.yaml",
+        "last_modified": "2025-08-18T10:30:00"
+      },
+      "minio": {
+        "loaded": true,
+        "file_path": "config/schemas/minio.yaml",
+        "last_modified": "2025-08-18T10:30:00"
+      }
+    },
+    "module_configs": {
+      "trading": {
+        "loaded": true,
+        "file_path": "config/modules/trading.yaml",
+        "last_modified": "2025-08-18T11:15:00"
+      },
+      "data_integrity": {
+        "loaded": true,
+        "file_path": "config/modules/data_integrity.yaml",
+        "last_modified": "2025-08-18T11:15:00"
+      }
+    }
+  },
+  "message": "配置状态获取成功"
 }
 ```
 

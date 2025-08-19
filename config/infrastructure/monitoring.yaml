@@ -1,6 +1,81 @@
-# 监控配置模块
-# 功能：实时监控、健康检查、智能告警
-# 创建时间：2025-08-13
+# 监控和日志配置
+# 整合了系统监控、业务监控、健康检查、告警和日志配置
+
+# 日志系统配置
+logging_config:
+  # 基础配置
+  level: "INFO"
+  format: "structured"
+  handlers:
+    - "console"
+    - "rotating_file"
+
+  # 文件配置
+  log_dir: "logs"
+  log_filename: "quant_system.log"
+  max_file_size: "100MB"
+  backup_count: 10
+  encoding: "utf-8"
+
+  # 轮转配置
+  rotation_when: "midnight"
+  rotation_interval: 1
+  rotation_backup_count: 30
+
+  # 控制台配置
+  console_level: "INFO"
+  console_format: "simple"
+
+  # 数据库配置
+  database_url: "${LOG_DATABASE_URL:}"
+  database_table: "logs"
+  database_level: "WARNING"
+
+  # 性能配置
+  enable_async_logging: false
+  log_queue_size: 1000
+  flush_interval: 1.0
+
+  # 功能开关
+  enable_structured_logging: true
+  enable_performance_logging: true
+  enable_error_tracking: true
+  enable_audit_logging: true
+  enable_security_logging: true
+
+  # 过滤配置
+  component_filters: []
+  level_filters: {}
+  sensitive_data_patterns:
+    - 'password=\w+'
+    - 'token=\w+'
+    - 'key=\w+'
+    - 'secret=\w+'
+
+  # 采样配置
+  enable_sampling: false
+  sampling_rate: 1.0
+  sampling_rules: {}
+
+  # 环境特定配置
+  environments:
+    development:
+      level: "DEBUG"
+      console_level: "DEBUG"
+      enable_performance_logging: false
+    
+    testing:
+      level: "INFO"
+      handlers:
+        - "file"
+    
+    production:
+      level: "WARNING"
+      enable_async_logging: true
+      handlers:
+        - "rotating_file"
+        - "database"
+        - "alert"
 
 # 系统监控配置
 system_monitoring:
@@ -116,6 +191,11 @@ health_checks:
 
 # 告警配置
 alerting:
+  # 告警级别配置
+  alert_level: "ERROR"
+  alert_webhook_url: "${ALERT_WEBHOOK_URL:}"
+  alert_email_recipients: []
+  
   # 告警渠道
   channels:
     email:

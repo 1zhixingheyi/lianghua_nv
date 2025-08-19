@@ -14,6 +14,7 @@ from pathlib import Path
 
 from .base_strategy import BaseStrategy, Signal, StrategyState
 from src.data import get_database_manager, get_tushare_client
+from config.config_manager import get_config_manager
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +34,12 @@ class StrategyManager:
         # 数据源
         self.db_manager = get_database_manager()
         self.data_client = get_tushare_client()
+        
+        # 配置管理器
+        self.config_manager = get_config_manager()
+        
+        # 初始化热重载功能
+        self._setup_hot_reload()
         
         # 自动发现并注册策略
         self._discover_strategies()
@@ -435,6 +442,124 @@ class StrategyManager:
             counter += 1
         
         return self.create_strategy(strategy_class, instance_name, params)
+    
+    def _setup_hot_reload(self):
+        """设置热重载功能"""
+        try:
+            from config.hot_reload_startup import init_hot_reload_for_strategy_manager
+            init_hot_reload_for_strategy_manager(self)
+            logger.info("策略管理器热重载功能已启用")
+        except ImportError:
+            logger.warning("热重载模块不可用，跳过热重载设置")
+        except Exception as e:
+            logger.error(f"设置策略管理器热重载功能失败: {e}")
+    
+    async def reload_config(self, config_data: Dict[str, Any]):
+        """重新加载配置
+        
+        Args:
+            config_data: 新的配置数据
+        """
+        try:
+            logger.info("开始重新加载策略配置...")
+            
+            # 更新所有活跃策略的参数
+            for instance_name, strategy in self._active_strategies.items():
+                try:
+                    # 获取策略相关配置
+                    strategy_class = self._strategy_configs[instance_name]['strategy_class']
+                    
+                    # 查找匹配的配置
+                    if strategy_class.lower() in str(config_data).lower():
+                        # 提取相关配置参数
+                        new_params = self._extract_strategy_params(config_data, strategy_class)
+                        
+                        if new_params:
+                            # 更新策略参数
+                            for key, value in new_params.items():
+                                if hasattr(strategy, 'set_parameter'):
+                                    strategy.set_parameter(key, value)
+                                    
+                            # 更新配置记录
+                            self._strategy_configs[instance_name]['params'].update(new_params)
+                            
+                            logger.info(f"策略 {instance_name} 配置已更新: {new_params}")
+                            
+                except Exception as e:
+                    logger.error(f"更新策略 {instance_name} 配置失败: {e}")
+                    
+            logger.info("策略配置重新加载完成")
+            
+        except Exception as e:
+            logger.error(f"重新加载策略配置失败: {e}")
+            
+    def _extract_strategy_params(self, config_data: Dict[str, Any], strategy_class: str) -> Dict[str, Any]:
+        """从配置数据中提取策略参数
+        
+        Args:
+            config_data: 配置数据
+            strategy_class: 策略类名
+            
+        Returns:
+            提取的参数字典
+        """
+        params = {}
+        
+        try:
+            # 查找策略相关配置
+            if 'strategies' in config_data:
+                strategies_config = config_data['strategies']
+                
+                # 检查是否有匹配的策略配置
+                for key, value in strategies_config.items():
+                    if strategy_class.lower() in key.lower():
+                        if isinstance(value, dict):
+                            params.update(value)
+                            
+            # 查找通用交易参数
+            if 'risk_management' in config_data:
+                risk_params = config_data['risk_management']
+                if isinstance(risk_params, dict):
+                    # 映射风险管理参数到策略参数
+                    if 'max_position_size' in risk_params:
+                        params['position_size'] = risk_params['max_position_size']
+                    if 'stop_loss_percent' in risk_params:
+                        params['stop_loss'] = risk_params['stop_loss_percent']
+                        
+            # 查找执行参数
+            if 'execution' in config_data:
+                exec_params = config_data['execution']
+                if isinstance(exec_params, dict):
+                    if 'order_timeout_seconds' in exec_params:
+                        params['timeout'] = exec_params['order_timeout_seconds']
+                        
+        except Exception as e:
+            logger.error(f"提取策略参数失败: {e}")
+            
+        return params
+    
+    def get_hot_reload_status(self) -> Dict[str, Any]:
+        """获取热重载状态
+        
+        Returns:
+            热重载状态信息
+        """
+        try:
+            from config.hot_reload_service import get_hot_reload_service
+            service = get_hot_reload_service()
+            
+            return {
+                'enabled': True,
+                'service_running': service.is_running,
+                'active_strategies': len(self._active_strategies),
+                'last_config_update': getattr(self, '_last_config_update', None),
+                'trading_config_available': 'trading' in service.component_handlers
+            }
+            
+        except ImportError:
+            return {'enabled': False, 'reason': '热重载模块不可用'}
+        except Exception as e:
+            return {'enabled': False, 'error': str(e)}
 
 
 # 全局策略管理器实例

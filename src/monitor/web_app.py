@@ -26,6 +26,7 @@ import json
 
 # 导入配置
 from config.config_manager import get_config_manager, get_mysql_config, get_trading_config
+from config.hot_reload_startup import initialize_hot_reload, init_hot_reload_for_flask
 
 # 导入后端模块
 from src.data import get_database_manager, get_tushare_client
@@ -82,6 +83,9 @@ def create_app(config_class=None):
     
     # 初始化监控数据
     init_monitor_data(app)
+    
+    # 初始化热重载功能
+    init_hot_reload_for_flask(app)
     
     logger.info("Flask应用已创建并初始化完成")
     return app
@@ -224,7 +228,8 @@ def health_check():
                 'database': check_database_status(),
                 'strategies': check_strategies_status(),
                 'risk_management': check_risk_status(),
-                'trading': check_trading_status()
+                'trading': check_trading_status(),
+                'hot_reload': check_hot_reload_status()
             }
         }
         
@@ -290,6 +295,92 @@ def check_trading_status():
         }
     except Exception as e:
         return {'healthy': False, 'message': f'交易检查失败: {e}'}
+
+def check_hot_reload_status():
+    """检查热重载状态"""
+    try:
+        from config.hot_reload_service import get_hot_reload_service
+        service = get_hot_reload_service()
+        stats = service.get_statistics()
+        return {
+            'healthy': service.is_running,
+            'message': f'热重载服务状态: {stats["service_status"]}',
+            'files_monitored': stats.get('files_monitored', 0),
+            'changes_detected': stats.get('changes_detected', 0),
+            'successful_reloads': stats.get('successful_reloads', 0)
+        }
+    except Exception as e:
+        return {'healthy': False, 'message': f'热重载检查失败: {e}'}
+
+@app.route('/api/hot_reload/status')
+def hot_reload_status():
+    """热重载状态API端点"""
+    try:
+        from config.hot_reload_service import get_hot_reload_service
+        service = get_hot_reload_service()
+        
+        if not service.is_running:
+            return jsonify({
+                'success': False,
+                'message': '热重载服务未运行',
+                'status': 'stopped'
+            })
+            
+        stats = service.get_statistics()
+        health = service.health_check() if hasattr(service, 'health_check') else {}
+        
+        return jsonify({
+            'success': True,
+            'status': 'running',
+            'statistics': stats,
+            'health': health,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"获取热重载状态失败: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'status': 'error'
+        }), 500
+
+@app.route('/api/hot_reload/history')
+def hot_reload_history():
+    """配置变更历史API端点"""
+    try:
+        from config.hot_reload_service import get_hot_reload_service
+        service = get_hot_reload_service()
+        
+        limit = request.args.get('limit', 50, type=int)
+        history = service.hot_reload_manager.get_change_history(limit)
+        
+        # 转换历史记录为JSON友好格式
+        history_data = []
+        for change in history:
+            history_data.append({
+                'key': change.key,
+                'change_type': change.change_type,
+                'old_value': str(change.old_value) if change.old_value is not None else None,
+                'new_value': str(change.new_value) if change.new_value is not None else None,
+                'timestamp': change.timestamp,
+                'version': change.version,
+                'source_file': change.source_file
+            })
+        
+        return jsonify({
+            'success': True,
+            'history': history_data,
+            'count': len(history_data),
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"获取配置变更历史失败: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 if __name__ == '__main__':
     # 开发模式运行

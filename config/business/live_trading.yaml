@@ -1,0 +1,429 @@
+# 实盘交易专用配置文件
+# 定义实盘交易的所有配置参数
+
+# 实盘交易模式配置
+trading_mode:
+  enabled: false  # 实盘交易总开关，默认关闭
+  environment: "test"  # test, staging, production
+  confirm_live_trading: false  # 二次确认开关
+  emergency_stop: false  # 紧急停止开关
+  max_daily_loss_stop: true  # 日亏损停止
+  
+# 券商接口配置
+brokers:
+  # QMT客户端配置
+  qmt:
+    enabled: true
+    primary:
+      host: "127.0.0.1"
+      port: 16099
+      account_id: "${QMT_ACCOUNT_ID}"
+      account_type: "STOCK"  # STOCK, FUTURES, OPTIONS
+      timeout: 30
+      max_retries: 3
+      retry_delay: 1.0
+      
+      # 认证配置
+      authentication_method: "password"  # password, certificate
+      trading_password: "${QMT_PASSWORD}"
+      certificate_path: ""
+      encryption_enabled: true
+      
+      # 安全配置
+      enable_order_verification: true
+      max_single_order_value: 100000.0
+      max_daily_trades: 1000
+      enable_market_hours_check: true
+      
+    backup:
+      enabled: false
+      host: "127.0.0.1"
+      port: 16100
+      
+  # 其他券商接口（预留）
+  ctp:
+    enabled: false
+    broker_id: "${CTP_BROKER_ID}"
+    user_id: "${CTP_USER_ID}"
+    password: "${CTP_PASSWORD}"
+    md_server: "tcp://180.168.146.187:10131"
+    td_server: "tcp://180.168.146.187:10130"
+    
+  tts:
+    enabled: false
+    account_id: "${TTS_ACCOUNT_ID}"
+    password: "${TTS_PASSWORD}"
+    server_url: "https://api.tts.com"
+
+# 实时数据流配置
+realtime_data:
+  # 数据流基础配置
+  stream_config:
+    buffer_size: 10000
+    batch_size: 100
+    flush_interval: 1.0
+    max_latency: 0.1
+    compression: true
+    heartbeat_interval: 30.0
+    
+  # WebSocket配置
+  websocket:
+    tick_url: "wss://api.example.com/ws/tick"
+    kline_url: "wss://api.example.com/ws/kline"
+    depth_url: "wss://api.example.com/ws/depth"
+    trade_url: "wss://api.example.com/ws/trade"
+    
+    # 连接配置
+    reconnect_interval: 5.0
+    max_reconnect_attempts: 10
+    ping_interval: 20.0
+    ping_timeout: 10.0
+    
+  # 数据质量控制
+  quality_control:
+    enabled: true
+    price_range_check:
+      enabled: true
+      max_change_percent: 20.0
+      action: "warn"  # warn, reject, correct
+    volume_check:
+      enabled: true
+      min_volume: 0
+      max_volume_multiplier: 100.0
+      action: "warn"
+    timestamp_check:
+      enabled: true
+      max_delay_seconds: 10.0
+      action: "reject"
+    duplicate_check:
+      enabled: true
+      window_size: 100
+      action: "reject"
+      
+  # 数据订阅配置
+  subscriptions:
+    # 默认订阅的数据类型
+    default_data_types: ["tick", "kline", "depth"]
+    default_kline_frequencies: ["1m", "5m", "15m", "1h", "1d"]
+    default_depth_levels: 20
+    
+    # 股票池订阅
+    stock_universe: []  # 空表示订阅所有
+    index_symbols: ["000001.SH", "399001.SZ", "000300.SH"]
+    
+# 实盘风控配置
+live_risk_management:
+  # 基础风控参数（覆盖trading.yaml中的配置）
+  position_limits:
+    max_single_position_value: 50000.0    # 单只股票最大仓位5万
+    max_total_position_ratio: 0.7         # 总仓位不超过70%
+    max_sector_concentration: 0.25        # 单行业最大集中度25%
+    max_stock_concentration: 0.1          # 单只股票最大集中度10%
+    
+  # 资金管理
+  capital_management:
+    min_cash_reserve_ratio: 0.15          # 最低现金储备15%
+    max_daily_turnover_ratio: 0.5         # 日最大换手率50%
+    max_intraday_loss_ratio: 0.02         # 日内最大亏损2%
+    
+  # 止损止盈（实盘更严格）
+  stop_loss:
+    enabled: true
+    default_percentage: 0.03               # 默认3%止损
+    trailing_stop: true
+    trailing_percentage: 0.02              # 追踪止损2%
+    forced_liquidation_threshold: 0.05    # 强制平仓阈值5%
+    
+  take_profit:
+    enabled: true
+    default_percentage: 0.10               # 默认10%止盈
+    partial_profit_taking: true
+    profit_levels:
+      - percentage: 0.05
+        sell_ratio: 0.3
+      - percentage: 0.10
+        sell_ratio: 0.5
+      - percentage: 0.15
+        sell_ratio: 0.8
+        
+  # 实时风控监控
+  realtime_monitoring:
+    enabled: true
+    check_interval_seconds: 5              # 每5秒检查一次
+    alert_thresholds:
+      position_concentration: 0.08         # 仓位集中度告警阈值8%
+      unrealized_loss_ratio: 0.015        # 未实现亏损比例告警1.5%
+      daily_turnover_ratio: 0.4           # 日换手率告警40%
+      
+  # 紧急处理
+  emergency_procedures:
+    auto_liquidation: false                # 自动清仓（默认关闭）
+    emergency_contacts: []                 # 紧急联系人
+    risk_alert_channels: ["email", "sms"]  # 风控告警渠道
+
+# 订单执行配置
+live_order_execution:
+  # 订单路由
+  order_routing:
+    default_venue: "qmt"
+    backup_venues: []
+    smart_routing: false
+    
+  # 执行算法
+  execution_algorithms:
+    default_algorithm: "twap"  # twap, vwap, pov, is
+    twap:
+      time_window_minutes: 30
+      slice_count: 10
+    vwap:
+      participation_rate: 0.1
+      urgency_factor: 0.5
+    
+  # 订单管理
+  order_management:
+    max_pending_orders: 50
+    order_timeout_minutes: 30
+    auto_cancel_eod: true
+    order_size_limits:
+      min_order_value: 1000.0
+      max_order_value: 100000.0
+      max_order_quantity: 10000
+      
+  # 成交确认
+  fill_confirmation:
+    enabled: true
+    confirmation_timeout_seconds: 10
+    retry_attempts: 3
+    
+  # 滑点控制
+  slippage_control:
+    max_slippage_bps: 50        # 最大滑点50个基点
+    slippage_monitoring: true
+    adaptive_pricing: false
+
+# 实盘监控配置
+live_monitoring:
+  # 实时监控
+  realtime_dashboard:
+    enabled: true
+    update_interval_seconds: 1
+    alert_sound: true
+    
+  # 性能监控
+  performance_tracking:
+    enabled: true
+    metrics_calculation_interval: 60
+    benchmark_symbols: ["000300.SH", "000001.SH"]
+    
+  # 系统监控
+  system_monitoring:
+    enabled: true
+    resource_monitoring: true
+    latency_monitoring: true
+    connection_monitoring: true
+    
+    # 告警阈值
+    alert_thresholds:
+      cpu_usage_percent: 80
+      memory_usage_percent: 85
+      disk_usage_percent: 90
+      network_latency_ms: 100
+      data_delay_seconds: 5
+      
+  # 日志配置
+  logging:
+    level: "INFO"
+    real_time_log: true
+    trade_log: true
+    error_log: true
+    performance_log: true
+    
+    # 日志文件
+    log_files:
+      trade_log: "logs/live_trades.log"
+      error_log: "logs/live_errors.log"
+      performance_log: "logs/live_performance.log"
+      system_log: "logs/live_system.log"
+
+# 数据存储配置
+live_data_storage:
+  # 四层存储架构配置
+  storage_layers:
+    # L1: 内存缓存
+    memory_cache:
+      enabled: true
+      max_size_mb: 512
+      ttl_seconds: 300
+      
+    # L2: Redis缓存
+    redis_cache:
+      enabled: true
+      host: "${REDIS_HOST}"
+      port: "${REDIS_PORT}"
+      db: 2  # 实盘使用独立的数据库
+      max_memory_mb: 1024
+      
+    # L3: ClickHouse
+    clickhouse:
+      enabled: true
+      host: "${CLICKHOUSE_HOST}"
+      port: "${CLICKHOUSE_PORT}"
+      database: "live_trading"
+      
+    # L4: MySQL
+    mysql:
+      enabled: true
+      host: "${MYSQL_HOST}"
+      port: "${MYSQL_PORT}"
+      database: "live_trading_db"
+      
+  # 数据备份
+  backup:
+    enabled: true
+    backup_interval_hours: 6
+    backup_retention_days: 30
+    backup_location: "data_storage/backups/live"
+
+# 安全配置
+security:
+  # 访问控制
+  access_control:
+    enabled: true
+    require_authentication: true
+    session_timeout_minutes: 60
+    max_concurrent_sessions: 3
+    
+  # 加密配置
+  encryption:
+    enabled: true
+    algorithm: "AES-256-GCM"
+    key_rotation_days: 30
+    
+  # 审计日志
+  audit_logging:
+    enabled: true
+    log_all_trades: true
+    log_configuration_changes: true
+    log_access_attempts: true
+    audit_log_file: "logs/live_audit.log"
+    
+  # 敏感信息保护
+  sensitive_data:
+    mask_account_numbers: true
+    encrypt_passwords: true
+    secure_api_keys: true
+
+# 合规配置
+compliance:
+  # 交易合规
+  trading_compliance:
+    enabled: true
+    pre_trade_checks: true
+    post_trade_reporting: true
+    
+  # 监管报告
+  regulatory_reporting:
+    enabled: true
+    daily_reports: true
+    exception_reports: true
+    report_output_dir: "reports/compliance"
+    
+  # 记录保留
+  record_retention:
+    trade_records_days: 2555  # 7年
+    order_records_days: 2555
+    audit_records_days: 2555
+    log_retention_days: 365
+
+# 灾备配置
+disaster_recovery:
+  # 故障切换
+  failover:
+    enabled: true
+    auto_failover: false  # 需要手动确认
+    backup_systems: []
+    
+  # 数据恢复
+  data_recovery:
+    enabled: true
+    backup_verification: true
+    recovery_testing_schedule: "monthly"
+    
+  # 应急程序
+  emergency_procedures:
+    emergency_stop_trading: true
+    notify_stakeholders: true
+    contact_list: []
+
+# 测试和验证配置
+testing:
+  # 模拟交易
+  paper_trading:
+    enabled: true
+    initial_capital: 1000000.0
+    commission_rate: 0.0003
+    
+  # 回测验证
+  backtesting:
+    enabled: true
+    validation_period_days: 30
+    performance_threshold:
+      min_sharpe_ratio: 1.0
+      max_drawdown: 0.1
+      
+  # 压力测试
+  stress_testing:
+    enabled: false
+    test_scenarios: ["market_crash", "liquidity_crisis", "system_failure"]
+
+# 外部服务配置
+external_services:
+  # 消息通知
+  notifications:
+    email:
+      enabled: true
+      smtp_server: "${SMTP_SERVER}"
+      smtp_port: 587
+      username: "${SMTP_USERNAME}"
+      password: "${SMTP_PASSWORD}"
+      
+    sms:
+      enabled: false
+      provider: "aliyun"
+      access_key: "${SMS_ACCESS_KEY}"
+      secret_key: "${SMS_SECRET_KEY}"
+      
+    webhook:
+      enabled: false
+      urls: []
+      
+  # 第三方数据源
+  market_data_vendors:
+    primary_vendor: "tushare"
+    backup_vendors: ["akshare", "eastmoney"]
+    
+  # 风控服务
+  risk_services:
+    external_risk_engine: false
+    risk_data_provider: ""
+
+# 环境变量配置映射
+environment_variables:
+  required:
+    - QMT_ACCOUNT_ID
+    - QMT_PASSWORD
+    - MYSQL_HOST
+    - MYSQL_PORT
+    - REDIS_HOST
+    - REDIS_PORT
+    - CLICKHOUSE_HOST
+    - CLICKHOUSE_PORT
+    
+  optional:
+    - SMTP_SERVER
+    - SMTP_USERNAME
+    - SMTP_PASSWORD
+    - TUSHARE_API_KEY
+    - CTP_BROKER_ID
+    - CTP_USER_ID
+    - CTP_PASSWORD

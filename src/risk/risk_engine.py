@@ -81,6 +81,9 @@ class RiskEngine:
             'last_trade_time': None
         }
         
+        # 初始化热重载功能
+        self._setup_hot_reload()
+        
         logger.info("风控引擎初始化完成")
     
     def start_monitoring(self):
@@ -353,6 +356,93 @@ class RiskEngine:
             'last_trade_time': None
         }
         logger.info("风控引擎已重置")
+    
+    def _setup_hot_reload(self):
+        """设置热重载功能"""
+        try:
+            from config.hot_reload_startup import init_hot_reload_for_risk_engine
+            init_hot_reload_for_risk_engine(self)
+            logger.info("风控引擎热重载功能已启用")
+        except ImportError:
+            logger.warning("热重载模块不可用，跳过热重载设置")
+        except Exception as e:
+            logger.error(f"设置风控引擎热重载功能失败: {e}")
+    
+    async def update_risk_parameters(self, config_data: Dict[str, Any]):
+        """更新风控参数
+        
+        Args:
+            config_data: 新的风控配置数据
+        """
+        try:
+            logger.info("开始更新风控参数...")
+            
+            # 更新风控配置
+            if 'risk_management' in config_data:
+                risk_config = config_data['risk_management']
+                
+                # 更新基础风控参数
+                if isinstance(risk_config, dict):
+                    # 更新止损止盈参数
+                    if 'stop_loss_percent' in risk_config:
+                        self.risk_config.price_limits.stop_loss_ratio = risk_config['stop_loss_percent'] / 100.0
+                        logger.info(f"止损比例已更新为: {self.risk_config.price_limits.stop_loss_ratio}")
+                    
+                    if 'stop_profit_percent' in risk_config:
+                        self.risk_config.price_limits.stop_profit_ratio = risk_config['stop_profit_percent'] / 100.0
+                        logger.info(f"止盈比例已更新为: {self.risk_config.price_limits.stop_profit_ratio}")
+                    
+                    # 更新仓位限制
+                    if 'max_position_size' in risk_config:
+                        self.risk_config.position_limits.max_single_position_value = risk_config['max_position_size']
+                        logger.info(f"最大单只股票仓位已更新为: {self.risk_config.position_limits.max_single_position_value}")
+                    
+                    if 'max_total_position' in risk_config:
+                        self.risk_config.position_limits.max_total_position = risk_config['max_total_position']
+                        logger.info(f"最大总仓位已更新为: {self.risk_config.position_limits.max_total_position}")
+                    
+                    # 更新资金管理参数
+                    if 'max_daily_loss' in risk_config:
+                        self.risk_config.capital_limits.max_daily_loss_ratio = risk_config['max_daily_loss'] / 100.0
+                        logger.info(f"最大日亏损比例已更新为: {self.risk_config.capital_limits.max_daily_loss_ratio}")
+            
+            # 更新执行参数
+            if 'execution' in config_data:
+                exec_config = config_data['execution']
+                if isinstance(exec_config, dict):
+                    # 这里可以添加执行相关的风控参数更新
+                    pass
+            
+            # 重新初始化风控规则（使新参数生效）
+            self.base_risk_manager._initialize_rules()
+            
+            logger.info("风控参数更新完成")
+            
+        except Exception as e:
+            logger.error(f"更新风控参数失败: {e}")
+    
+    def get_hot_reload_status(self) -> Dict[str, Any]:
+        """获取热重载状态
+        
+        Returns:
+            热重载状态信息
+        """
+        try:
+            from config.hot_reload_service import get_hot_reload_service
+            service = get_hot_reload_service()
+            
+            return {
+                'enabled': True,
+                'service_running': service.is_running,
+                'last_config_update': getattr(self, '_last_config_update', None),
+                'current_config_summary': self.risk_config.get_config_summary(),
+                'risk_config_available': 'risk_management' in service.component_handlers
+            }
+            
+        except ImportError:
+            return {'enabled': False, 'reason': '热重载模块不可用'}
+        except Exception as e:
+            return {'enabled': False, 'error': str(e)}
 
 
 class StrategyRiskAdapter:

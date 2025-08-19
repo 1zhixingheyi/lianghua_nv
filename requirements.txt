@@ -113,6 +113,9 @@ arrow==1.2.3
 # 系统监控
 psutil==5.9.5
 
+# 文件监控
+watchdog==3.0.0
+
 # HTTP服务器
 gunicorn==21.2.0
 eventlet==0.33.3

@@ -63,11 +63,11 @@ pip install -r requirements.txt
 
 3. **配置系统**
 ```bash
-# 复制配置文件模板
+# 复制环境变量模板
 cp .env.example .env
 
-# 编辑配置文件
-nano config.json
+# 编辑环境变量文件
+nano .env
 ```
 
 4. **启动系统**
@@ -131,8 +131,20 @@ lianghua_vn/
 │   ├── portfolio.py       # 组合管理
 │   ├── performance.py     # 绩效分析
 │   └── visualizer.py      # 可视化
-├── 📁 config/             # 配置管理
-│   └── settings.py        # 系统配置
+├── 📁 config/             # 配置管理 (企业级四层存储架构)
+│   ├── config_manager.py  # 统一配置管理器
+│   ├── hot_reload_manager.py # 热重载管理器
+│   ├── schemas/           # 存储层配置
+│   │   ├── mysql.yaml     # MySQL配置 (结构化数据层)
+│   │   ├── clickhouse.yaml # ClickHouse配置 (分析层)
+│   │   ├── redis.yaml     # Redis配置 (缓存层)
+│   │   ├── minio.yaml     # MinIO配置 (对象存储层)
+│   │   ├── api.yaml       # API配置
+│   │   ├── logging.yaml   # 日志配置
+│   │   └── system.yaml    # 系统配置
+│   └── modules/           # 业务模块配置
+│       ├── trading.yaml   # 交易配置
+│       └── data_integrity.yaml # 数据完整性配置
 ├── 📁 data/               # 数据管理
 │   ├── database.py        # 数据库操作
 │   └── tushare_client.py  # 数据源接口
@@ -166,7 +178,7 @@ lianghua_vn/
 │   └── qmt_interface.py   # QMT接口
 ├── 📁 validation/         # 验证系统
 │   └── system_checker.py  # 系统检查
-├── 📋 config.json         # 主配置文件
+├── 📋 .env                # 环境变量配置文件
 ├── 🚀 run_monitor.py      # 监控启动
 ├── 🧪 run_tests.py        # 测试运行
 └── 📦 requirements.txt    # 依赖包列表
@@ -227,29 +239,58 @@ python run_tests.py
 
 ### 配置管理
 
-系统支持多种配置方式：
+系统采用企业级四层存储架构配置管理，支持YAML配置文件和环境变量：
 
-1. **主配置文件** (`config.json`)
-```json
-{
-  "DATABASE_URL": "sqlite:///lianghua_trading.db",
-  "TRADING_CONFIG": {
-    "max_position_size": 0.1,
-    "commission_rate": 0.0003
-  },
-  "RISK_CONFIG": {
-    "max_daily_loss": 0.02,
-    "max_position_concentration": 0.1
-  }
-}
-```
+#### 1. **四层存储架构**
+- **MySQL层**: 结构化数据存储 (`config/schemas/mysql.yaml`)
+- **ClickHouse层**: 分析数据存储 (`config/schemas/clickhouse.yaml`)
+- **Redis层**: 缓存数据存储 (`config/schemas/redis.yaml`)
+- **MinIO层**: 对象数据存储 (`config/schemas/minio.yaml`)
 
-2. **环境变量** (`.env`)
+#### 2. **业务模块配置**
+- **交易配置**: `config/modules/trading.yaml`
+- **数据完整性**: `config/modules/data_integrity.yaml`
+
+#### 3. **环境变量配置** (`.env`)
 ```bash
+# 数据库配置
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_USER=root
+MYSQL_PASSWORD=your_password
+MYSQL_DATABASE=lianghua_mysql
+
+# ClickHouse配置
+CLICKHOUSE_HOST=localhost
+CLICKHOUSE_PORT=9000
+CLICKHOUSE_DATABASE=lianghua_ch
+
+# Redis配置
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+
+# MinIO配置
+MINIO_ENDPOINT=localhost:9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+
+# API配置
 TUSHARE_TOKEN=your_tushare_token
-QMT_PATH=/path/to/qmt
-SECRET_KEY=your_secret_key
+
+# 系统配置
+ENVIRONMENT=development
+DEBUG_MODE=true
+LOG_LEVEL=INFO
 ```
+
+#### 4. **配置热重载**
+系统支持配置文件变更监控和自动重载，无需重启服务。
+
+#### 5. **多环境支持**
+- 开发环境: `ENVIRONMENT=development`
+- 测试环境: `ENVIRONMENT=testing`
+- 生产环境: `ENVIRONMENT=production`
 
 ### 策略开发
 
